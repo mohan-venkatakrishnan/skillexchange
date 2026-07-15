@@ -60,18 +60,45 @@ function decodeJwtPayload(token) {
   return JSON.parse(decodeURIComponent(escape(atob(b64))));
 }
 
-function sessionFromTokens({ IdToken, AccessToken, RefreshToken, ExpiresIn }) {
+/* NEVER surface cognito:username. For federated users Cognito sets it to
+   "Google_<sub>" — that string is what shipped a "google_…" handle into the
+   nav. The real handle lives in custom:username (written back by the
+   PostConfirmation trigger) and is authoritative in DynamoDB; until the token
+   carries it we show a readable placeholder and let refreshProfile() fill in. */
+function sessionFromTokens({ IdToken, AccessToken, RefreshToken, ExpiresIn }, prev = {}) {
   const claims = decodeJwtPayload(IdToken);
+  const handle = (claims['custom:username'] || '').toLowerCase() || null;
+  const emailLocal = claims.email ? claims.email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '') : '';
   return {
     idToken: IdToken,
     accessToken: AccessToken,
-    refreshToken: RefreshToken,
+    refreshToken: RefreshToken || prev.refreshToken,
     expiresAt: Date.now() + (ExpiresIn ? ExpiresIn * 1000 : 24 * 3600 * 1000) - 60_000,
     userId: claims.sub,
     email: claims.email,
-    username: claims['custom:username'] || claims['cognito:username'],
-    name: claims.name || claims['custom:username'] || (claims.email ? claims.email.split('@')[0] : 'You'),
+    username: handle || prev.username || emailLocal || 'you',
+    name: claims.name || prev.name || handle || emailLocal || 'You',
+    avatarUrl: prev.avatarUrl,
+    handleResolved: !!handle,
   };
+}
+
+/* DynamoDB is the source of truth for the handle, display name and avatar.
+   Called right after sign-in so the nav never shows a placeholder for long. */
+export async function refreshProfile() {
+  const s = getSession();
+  if (!s || MOCK) return s;
+  try {
+    const res = await fetch(`${(import.meta.env.VITE_API_URL || '').replace(/\/$/, '')}/me`, {
+      headers: { Authorization: s.idToken },
+    });
+    if (!res.ok) return s;
+    const { profile } = await res.json();
+    if (!profile?.username) return s;
+    const next = { ...s, username: profile.username, name: profile.name || profile.username, avatarUrl: profile.avatarUrl || null, handleResolved: true };
+    saveSession(next);
+    return next;
+  } catch { return s; }
 }
 
 // ── Public API ──

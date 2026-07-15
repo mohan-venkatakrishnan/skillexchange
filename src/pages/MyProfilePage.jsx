@@ -1,78 +1,208 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme, FONT_DISPLAY, FONT_UI } from '../tokens/theme';
 import SkillCard from '../components/SkillCard.jsx';
-import { PageWrap, VerifiedStamp, SellerBdg, Loading, ErrorBox } from '../components/Shared.jsx';
+import Loader from '../components/Loader.jsx';
 import { Ic } from '../components/Icons.jsx';
+import { PageWrap, VerifiedStamp, SellerBdg, Stars, Downloads } from '../components/Shared.jsx';
+import { Card, GoldButton, GhostButton, Input, Textarea, Avatar, AvatarUpload, ErrorBox, EmptyState } from '../components/ui.jsx';
 import * as api from '../lib/api.js';
 import useFetch from '../lib/useFetch.js';
 
-export default function MyProfilePage({ T, user, onLogout, onShowAuth }) {
+const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
+
+export default function MyProfilePage({ user, onLogout, onShowAuth }) {
+  const { c } = useTheme();
   const nav = useNavigate();
-  const [showLogout,setShowLogout]=useState(false);
+  const [showAccount, setShowAccount] = useState(false);
+  const [editing, setEditing] = useState(false);
   const me = useFetch(() => api.getMe(), [user?.username]);
 
-  if (me.loading) return <PageWrap><Loading T={T} verb="Loading your profile"/></PageWrap>;
-  if (me.error) return <PageWrap><ErrorBox T={T} message={me.error} onRetry={me.retry}/></PageWrap>;
-  const profile = me.data;
-  const totalDL=(profile.skills||[]).reduce((s,x)=>s+x.downloads,0);
-  const avgR=(profile.skills||[]).length?((profile.skills.reduce((s,x)=>s+x.rating,0)/profile.skills.length).toFixed(1)):"—";
+  if (me.loading) return <PageWrap><Loader label="Loading your profile" /></PageWrap>;
+  if (me.error) return <PageWrap><ErrorBox message={me.error} onRetry={me.retry} /></PageWrap>;
 
-  if(showLogout) return (
-    <PageWrap>
-      <div style={{padding:"60px clamp(16px,4vw,40px)",maxWidth:440,margin:"0 auto",textAlign:"center"}}>
-        <div style={{width:72,height:72,borderRadius:"50%",background:`linear-gradient(135deg,${T.gold},${T.goldDim})`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Playfair Display",fontSize:28,fontWeight:700,color:"#fff",margin:"0 auto 16px"}}>{profile.name[0]}</div>
-        <h2 style={{fontFamily:"Playfair Display",fontSize:22,color:T.text,margin:"0 0 4px"}}>{profile.name}</h2>
-        <p style={{fontFamily:"Inter",fontSize:13,color:T.muted,margin:"0 0 32px"}}>@{profile.username}</p>
-        <div style={{display:"flex",flexDirection:"column",gap:12}}>
-          <button onClick={()=>setShowLogout(false)} style={{background:T.surface,border:`1px solid ${T.border}`,color:T.text,borderRadius:10,padding:"13px",fontFamily:"Inter",fontWeight:600,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-            <Ic.User s={16} c={T.text}/> Continue as {profile.username}
-          </button>
-          <button onClick={()=>{onLogout();setShowLogout(false);onShowAuth();}} style={{background:T.surface,border:`1px solid ${T.border}`,color:T.muted,borderRadius:10,padding:"13px",fontFamily:"Inter",fontWeight:500,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-            <Ic.User s={16} c={T.muted}/> Switch Account
-          </button>
-          <button onClick={()=>{onLogout();setShowLogout(false);}} data-testid="sign-out" style={{background:T.coralSoft,border:`1px solid ${T.coral}40`,color:T.coral,borderRadius:10,padding:"13px",fontFamily:"Inter",fontWeight:600,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-            <Ic.LogOut s={16} c={T.coral}/> Sign Out
-          </button>
-        </div>
-        <p style={{fontFamily:"Inter",fontSize:11,color:T.muted,marginTop:24}}>Skill Exchange · skillexchange.tapdot.org</p>
-      </div>
-    </PageWrap>
-  );
+  const p = me.data;
+  const skills = p.skills || [];
+  const published = skills.filter(s => s.status === 'approved' || !s.status);
+  const pending = skills.filter(s => s.status && s.status !== 'approved');
+  const totalDownloads = skills.reduce((s, x) => s + (Number(x.downloads) || 0), 0);
+  const rated = skills.filter(x => Number(x.reviews) > 0);
+  const totalReviews = rated.reduce((s, x) => s + Number(x.reviews), 0);
+  const avgRating = rated.length ? rated.reduce((s, x) => s + Number(x.rating), 0) / rated.length : 0;
+
+  if (showAccount) return <AccountPane profile={p} onBack={() => setShowAccount(false)} onLogout={onLogout} onShowAuth={onShowAuth} />;
 
   return (
     <PageWrap>
-      <div style={{padding:"28px clamp(16px,4vw,40px)"}}>
-        <div style={{display:"flex",alignItems:"center",gap:20,marginBottom:28,flexWrap:"wrap"}}>
-          <div style={{width:60,height:60,minWidth:60,borderRadius:"50%",background:`linear-gradient(135deg,${T.gold},${T.goldDim})`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"Playfair Display",fontSize:22,fontWeight:700,color:"#fff",flexShrink:0}}>{profile.name[0]}</div>
-          <div style={{flex:1}}>
-            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4,flexWrap:"wrap"}}>
-              <h1 style={{fontFamily:"Playfair Display",fontSize:22,color:T.text,margin:0}}>{profile.name}</h1>
-              {profile.verified&&<VerifiedStamp size={24} T={T}/>}
+      <div style={{ maxWidth: 940, margin: '0 auto', padding: '26px clamp(16px,4vw,40px) 56px' }}>
+
+        {/* ── Header: avatar + identity share one top edge; the Account button
+             is pinned to the same row, not floating loose as before. ── */}
+        <div className="fade-up profile-head" style={{ display: 'flex', alignItems: 'flex-start', gap: 22, marginBottom: 28 }}>
+          <AvatarUpload name={p.name} src={p.avatarUrl} size={84}
+            onPick={f => uploadAvatar(f, me.retry)} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 5 }}>
+              <h1 style={{ fontFamily: FONT_DISPLAY, fontSize: 'clamp(21px,3vw,27px)', fontWeight: 700, color: c.text, margin: 0, letterSpacing: '-0.02em', lineHeight: 1.2 }}>{p.name}</h1>
+              {p.verified && <VerifiedStamp size={22} />}
             </div>
-            <p style={{fontFamily:"Inter",fontSize:11,color:T.muted,margin:"0 0 10px"}}>@{profile.username}</p>
-            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>{(profile.badges||[]).map(b=><SellerBdg key={b} b={b} T={T}/>)}</div>
+            <p style={{ fontFamily: FONT_UI, fontSize: 12.5, color: c.gold, margin: '0 0 10px' }}>
+              @{p.username}{p.location && <span style={{ color: c.textMuted }}> · {p.location}</span>}
+            </p>
+            {p.bio && <p style={{ fontFamily: FONT_UI, fontSize: 13.5, color: c.textSub, margin: '0 0 12px', lineHeight: 1.6, maxWidth: 620 }}>{p.bio}</p>}
+            <div className="profile-actions" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+              {(p.badges || []).map(b => <SellerBdg key={b} b={b} />)}
+              <GhostButton size="sm" onClick={() => setEditing(e => !e)} testId="edit-profile">
+                {editing ? 'Close editor' : 'Edit profile'}
+              </GhostButton>
+            </div>
           </div>
-          <button onClick={()=>setShowLogout(true)} data-testid="account-btn" style={{background:"none",border:`1px solid ${T.borderSub}`,color:T.muted,borderRadius:8,padding:"7px 14px",fontFamily:"Inter",fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:6}}>
-            <Ic.LogOut s={14} c={T.muted}/> Account
+          <GhostButton size="sm" onClick={() => setShowAccount(true)} testId="account-btn">
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Ic.User s={13} c={c.textSub} /> Account</span>
+          </GhostButton>
+        </div>
+
+        {editing && <ProfileEditor profile={p} onSaved={() => { setEditing(false); me.retry(); }} onCancel={() => setEditing(false)} />}
+
+        {/* ── Stats ── */}
+        <div className="fade-up-d1" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 12, marginBottom: 32 }}>
+          <Stat label={skills.length === 1 ? 'Skill' : 'Skills'}>
+            <span style={{ fontFamily: FONT_UI, fontSize: 20, fontWeight: 700, color: c.text }}>{skills.length}</span>
+          </Stat>
+          {totalDownloads > 0 && <Stat label="All-time"><Downloads count={totalDownloads} size={15} /></Stat>}
+          <Stat label="Average rating"><Stars rating={avgRating} count={totalReviews} size={12} /></Stat>
+        </div>
+
+        {/* ── Skills ── */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
+          <h2 style={{ fontFamily: FONT_DISPLAY, fontSize: 19, fontWeight: 700, color: c.text, margin: 0, letterSpacing: '-0.01em' }}>My skills</h2>
+          <GhostButton size="sm" onClick={() => nav('/publish')}>+ Publish new</GhostButton>
+        </div>
+
+        {skills.length === 0 ? (
+          <EmptyState title="You haven't published a skill yet"
+            body="Package a workflow you've already built, prove it with the project it shipped, and keep 90% of every sale."
+            action={<GoldButton onClick={() => nav('/publish')}>Publish your first skill</GoldButton>} />
+        ) : (
+          <>
+            {pending.length > 0 && (
+              <div style={{ marginBottom: 22 }}>
+                <div style={{ fontFamily: FONT_UI, fontSize: 11, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10 }}>In review</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(290px,1fr))', gap: 16 }}>
+                  {pending.map(s => (
+                    <div key={s.id} style={{ position: 'relative' }}>
+                      <span style={{ position: 'absolute', top: 10, right: 10, zIndex: 2, fontFamily: FONT_UI, fontSize: 10, fontWeight: 600, color: c.coral, background: c.coralSoft, border: `1px solid ${c.coral}40`, borderRadius: 20, padding: '2px 9px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{s.status}</span>
+                      <SkillCard skill={s} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {published.length > 0 && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(290px,1fr))', gap: 16 }}>
+                {published.map((s, i) => <SkillCard key={s.id} skill={s} className={i < 8 ? 'fade-up-d2' : undefined} />)}
+              </div>
+            )}
+          </>
+        )}
+
+        {!p.verified && (
+          <Card className="fade-up" style={{ marginTop: 32, display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap', background: `linear-gradient(160deg, ${c.goldSoft}, transparent 70%)`, borderColor: c.borderGold }}>
+            <VerifiedStamp size={38} animate={false} />
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <div style={{ fontFamily: FONT_UI, fontSize: 14, fontWeight: 700, color: c.text, marginBottom: 4 }}>Get the Verified Creator badge</div>
+              <div style={{ fontFamily: FONT_UI, fontSize: 12.5, color: c.textMuted, lineHeight: 1.6 }}>A human reviews your proof of concept. Verified skills earn buyer trust and become eligible for featured placement.</div>
+            </div>
+            <GoldButton onClick={() => nav('/verify')}>Apply</GoldButton>
+          </Card>
+        )}
+
+        <style>{`
+          @media (max-width: 620px) {
+            .profile-head { flex-direction: column; align-items: center; text-align: center; }
+            .profile-head > div { width: 100%; }
+            .profile-actions { justify-content: center; }
+          }
+        `}</style>
+      </div>
+    </PageWrap>
+  );
+}
+
+async function uploadAvatar(file, done) {
+  if (!/^image\/(png|jpeg|webp)$/.test(file.type)) { alert('Photo must be a PNG, JPG or WebP.'); return; }
+  if (file.size > MAX_AVATAR_BYTES) { alert('Photo is over 2MB — pick a smaller one.'); return; }
+  try { await api.uploadAvatar(file); done(); }
+  catch (e) { alert(e.message || 'Upload failed. Try again.'); }
+}
+
+function Stat({ label, children }) {
+  const { c } = useTheme();
+  return (
+    <div style={{ background: c.surface, border: `1px solid ${c.border}`, borderRadius: 12, padding: '14px 16px' }}>
+      <div style={{ minHeight: 26, display: 'flex', alignItems: 'center' }}>{children}</div>
+      <div style={{ fontFamily: FONT_UI, fontSize: 11, color: c.textMuted, marginTop: 4, letterSpacing: '0.05em', textTransform: 'uppercase', fontWeight: 600 }}>{label}</div>
+    </div>
+  );
+}
+
+function ProfileEditor({ profile, onSaved, onCancel }) {
+  const { c } = useTheme();
+  const [name, setName] = useState(profile.name || '');
+  const [bio, setBio] = useState(profile.bio || '');
+  const [location, setLocation] = useState(profile.location || '');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  const save = async () => {
+    if (!name.trim()) { setError('Name cannot be empty.'); return; }
+    setBusy(true); setError('');
+    try { await api.updateProfile({ name: name.trim(), bio: bio.trim(), location: location.trim() }); onSaved(); }
+    catch (e) { setError(e.message); }
+    finally { setBusy(false); }
+  };
+
+  return (
+    <Card className="fade-up" style={{ marginBottom: 28 }}>
+      <div style={{ fontFamily: FONT_UI, fontSize: 11, fontWeight: 700, color: c.gold, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>Edit profile</div>
+      <Input label="Display name" value={name} onChange={e => { setName(e.target.value); setError(''); }} placeholder="Your name" testId="profile-name" />
+      <Input label="Location" hint="optional" value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Mumbai, India" testId="profile-location" />
+      <Textarea label="Bio" hint="optional" rows={3} value={bio} onChange={e => setBio(e.target.value)} placeholder="What do you build?" testId="profile-bio" />
+      <p style={{ fontFamily: FONT_UI, fontSize: 11.5, color: c.textMuted, margin: '-6px 0 16px' }}>
+        Your username <span style={{ color: c.text }}>@{profile.username}</span> is permanent and can't be changed.
+      </p>
+      {error && <p style={{ fontFamily: FONT_UI, fontSize: 12.5, color: c.coral, margin: '0 0 14px' }}>{error}</p>}
+      <div style={{ display: 'flex', gap: 10 }}>
+        <GoldButton onClick={save} disabled={busy} testId="profile-save">{busy ? 'Saving…' : 'Save changes'}</GoldButton>
+        <GhostButton onClick={onCancel}>Cancel</GhostButton>
+      </div>
+    </Card>
+  );
+}
+
+function AccountPane({ profile, onBack, onLogout, onShowAuth }) {
+  const { c } = useTheme();
+  return (
+    <PageWrap>
+      <div className="fade-up" style={{ maxWidth: 420, margin: '0 auto', padding: '64px clamp(16px,4vw,40px)', textAlign: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}>
+          <Avatar name={profile.name} src={profile.avatarUrl} size={72} />
+        </div>
+        <h2 style={{ fontFamily: FONT_DISPLAY, fontSize: 23, fontWeight: 700, color: c.text, margin: '0 0 4px', letterSpacing: '-0.02em' }}>{profile.name}</h2>
+        <p style={{ fontFamily: FONT_UI, fontSize: 13, color: c.textMuted, margin: '0 0 34px' }}>@{profile.username}</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
+          <GhostButton full onClick={onBack}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}><Ic.User s={15} c={c.textSub} /> Continue as {profile.username}</span>
+          </GhostButton>
+          <GhostButton full onClick={() => { onLogout(); onShowAuth(); }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}><Ic.User s={15} c={c.textSub} /> Switch account</span>
+          </GhostButton>
+          <button onClick={onLogout} data-testid="sign-out"
+            style={{ background: c.coralSoft, border: `1px solid ${c.coral}40`, color: c.coral, borderRadius: 10, padding: '12px', fontFamily: FONT_UI, fontWeight: 600, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <Ic.LogOut s={15} c={c.coral} /> Sign out
           </button>
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))",gap:10,marginBottom:28}}>
-          {[["Skills",(profile.skills||[]).length],["Downloads",totalDL],["Avg Rating",avgR]].map(([l,v])=>(
-            <div key={l} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:10,padding:"14px 16px"}}>
-              <div style={{fontFamily:"Inter",fontSize:20,fontWeight:700,color:T.text}}>{v}</div>
-              <div style={{fontFamily:"Inter",fontSize:11,color:T.muted,marginTop:3}}>{l}</div>
-            </div>
-          ))}
-        </div>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,flexWrap:"wrap",gap:10}}>
-          <h2 style={{fontFamily:"Playfair Display",fontSize:18,color:T.text,margin:0}}>My Skills</h2>
-          <button onClick={()=>nav("/publish")} style={{background:T.goldSoft,border:`1px solid ${T.gold}`,color:T.gold,borderRadius:6,padding:"7px 14px",fontFamily:"Inter",fontSize:12,cursor:"pointer"}}>+ Publish New</button>
-        </div>
-        {(profile.skills||[]).length===0
-          ?<p style={{fontFamily:"Inter",fontSize:13,color:T.muted}}>No skills published yet.</p>
-          :<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:14,marginBottom:24}}>{profile.skills.map(s=><SkillCard key={s.id} skill={s} T={T}/>)}</div>
-        }
-        <button onClick={()=>nav("/verify")} style={{background:T.goldSoft,border:`1px solid ${T.gold}`,color:T.gold,borderRadius:8,padding:"10px 20px",fontFamily:"Inter",fontSize:13,fontWeight:600,cursor:"pointer"}}>✦ Get Verified</button>
+        <p style={{ fontFamily: FONT_UI, fontSize: 11, color: c.textMuted, marginTop: 26 }}>Skill Exchange · skillexchange.tapdot.org</p>
       </div>
     </PageWrap>
   );

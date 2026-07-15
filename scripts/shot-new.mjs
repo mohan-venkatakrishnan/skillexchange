@@ -1,0 +1,12 @@
+import { chromium } from '@playwright/test';
+import { preview } from 'vite';
+const server = await preview({ preview: { port: 5189 } });
+const b = await chromium.launch();
+const p = await b.newPage({ viewport: { width: 1360, height: 950 } });
+await p.goto('http://localhost:5189/');
+await p.waitForTimeout(1500);
+await p.screenshot({ path: 'shot-home.png' });
+await p.evaluate(() => window.scrollTo(0, 900));
+await p.waitForTimeout(1200);
+await p.screenshot({ path: 'shot-how.png' });
+await b.close(); await server.close(); process.exit(0);

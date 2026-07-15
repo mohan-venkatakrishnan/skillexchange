@@ -92,6 +92,8 @@ export function normalizeSkill(s) {
     pocScreenshotUrl: s.pocScreenshotUrl,
     sellerBadges: s.sellerBadges || [],
     status: s.status,
+    createdAt: s.createdAt,
+    iconUrl: s.iconUrl || null,
   };
 }
 
@@ -230,4 +232,19 @@ export async function publishSkill(form) {
 export async function applyVerification({ skillUrl, note }) {
   if (MOCK) { await delay(); return { applicationId: `mock-${Date.now()}`, status: 'submitted' }; }
   return request('/verify', { method: 'POST', body: { skillUrl, note }, auth: true });
+}
+
+export async function updateProfile({ name, bio, location }) {
+  if (MOCK) { await delay(); return { updated: true }; }
+  return request('/me', { method: 'POST', body: { name, bio, location }, auth: true });
+}
+
+/* Two-step, same shape as skill publishing: ask for a presigned PUT, then send
+   the bytes straight to S3 — image data never passes through Lambda. */
+export async function uploadAvatar(file) {
+  if (MOCK) { await delay(400); return { updated: true }; }
+  const { uploadUrl } = await request('/me/avatar', { method: 'POST', body: { contentType: file.type }, auth: true });
+  const res = await fetch(uploadUrl, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file });
+  if (!res.ok) throw new ApiError(res.status, 'Photo upload failed. Please retry.');
+  return { updated: true };
 }

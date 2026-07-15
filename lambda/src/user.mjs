@@ -2,7 +2,7 @@
 // confirm/download. Identity comes exclusively from the Cognito authorizer.
 import crypto from 'node:crypto';
 import { db, skillToApi, profileToApi } from './lib/db.mjs';
-import { presignPut, presignGet, skillFileKey, screenshotKey } from './lib/s3.mjs';
+import { presignPut, presignGet, skillFileKey, screenshotKey, avatarKey } from './lib/s3.mjs';
 import { ok, bad, forbidden, notFound, conflict, unavailable, parseBody, claims, route } from './lib/http.mjs';
 import { paymentsConfigured, razorpayKeyId, createOrder, verifyCheckoutSignature } from './lib/razorpay.mjs';
 import { recordPurchase, hasPurchase } from './lib/purchases.mjs';
@@ -19,6 +19,8 @@ export const handler = route(async (event) => {
   const method = event.httpMethod;
 
   if (method === 'GET' && parts[0] === 'me') return getMe(me);
+  if (method === 'POST' && parts[0] === 'me' && !parts[1]) return updateProfile(me, parseBody(event));
+  if (method === 'POST' && parts[0] === 'me' && parts[1] === 'avatar') return avatarUploadUrl(me, parseBody(event));
   if (method === 'GET' && parts[0] === 'library') return getLibrary(me);
   if (method === 'POST' && parts[0] === 'verify') return applyVerification(me, parseBody(event));
   if (method === 'POST' && parts[0] === 'skills' && !parts[1]) return createSkill(me, parseBody(event));
@@ -55,7 +57,42 @@ async function getMe(me) {
     ExpressionAttributeValues: { ':pk': `SELLER#${me.userId}` },
     ScanIndexForward: false,
   });
-  return ok({ profile: profileToApi(profile), skills: skills.map(s => skillToApi(s, profile)) });
+  const avatarUrl = profile.avatarKey ? await presignGet(profile.avatarKey, 3600) : null;
+  return ok({ profile: profileToApi(profile, avatarUrl), skills: skills.map(s => skillToApi(s, profile)) });
+}
+
+/* Display name, bio and location are editable. Username is NOT — it is the
+   permanent public handle and its uniqueness claim is keyed on it. */
+async function updateProfile(me, body) {
+  if (!body) return bad('Invalid request body');
+  const name = (body.name || '').trim();
+  if (!name || name.length > 60) return bad('Name is required (max 60 characters)');
+  const bio = (body.bio || '').trim().slice(0, 400);
+  const location = (body.location || '').trim().slice(0, 80);
+  await ensureProfile(me);
+  await db.update({
+    Key: { PK: `USER#${me.userId}`, SK: 'PROFILE' },
+    UpdateExpression: 'SET #n = :n, bio = :b, #l = :l',
+    ExpressionAttributeNames: { '#n': 'name', '#l': 'location' },
+    ExpressionAttributeValues: { ':n': name, ':b': bio, ':l': location },
+  });
+  return ok({ updated: true });
+}
+
+/* Presigned PUT for the profile photo; the key is deterministic per user so a
+   re-upload replaces the old object instead of orphaning it. */
+async function avatarUploadUrl(me, body) {
+  const type = body?.contentType || 'image/png';
+  if (!/^image\/(png|jpeg|webp)$/.test(type)) return bad('Photo must be a PNG, JPG or WebP');
+  const ext = type === 'image/png' ? 'png' : type === 'image/webp' ? 'webp' : 'jpg';
+  const key = avatarKey(me.userId, ext);
+  await ensureProfile(me);
+  await db.update({
+    Key: { PK: `USER#${me.userId}`, SK: 'PROFILE' },
+    UpdateExpression: 'SET avatarKey = :k',
+    ExpressionAttributeValues: { ':k': key },
+  });
+  return ok({ uploadUrl: await presignPut(key, type), key });
 }
 
 async function getLibrary(me) {

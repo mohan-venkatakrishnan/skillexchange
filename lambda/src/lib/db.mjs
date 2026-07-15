@@ -64,7 +64,7 @@ export function skillToApi(item, seller) {
   };
 }
 
-export function profileToApi(p) {
+export function profileToApi(p, avatarUrl) {
   return {
     userId: p.userId,
     username: p.username,
@@ -74,6 +74,8 @@ export function profileToApi(p) {
     verified: !!p.isVerified,
     badges: p.badges || [],
     salesCount: p.salesCount || 0,
+    avatarUrl: avatarUrl || null,
+    usernameAutoDerived: !!p.usernameAutoDerived,
     createdAt: p.createdAt,
   };
 }

@@ -1,99 +1,220 @@
 import { useNavigate } from 'react-router-dom';
+import { useTheme, FONT_DISPLAY, FONT_UI } from '../tokens/theme';
 import Logo from '../components/Logo.jsx';
 import SkillCard from '../components/SkillCard.jsx';
-import { PageWrap, Stars, BuilderIcon, Loading, ErrorBox } from '../components/Shared.jsx';
+import Loader from '../components/Loader.jsx';
+import { Ic } from '../components/Icons.jsx';
+import { PageWrap, Stars, BuilderIcon } from '../components/Shared.jsx';
+import { GoldButton, GhostButton, Card, ErrorBox, Reveal, Section, SectionHeading, Avatar } from '../components/ui.jsx';
 import { CATEGORIES } from '../data/constants.js';
 import * as api from '../lib/api.js';
 import useFetch from '../lib/useFetch.js';
 
-export default function HomePage({ T, user, onShowAuth }) {
+/* How the exchange actually works — the front page has to answer this before
+   anyone will trust it with a payment. */
+const STEPS_BUY = [
+  { n: '01', t: 'Browse by what you build', d: 'Filter by category, AI assistant, and price. Every listing says which stack it targets and roughly how long it saves.' },
+  { n: '02', t: 'Check the proof', d: 'No skill lists without a live project URL and a screenshot of it running. You see the real thing the skill built before you pay.' },
+  { n: '03', t: 'Pay once, own it', d: 'One-time payment. No subscription, no seats, no expiry. Free skills download instantly.' },
+  { n: '04', t: 'Paste and ship', d: 'Drop the SKILL.md into Claude Code, ChatGPT, Cursor, Gemini or Copilot at the start of a session. Your assistant now knows the whole workflow.' },
+];
+const STEPS_SELL = [
+  { n: '01', t: 'Write it — or generate it', d: 'Already have a SKILL.md? Publish it. If not, the Create a Skill generator writes the prompt that builds one for your platform.' },
+  { n: '02', t: 'Publish with proof', d: 'Project URL and screenshot are mandatory, not optional. That rule is what makes every other listing here worth trusting.' },
+  { n: '03', t: 'We review it by hand', d: 'A human checks your proof of concept against your claims. Approved skills go live, usually within 48 hours.' },
+  { n: '04', t: 'Keep 90%', d: 'You set the price. The exchange takes 10% on paid sales — nothing else, ever. Your commission rate is locked at the sale.' },
+];
+
+const PRINCIPLES = [
+  { icon: (c) => <Ic.Shield s={18} c={c.gold} />, t: 'Proof or it doesn\'t list', d: 'Every skill ships with a live project and a screenshot. Enforced at publish time, checked by a human.' },
+  { icon: (c) => <Ic.Bolt s={18} c={c.gold} />, t: 'One-time payments', d: 'Buy a skill, own it forever. No subscriptions and no tiers anywhere on the exchange.' },
+  { icon: (c) => <Ic.Crown s={18} c={c.gold} />, t: 'Sellers keep 90%', d: 'A flat 10% commission on paid sales, stored per transaction so your rate never changes retroactively.' },
+  { icon: (c) => <Ic.Gem s={18} c={c.gold} />, t: 'Every assistant, not just one', d: 'Claude, ChatGPT, Gemini, Cursor and Copilot. Skills declare what they target; you filter on it.' },
+];
+
+export default function HomePage({ user, onShowAuth }) {
+  const { c } = useTheme();
   const nav = useNavigate();
   const stats = useFetch(() => api.getStats(), []);
   const skills = useFetch(() => api.listSkills(), []);
   const lb = useFetch(() => api.getLeaderboard(), []);
-  const featured = (skills.data || []).filter(s => s.featured);
+  const featured = (skills.data || []).filter(s => s.featured).slice(0, 6);
+  const catCounts = (skills.data || []).reduce((m, s) => { m[s.category] = (m[s.category] || 0) + 1; return m; }, {});
 
   return (
     <PageWrap>
-      <div>
-        {/* Hero */}
-        <div style={{padding:"80px 40px 64px",textAlign:"center",borderBottom:`1px solid ${T.border}`}}>
-          <div style={{animation:"fadeUp 0.6s ease both"}}>
-            <div style={{display:"flex",justifyContent:"center",marginBottom:20}}><Logo size={56} T={T}/></div>
-            <h1 style={{fontFamily:"Playfair Display",fontSize:"clamp(1.8rem,5vw,3rem)",fontWeight:700,color:T.text,margin:"0 0 4px",lineHeight:1.15}}>Where AI builders</h1>
-            <h1 style={{fontFamily:"Playfair Display",fontSize:"clamp(1.8rem,5vw,3rem)",fontWeight:700,margin:"0 0 18px",lineHeight:1.15,color:T.gold}}>share their edge</h1>
-            <p style={{fontFamily:"Inter",fontSize:16,color:T.muted,margin:"0 0 32px",maxWidth:520,marginLeft:"auto",marginRight:"auto",lineHeight:1.65}}>The GitHub for AI skills — buy and sell reusable workflows that power real products</p>
-            <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
-              <button onClick={()=>nav("/marketplace")} style={{background:`linear-gradient(135deg,${T.gold},${T.goldDim})`,color:"#fff",border:"none",borderRadius:10,padding:"13px 30px",fontFamily:"Inter",fontWeight:700,fontSize:14,cursor:"pointer",boxShadow:`0 4px 20px ${T.gold}28`}}>Browse Skills</button>
-              {user
-                ? <button onClick={()=>nav("/publish")} style={{background:"transparent",color:T.gold,border:`1.5px solid ${T.gold}`,borderRadius:10,padding:"13px 30px",fontFamily:"Inter",fontWeight:600,fontSize:14,cursor:"pointer"}}>Publish a Skill</button>
-                : <button onClick={()=>onShowAuth()} style={{background:"transparent",color:T.gold,border:`1.5px solid ${T.gold}`,borderRadius:10,padding:"13px 30px",fontFamily:"Inter",fontWeight:600,fontSize:14,cursor:"pointer"}}>Sign In to Publish</button>
-              }
-            </div>
-            <p style={{fontFamily:"Inter",fontSize:11,color:T.muted,marginTop:16}}>{user?`Browse free · Publish or buy anytime · Every skill ships with proof it works`:`Browse free · Sign in to buy or publish · Every skill ships with proof it works`}</p>
+      {/* ── Hero — centred, 70vh, never the full viewport ── */}
+      <section style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '86px 24px 56px', position: 'relative' }}>
+        <div style={{ maxWidth: 760, textAlign: 'center', position: 'relative', zIndex: 1 }}>
+          <div className="float" style={{ marginBottom: 26, display: 'inline-block' }}><Logo size={64} /></div>
+          <h1 className="fade-up" style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 'clamp(36px, 6vw, 60px)', lineHeight: 1.12, letterSpacing: '-0.025em', color: c.text, margin: '0 0 20px' }}>
+            Where AI builders<br /><span style={{ color: c.gold }}>share their edge</span>
+          </h1>
+          <p className="fade-up-d1" style={{ fontFamily: FONT_UI, fontSize: 17, lineHeight: 1.7, color: c.textSub, maxWidth: 540, margin: '0 auto 34px' }}>
+            The GitHub for AI skills — buy and sell the reusable workflows that power real products.
+          </p>
+          <div className="fade-up-d2" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <GoldButton size="lg" onClick={() => nav('/marketplace')}>Browse skills</GoldButton>
+            {user
+              ? <GhostButton size="lg" onClick={() => nav('/publish')}>Publish a skill</GhostButton>
+              : <GhostButton size="lg" onClick={onShowAuth}>Sign in to publish</GhostButton>}
           </div>
+          <p className="fade-up-d3" style={{ fontFamily: FONT_UI, fontSize: 12, color: c.textMuted, marginTop: 18 }}>
+            Browsing is free · {user ? 'Publish or buy anytime' : 'Sign in only to buy or publish'} · Every skill ships with proof it works
+          </p>
         </div>
+      </section>
 
-        {/* Stats */}
-        <div style={{display:"flex",justifyContent:"center",gap:"clamp(20px,4vw,48px)",padding:"18px clamp(16px,4vw,40px)",borderBottom:`1px solid ${T.border}`,background:T.surface,flexWrap:"wrap"}}>
-          {[[stats.data?.skills??"—","Skills Published"],[stats.data?.downloads??"—","Downloads"],[stats.data?.builders??"—","Builders"],[stats.data?.avgRating??"—","Avg Rating"]].map(([v,l])=>(
-            <div key={l} style={{textAlign:"center"}}>
-              <div style={{fontFamily:"Inter",fontSize:22,fontWeight:700,color:T.gold}}>{v}</div>
-              <div style={{fontFamily:"Inter",fontSize:11,color:T.muted,marginTop:2}}>{l}</div>
-            </div>
+      {/* ── Stats ── */}
+      <div style={{ position: 'relative', zIndex: 1, borderTop: `1px solid ${c.border}`, borderBottom: `1px solid ${c.border}`, background: c.surface }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', justifyContent: 'center', gap: 'clamp(24px,5vw,72px)', padding: '22px clamp(16px,4vw,40px)', flexWrap: 'wrap' }}>
+          {[[stats.data?.skills, 'Skills published'], [stats.data?.categories, 'Categories'], [stats.data?.builders, 'Builders'], [stats.data?.avgRating, 'Average rating']]
+            .filter(([v]) => v && v !== '0' && v !== '—')
+            .map(([v, l]) => (
+              <div key={l} style={{ textAlign: 'center' }}>
+                <div style={{ fontFamily: FONT_UI, fontSize: 23, fontWeight: 700, color: c.gold, letterSpacing: '-0.02em' }}>{v}</div>
+                <div style={{ fontFamily: FONT_UI, fontSize: 11, color: c.textMuted, marginTop: 3 }}>{l}</div>
+              </div>
+            ))}
+        </div>
+      </div>
+
+      {/* ── How it works ── */}
+      <Section id="how">
+        <SectionHeading eyebrow="How the exchange works"
+          title="Skills with receipts"
+          sub="A skill file teaches your AI assistant one workflow end to end. Here every one of them arrives with evidence it actually shipped something." />
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 18 }}>
+          {PRINCIPLES.map((p, i) => (
+            <Reveal key={p.t} delay={Math.min(3, i + 1)}>
+              <Card style={{ height: '100%' }}>
+                <div style={{ width: 36, height: 36, borderRadius: 9, background: c.goldSoft, border: `1px solid ${c.borderGold}`, display: 'grid', placeItems: 'center', marginBottom: 13 }}>{p.icon(c)}</div>
+                <div style={{ fontFamily: FONT_UI, fontSize: 14, fontWeight: 700, color: c.text, marginBottom: 6 }}>{p.t}</div>
+                <div style={{ fontFamily: FONT_UI, fontSize: 12.5, color: c.textMuted, lineHeight: 1.6 }}>{p.d}</div>
+              </Card>
+            </Reveal>
           ))}
         </div>
 
-        {/* Featured */}
-        <div style={{padding:"44px clamp(16px,4vw,40px) 28px"}}>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
-            <h2 style={{fontFamily:"Playfair Display",fontSize:"clamp(18px,3vw,22px)",color:T.text,margin:0}}>✦ Featured Skills</h2>
-            <button onClick={()=>nav("/marketplace")} style={{background:"none",border:"none",color:T.gold,fontFamily:"Inter",fontSize:13,cursor:"pointer"}}>View all →</button>
-          </div>
-          {skills.loading?<Loading T={T} verb="Loading featured skills"/>
-            :skills.error?<ErrorBox T={T} message={skills.error} onRetry={skills.retry}/>
-            :featured.length===0?<p style={{fontFamily:"Inter",fontSize:13,color:T.muted,textAlign:"center",padding:"24px 0"}}>No featured skills yet — <span onClick={()=>nav("/marketplace")} style={{color:T.gold,cursor:"pointer"}}>browse the marketplace</span>.</p>
-            :<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:14}}>
-              {featured.map(s=><SkillCard key={s.id} skill={s} T={T}/>)}
-            </div>
-          }
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 22, marginTop: 30 }}>
+          <StepColumn title="If you're buying" steps={STEPS_BUY} accent={c.gold} />
+          <StepColumn title="If you're selling" steps={STEPS_SELL} accent={c.green} />
         </div>
 
-        {/* Categories */}
-        <div style={{padding:"0 clamp(16px,4vw,40px) 44px"}}>
-          <h2 style={{fontFamily:"Playfair Display",fontSize:"clamp(18px,3vw,22px)",color:T.text,marginBottom:18}}>Browse by Category</h2>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(110px,1fr))",gap:10}}>
-            {CATEGORIES.map(c=>(
-              <button key={c} onClick={()=>nav(`/marketplace?cat=${encodeURIComponent(c)}`)} style={{background:T.surface,border:`1px solid ${T.borderSub}`,borderRadius:8,padding:"13px 10px",textAlign:"center",cursor:"pointer",fontFamily:"Inter",fontSize:12,fontWeight:500,color:T.muted,transition:"all 0.18s"}}
-                onMouseEnter={e=>{e.currentTarget.style.borderColor=T.gold;e.currentTarget.style.color=T.gold;e.currentTarget.style.background=T.goldSoft;}}
-                onMouseLeave={e=>{e.currentTarget.style.borderColor=T.borderSub;e.currentTarget.style.color=T.muted;e.currentTarget.style.background=T.surface;}}>{c}</button>
+        <Reveal style={{ textAlign: 'center', marginTop: 34 }}>
+          <GhostButton onClick={() => nav('/create')}>Not sure how to write one? Generate a SKILL.md →</GhostButton>
+        </Reveal>
+      </Section>
+
+      {/* ── Featured — centred inside the house measure ── */}
+      <Section id="featured" style={{ paddingTop: 12 }}>
+        <SectionHeading eyebrow="✦ Featured" title="Hand-picked skills"
+          sub="Verified proof of concept, clear instructions, real time saved." />
+        {skills.loading ? <Loader label="Loading featured skills" />
+          : skills.error ? <ErrorBox message={skills.error} onRetry={skills.retry} />
+          : featured.length === 0 ? null
+          : (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: 16 }}>
+                {featured.map((s, i) => (
+                  <Reveal key={s.id} delay={Math.min(3, (i % 3) + 1)} style={{ display: 'flex' }}>
+                    <div style={{ width: '100%' }}><SkillCard skill={s} /></div>
+                  </Reveal>
+                ))}
+              </div>
+              <Reveal style={{ textAlign: 'center', marginTop: 30 }}>
+                <GoldButton onClick={() => nav('/marketplace')}>Browse every skill →</GoldButton>
+              </Reveal>
+            </>
+          )}
+      </Section>
+
+      {/* ── Categories ── */}
+      <Section id="categories" style={{ paddingTop: 12 }}>
+        <SectionHeading eyebrow="Browse" title="Every domain you build in" />
+        <Reveal>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 10 }}>
+            {CATEGORIES.map(cat => (
+              <button key={cat} onClick={() => nav(`/marketplace?cat=${encodeURIComponent(cat)}`)}
+                style={{ background: c.surface, border: `1px solid ${c.border}`, borderRadius: 10, padding: '15px 12px', cursor: 'pointer', fontFamily: FONT_UI, fontSize: 13, fontWeight: 500, color: c.textSub, transition: 'all 0.18s', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = c.gold; e.currentTarget.style.color = c.gold; e.currentTarget.style.background = c.goldSoft; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = c.border; e.currentTarget.style.color = c.textSub; e.currentTarget.style.background = c.surface; }}>
+                <span>{cat}</span>
+                {catCounts[cat] > 0 && <span style={{ fontSize: 11, color: c.textMuted }}>{catCounts[cat]}</span>}
+              </button>
             ))}
           </div>
-        </div>
+        </Reveal>
+      </Section>
 
-        {/* Leaderboard snippet */}
-        <div style={{padding:"0 clamp(16px,4vw,40px) 60px"}}>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18}}>
-            <h2 style={{fontFamily:"Playfair Display",fontSize:"clamp(18px,3vw,22px)",color:T.text,margin:0}}>Top Builders</h2>
-            <button onClick={()=>nav("/leaderboard")} style={{background:"none",border:"none",color:T.gold,fontFamily:"Inter",fontSize:13,cursor:"pointer"}}>Full leaderboard →</button>
-          </div>
-          {lb.loading?<Loading T={T} verb="Loading leaderboard"/>
-            :lb.error?<ErrorBox T={T} message={lb.error} onRetry={lb.retry}/>
-            :(lb.data?.builders||[]).length===0?<p style={{fontFamily:"Inter",fontSize:13,color:T.muted,textAlign:"center",padding:"24px 0"}}>No builders ranked yet — be the first to publish.</p>
-            :<div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:14,overflow:"hidden"}}>
-              {lb.data.builders.slice(0,3).map((e,i)=>(
-                <div key={e.rank} style={{display:"flex",alignItems:"center",gap:14,padding:"13px 20px",borderBottom:i<2?`1px solid ${T.borderSub}`:"none"}}>
-                  <span style={{fontFamily:"Inter",fontSize:12,fontWeight:600,color:i===0?T.gold:T.muted,width:22}}>#{e.rank}</span>
-                  <BuilderIcon b={e.badge} T={T}/>
-                  <span onClick={()=>nav(`/u/${e.name}`)} style={{fontFamily:"Inter",fontWeight:600,color:T.text,flex:1,cursor:"pointer"}} onMouseEnter={ev=>ev.target.style.color=T.gold} onMouseLeave={ev=>ev.target.style.color=T.text}>{e.name}</span>
-                  <span style={{fontFamily:"Inter",fontSize:12,color:T.muted}}>{e.sales} sales</span>
-                  <Stars rating={e.rating} T={T}/>
-                </div>
-              ))}
-            </div>
-          }
-        </div>
-      </div>
+      {/* ── Top builders ── */}
+      <Section id="builders" style={{ paddingTop: 12 }}>
+        <SectionHeading eyebrow="Leaderboard" title="Top builders" />
+        {lb.loading ? <Loader label="Loading leaderboard" />
+          : lb.error ? <ErrorBox message={lb.error} onRetry={lb.retry} />
+          : (lb.data?.builders || []).length === 0 ? null
+          : (
+            <Reveal>
+              <Card style={{ padding: 0, overflow: 'hidden', maxWidth: 720, margin: '0 auto' }}>
+                {lb.data.builders.slice(0, 5).map((e, i, arr) => (
+                  <div key={e.rank} onClick={() => nav(`/u/${e.name}`)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px', borderBottom: i < arr.length - 1 ? `1px solid ${c.border}` : 'none', cursor: 'pointer', transition: 'background 0.15s' }}
+                    onMouseEnter={ev => ev.currentTarget.style.background = c.surfaceHover}
+                    onMouseLeave={ev => ev.currentTarget.style.background = 'transparent'}>
+                    <span style={{ fontFamily: FONT_UI, fontSize: 12, fontWeight: 700, color: i === 0 ? c.gold : c.textMuted, width: 22 }}>#{e.rank}</span>
+                    <Avatar name={e.name} src={e.avatarUrl} size={30} />
+                    <span style={{ fontFamily: FONT_UI, fontWeight: 600, fontSize: 13.5, color: c.text, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{e.name}</span>
+                    <BuilderIcon b={e.badge} />
+                    <Stars rating={e.rating} count={e.ratingCount} showEmpty={false} />
+                  </div>
+                ))}
+              </Card>
+              <div style={{ textAlign: 'center', marginTop: 22 }}>
+                <GhostButton onClick={() => nav('/leaderboard')}>Full leaderboard →</GhostButton>
+              </div>
+            </Reveal>
+          )}
+      </Section>
+
+      {/* ── Closing CTA ── */}
+      <Section style={{ paddingTop: 12, paddingBottom: 96 }} max={760}>
+        <Reveal>
+          <Card style={{ textAlign: 'center', padding: '44px 28px', background: `linear-gradient(160deg, ${c.goldSoft}, transparent 70%)`, borderColor: c.borderGold }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}><Logo size={40} /></div>
+            <h2 style={{ fontFamily: FONT_DISPLAY, fontSize: 'clamp(22px,3vw,28px)', color: c.text, margin: '0 0 10px' }}>Sell the workflow you already built</h2>
+            <p style={{ fontFamily: FONT_UI, fontSize: 14, color: c.textMuted, lineHeight: 1.7, maxWidth: 460, margin: '0 auto 24px' }}>
+              You've already solved it once. Package it as a skill, prove it with the project it shipped, and keep 90% of every sale.
+            </p>
+            <GoldButton size="lg" onClick={() => (user ? nav('/publish') : onShowAuth())}>
+              {user ? 'Publish a skill' : 'Get started — it\'s free'}
+            </GoldButton>
+          </Card>
+        </Reveal>
+      </Section>
     </PageWrap>
+  );
+}
+
+function StepColumn({ title, steps, accent }) {
+  const { c } = useTheme();
+  return (
+    <Reveal>
+      <Card style={{ height: '100%' }}>
+        <div style={{ fontFamily: FONT_UI, fontSize: 11, fontWeight: 700, color: accent, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 18 }}>{title}</div>
+        {steps.map((s, i) => (
+          <div key={s.n} style={{ display: 'flex', gap: 14, paddingBottom: i < steps.length - 1 ? 18 : 0 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+              <div style={{ width: 26, height: 26, borderRadius: '50%', border: `1px solid ${accent}55`, background: `${accent}12`, display: 'grid', placeItems: 'center', fontFamily: FONT_UI, fontSize: 10, fontWeight: 700, color: accent }}>{s.n}</div>
+              {i < steps.length - 1 && <div style={{ width: 1, flex: 1, minHeight: 18, background: c.border, marginTop: 5 }} />}
+            </div>
+            <div style={{ paddingTop: 2 }}>
+              <div style={{ fontFamily: FONT_UI, fontSize: 13.5, fontWeight: 600, color: c.text, marginBottom: 4 }}>{s.t}</div>
+              <div style={{ fontFamily: FONT_UI, fontSize: 12.5, color: c.textMuted, lineHeight: 1.6 }}>{s.d}</div>
+            </div>
+          </div>
+        ))}
+      </Card>
+    </Reveal>
   );
 }

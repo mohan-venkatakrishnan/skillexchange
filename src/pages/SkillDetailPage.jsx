@@ -1,11 +1,26 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { PageWrap, VerifiedStamp, Stars, SkillBdg, PTag, SellerBdg, Loading, ErrorBox } from '../components/Shared.jsx';
+import { useTheme, FONT_DISPLAY, FONT_UI, FONT_MONO } from '../tokens/theme';
+import { PageWrap, VerifiedStamp, Stars, Downloads, SkillBdg, PTag, SellerBdg } from '../components/Shared.jsx';
+import { GoldButton, GhostButton, Textarea, ErrorBox } from '../components/ui.jsx';
+import SkillIcon from '../components/SkillIcon.jsx';
+import Loader from '../components/Loader.jsx';
 import { Ic } from '../components/Icons.jsx';
 import * as api from '../lib/api.js';
 import useFetch from '../lib/useFetch.js';
 
-export default function SkillDetailPage({ T, user, onShowAuth }) {
+/* The two-column shell collapses under 880px. On narrow screens the buy card
+   moves ABOVE the long-form content (order:-1) — the price and CTA are the
+   reason people opened the page; they should never be a scroll away. */
+const SHELL_CSS = `
+  @media (max-width: 880px) {
+    .sd-shell { grid-template-columns: 1fr !important; }
+    .sd-side { position: static !important; order: -1; }
+  }
+`;
+
+export default function SkillDetailPage({ user, onShowAuth }) {
+  const { c } = useTheme();
   const { id } = useParams();
   const nav = useNavigate();
   const skill = useFetch(() => api.getSkill(id), [id]);
@@ -31,8 +46,8 @@ export default function SkillDetailPage({ T, user, onShowAuth }) {
     return () => { alive = false; };
   }, [user, id]);
 
-  if (skill.loading) return <PageWrap><Loading T={T} verb="Loading skill"/></PageWrap>;
-  if (skill.error) return <PageWrap><ErrorBox T={T} message={skill.error} onRetry={skill.retry}/></PageWrap>;
+  if (skill.loading) return <PageWrap><Loader label="Loading skill" /></PageWrap>;
+  if (skill.error) return <PageWrap><ErrorBox message={skill.error} onRetry={skill.retry} /></PageWrap>;
   const s = skill.data;
   const isFree = s.price === 0;
   const canDownload = isFree || owned.value;
@@ -73,103 +88,206 @@ export default function SkillDetailPage({ T, user, onShowAuth }) {
     finally { setReviewBusy(false); }
   };
 
+  // Only non-empty facts reach the stats list — a "0 downloads" row reads as
+  // failure, where an absent row reads as "too early to say".
+  const stats = [
+    ['Category', s.category, false],
+    s.timeSaved ? ['Time saved', `~${s.timeSaved}h est.`, true] : null,
+    s.downloads ? ['Downloads', Number(s.downloads).toLocaleString(), false] : null,
+    s.reviews ? ['Rating', `${Number(s.rating).toFixed(1)}/5`, false] : null,
+    s.reviews ? ['Reviews', Number(s.reviews).toLocaleString(), false] : null,
+  ].filter(Boolean);
+
+  const reviewList = reviews.data || [];
+
   return (
     <PageWrap>
-      <div style={{padding:"28px clamp(16px,4vw,40px)",maxWidth:900,margin:"0 auto"}}>
-        <button onClick={()=>nav("/marketplace")} style={{background:"none",border:"none",color:T.muted,fontFamily:"Inter",fontSize:13,cursor:"pointer",marginBottom:18,padding:0}}>← Back</button>
-        <div style={{display:"flex",gap:32,flexWrap:"wrap"}}>
-          <div style={{flex:"1 1 320px"}}>
-            <div style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:10}}>
-              <div style={{flex:1}}>
-                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
-                  <span style={{fontFamily:"Inter",fontSize:10,fontWeight:600,color:T.slate,textTransform:"uppercase",letterSpacing:"0.07em"}}>{s.category}</span>
-                  {s.skillBadge&&<SkillBdg label={s.skillBadge} T={T}/>}
+      <style>{SHELL_CSS}</style>
+      <div style={{ maxWidth: 1120, margin: '0 auto', padding: '22px clamp(16px,3.5vw,32px) 60px' }}>
+        <div style={{ marginBottom: 20 }}>
+          <GhostButton size="sm" onClick={() => nav('/marketplace')}>← Back to marketplace</GhostButton>
+        </div>
+
+        <div className="sd-shell" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 316px', gap: 'clamp(24px,3.5vw,44px)', alignItems: 'start' }}>
+          {/* ── Main column ── */}
+          <main className="fade-up" style={{ minWidth: 0 }}>
+            {/* Title block */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+              <SkillIcon skill={s} size={64} radius={14} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7, flexWrap: 'wrap' }}>
+                  <span style={{ fontFamily: FONT_UI, fontSize: 10, fontWeight: 700, color: c.slate, textTransform: 'uppercase', letterSpacing: '0.09em' }}>{s.category}</span>
+                  {s.skillBadge && <SkillBdg label={s.skillBadge} />}
                 </div>
-                <h1 style={{fontFamily:"Playfair Display",fontSize:"clamp(20px,3vw,24px)",color:T.text,margin:"0 0 8px"}}>{s.title}</h1>
+                <h1 style={{ fontFamily: FONT_DISPLAY, fontSize: 'clamp(23px,3.4vw,32px)', fontWeight: 700, color: c.text, letterSpacing: '-0.02em', lineHeight: 1.18, margin: 0 }}>{s.title}</h1>
               </div>
-              {s.verified&&<VerifiedStamp size={32} T={T}/>}
-            </div>
-            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12,flexWrap:"wrap"}}>
-              <Stars rating={s.rating} count={s.reviews} T={T}/>
-              <span style={{fontFamily:"Inter",fontSize:12,color:T.muted}}>{s.downloads} downloads</span>
-              <span style={{fontFamily:"Inter",fontSize:12,color:T.muted}}>by <span onClick={()=>nav(`/u/${s.author}`)} style={{color:T.gold,cursor:"pointer"}}>{s.author}</span></span>
-            </div>
-            {s.timeSaved&&(
-              <div style={{background:T.goldSoft,border:`1px solid ${T.gold}28`,borderRadius:10,padding:"10px 14px",marginBottom:16,display:"inline-flex",alignItems:"center",gap:8}}>
-                <Ic.Clock s={16} c={T.gold}/>
-                <span style={{fontFamily:"Inter",fontSize:14,fontWeight:600,color:T.gold}}>~{s.timeSaved} hours saved</span>
-                <span style={{fontFamily:"Inter",fontSize:11,color:T.muted}}>· seller estimate</span>
-              </div>
-            )}
-            <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:18}}>{s.platforms.map(p=><PTag key={p} p={p} T={T}/>)}{s.sellerBadges.map(b=><SellerBdg key={b} b={b} T={T}/>)}</div>
-            <p style={{fontFamily:"Inter",fontSize:14,color:T.muted,lineHeight:1.7,marginBottom:20}}>{s.description}</p>
-            <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:10,padding:16,marginBottom:14}}>
-              <h3 style={{fontFamily:"Inter",fontSize:11,fontWeight:700,color:T.gold,margin:"0 0 8px",textTransform:"uppercase",letterSpacing:"0.06em"}}>How to use this skill</h3>
-              <p style={{fontFamily:"Inter",fontSize:13,color:T.muted,lineHeight:1.6,margin:0}}>{s.usage}</p>
-            </div>
-            <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:10,padding:16,marginBottom:22}}>
-              <h3 style={{fontFamily:"Inter",fontSize:11,fontWeight:700,color:T.gold,margin:"0 0 10px",textTransform:"uppercase",letterSpacing:"0.06em"}}>Proof of Concept</h3>
-              {s.pocScreenshot&&(s.pocScreenshotUrl
-                ?<img src={s.pocScreenshotUrl} alt={`${s.title} proof of concept`} style={{width:"100%",maxHeight:220,objectFit:"cover",borderRadius:8,marginBottom:10,border:`1px solid ${T.borderSub}`}}/>
-                :<div style={{background:T.elevated,borderRadius:8,height:100,display:"flex",alignItems:"center",justifyContent:"center",marginBottom:10,border:`1px solid ${T.borderSub}`}}><span style={{fontFamily:"Inter",fontSize:12,color:T.muted}}>📸 Cover screenshot</span></div>
-              )}
-              <a href={s.pocUrl} target="_blank" rel="noreferrer" style={{fontFamily:"JetBrains Mono",fontSize:12,color:T.gold,textDecoration:"none"}}>{s.pocUrl} ↗</a>
+              {s.verified && <VerifiedStamp size={34} />}
             </div>
 
-            <h3 style={{fontFamily:"Playfair Display",fontSize:18,color:T.text,marginBottom:14}}>Reviews</h3>
-            {reviews.loading?<Loading T={T} verb="Loading reviews"/>
-              :reviews.error?<ErrorBox T={T} message={reviews.error} onRetry={reviews.retry}/>
-              :(reviews.data||[]).length===0?<p style={{fontFamily:"Inter",fontSize:13,color:T.muted}}>No reviews yet. {canDownload?"Be the first to review it below.":"Buy this skill to leave the first review."}</p>
-              :(reviews.data||[]).map((r,i)=>(
-                <div key={r.reviewId||i} style={{background:T.surface,border:`1px solid ${T.borderSub}`,borderRadius:8,padding:14,marginBottom:10}}>
-                  <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
-                    <span onClick={()=>nav(`/u/${r.user}`)} style={{fontFamily:"Inter",fontSize:13,fontWeight:600,color:T.text,cursor:"pointer"}}>{r.user}</span>
-                    <Stars rating={r.rating} T={T}/>
+            {/* Meta row */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', margin: '14px 0 0' }}>
+              <Stars rating={s.rating} count={s.reviews} size={12} />
+              <Downloads count={s.downloads} size={12} />
+              <span style={{ fontFamily: FONT_UI, fontSize: 12, color: c.textMuted }}>
+                by <button onClick={() => nav(`/u/${s.author}`)}
+                  style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', color: c.gold, cursor: 'pointer' }}>{s.author}</button>
+              </span>
+            </div>
+
+            {/* Platforms + seller badges */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, margin: '16px 0 0' }}>
+              {s.platforms.map(p => <PTag key={p} p={p} />)}
+              {s.sellerBadges.map(b => <SellerBdg key={b} b={b} />)}
+            </div>
+
+            {/* Time saved — always labelled as the seller's own estimate */}
+            {s.timeSaved && (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 9, background: c.goldSoft, border: `1px solid ${c.gold}30`, borderRadius: 10, padding: '10px 15px', marginTop: 20 }}>
+                <Ic.Clock s={15} c={c.gold} />
+                <span style={{ fontFamily: FONT_UI, fontSize: 14, fontWeight: 700, color: c.gold }}>~{s.timeSaved} hours saved</span>
+                <span style={{ fontFamily: FONT_UI, fontSize: 11, color: c.textMuted }}>· seller estimate</span>
+              </div>
+            )}
+
+            <p style={{ fontFamily: FONT_UI, fontSize: 14.5, color: c.textSub, lineHeight: 1.75, margin: '22px 0 0' }}>{s.description}</p>
+
+            {/* ── How to use ── */}
+            <Section title="How to use this skill">
+              <p style={{ fontFamily: FONT_UI, fontSize: 13.5, color: c.textSub, lineHeight: 1.7, margin: 0, whiteSpace: 'pre-wrap' }}>{s.usage}</p>
+            </Section>
+
+            {/* ── Proof of concept — the screenshot is evidence, never cropped ── */}
+            <Section title="Proof of concept">
+              {s.pocScreenshot && (s.pocScreenshotUrl
+                ? <img src={s.pocScreenshotUrl} alt={`${s.title} used in a real project`}
+                    style={{ display: 'block', width: '100%', height: 'auto', maxHeight: 380, objectFit: 'contain', objectPosition: 'top', background: c.elevated, border: `1px solid ${c.border}`, borderRadius: 10, marginBottom: 14 }} />
+                : <div style={{ background: c.elevated, border: `1px solid ${c.border}`, borderRadius: 10, height: 120, display: 'grid', placeItems: 'center', marginBottom: 14 }}>
+                    <span style={{ fontFamily: FONT_UI, fontSize: 12, color: c.textMuted }}>Screenshot unavailable</span>
                   </div>
-                  <p style={{fontFamily:"Inter",fontSize:13,color:T.muted,margin:0,lineHeight:1.5}}>{r.text}</p>
+              )}
+              <a href={s.pocUrl} target="_blank" rel="noreferrer"
+                style={{ display: 'inline-block', fontFamily: FONT_MONO, fontSize: 12, color: c.gold, textDecoration: 'none', wordBreak: 'break-all' }}>
+                {s.pocUrl} ↗
+              </a>
+            </Section>
+
+            {/* ── Reviews ── */}
+            <div style={{ borderTop: `1px solid ${c.border}`, marginTop: 34, paddingTop: 30 }}>
+              <h2 style={{ fontFamily: FONT_DISPLAY, fontSize: 20, fontWeight: 700, color: c.text, letterSpacing: '-0.02em', margin: '0 0 16px' }}>
+                Reviews {reviewList.length > 0 && <span style={{ fontFamily: FONT_UI, fontSize: 13, fontWeight: 400, color: c.textMuted }}>({reviewList.length})</span>}
+              </h2>
+
+              {reviews.loading ? <Loader label="Loading reviews" pad="28px 16px" mark={30} />
+                : reviews.error ? <ErrorBox message={reviews.error} onRetry={reviews.retry} />
+                : reviewList.length === 0 ? (
+                  <p style={{ fontFamily: FONT_UI, fontSize: 13.5, color: c.textMuted, lineHeight: 1.6, margin: 0 }}>
+                    No reviews yet. {canDownload ? 'Be the first to review it below.' : 'Buy this skill to leave the first review.'}
+                  </p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    {reviewList.map((r, i) => (
+                      <div key={r.reviewId || i} style={{ padding: '16px 0', borderTop: i === 0 ? 'none' : `1px solid ${c.border}` }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 7 }}>
+                          <button onClick={() => nav(`/u/${r.user}`)}
+                            style={{ background: 'none', border: 'none', padding: 0, fontFamily: FONT_UI, fontSize: 13, fontWeight: 600, color: c.text, cursor: 'pointer' }}>{r.user}</button>
+                          <ReviewStars rating={r.rating} />
+                        </div>
+                        <p style={{ fontFamily: FONT_UI, fontSize: 13.5, color: c.textSub, margin: 0, lineHeight: 1.65 }}>{r.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+              {/* Review composer — owners only */}
+              {user && owned.known && canDownload && !reviewDone && (
+                <div style={{ background: c.surface, border: `1px solid ${c.border}`, borderRadius: 14, padding: 18, marginTop: 22 }}>
+                  <h3 style={{ fontFamily: FONT_UI, fontSize: 13, fontWeight: 600, color: c.text, letterSpacing: 0, margin: '0 0 12px' }}>Leave a review</h3>
+                  <div role="radiogroup" aria-label="Your rating" style={{ display: 'flex', gap: 7, marginBottom: 12 }}>
+                    {[1, 2, 3, 4, 5].map(i => (
+                      <span key={i} data-testid={`star-${i}`} role="radio" tabIndex={0}
+                        aria-checked={i === userRating} aria-label={`${i} star${i > 1 ? 's' : ''}`}
+                        onClick={() => setUserRating(i)}
+                        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setUserRating(i); } }}
+                        style={{ cursor: 'pointer', display: 'inline-flex', lineHeight: 0 }}>
+                        <Ic.Star s={20} c={c.gold} filled={i <= userRating} />
+                      </span>
+                    ))}
+                  </div>
+                  <Textarea value={reviewText} onChange={e => setReviewText(e.target.value)} rows={3}
+                    placeholder="What worked well? What could be improved?" testId="review-text" />
+                  {reviewError && <p style={{ fontFamily: FONT_UI, fontSize: 12, color: c.coral, margin: '10px 0 0' }}>{reviewError}</p>}
+                  <div style={{ marginTop: 12 }}>
+                    <GoldButton size="sm" disabled={reviewBusy} onClick={submitReview}>{reviewBusy ? 'Submitting…' : 'Submit review'}</GoldButton>
+                  </div>
                 </div>
-              ))}
+              )}
+              {reviewDone && <p style={{ fontFamily: FONT_UI, fontSize: 13.5, color: c.green, marginTop: 18 }}>✓ Review submitted — thank you.</p>}
+            </div>
+          </main>
 
-            {user&&owned.known&&canDownload&&!reviewDone&&(
-              <div style={{background:T.surface,border:`1px solid ${T.borderSub}`,borderRadius:8,padding:14,marginTop:14}}>
-                <h4 style={{fontFamily:"Inter",fontSize:13,fontWeight:600,color:T.text,margin:"0 0 10px"}}>Leave a review</h4>
-                <div style={{display:"flex",gap:6,marginBottom:10}}>{[1,2,3,4,5].map(i=><span key={i} onClick={()=>setUserRating(i)} style={{cursor:"pointer"}} data-testid={`star-${i}`}><Ic.Star s={18} c={T.gold} filled={i<=userRating}/></span>)}</div>
-                <textarea value={reviewText} onChange={e=>setReviewText(e.target.value)} placeholder="What worked well? What could be improved?" style={{width:"100%",background:T.elevated,border:`1px solid ${T.border}`,borderRadius:6,padding:10,color:T.text,fontFamily:"Inter",fontSize:13,resize:"vertical",minHeight:70,boxSizing:"border-box",outline:"none"}}/>
-                {reviewError&&<p style={{fontFamily:"Inter",fontSize:12,color:T.coral,margin:"8px 0 0"}}>{reviewError}</p>}
-                <button disabled={reviewBusy} onClick={submitReview} style={{marginTop:8,background:T.goldSoft,border:`1px solid ${T.gold}`,color:T.gold,borderRadius:6,padding:"7px 16px",fontFamily:"Inter",fontSize:13,cursor:reviewBusy?"wait":"pointer",opacity:reviewBusy?0.7:1}}>{reviewBusy?"Submitting…":"Submit Review"}</button>
+          {/* ── Sticky buy sidebar ── */}
+          <aside className="sd-side" style={{ position: 'sticky', top: 68, minWidth: 0 }}>
+            <div style={{ background: c.surface, border: `1px solid ${c.border}`, borderRadius: 16, padding: 22 }}>
+              <div style={{ textAlign: 'center', marginBottom: 18 }}>
+                <div style={{ fontFamily: FONT_UI, fontSize: 34, fontWeight: 700, letterSpacing: '-0.03em', color: isFree ? c.green : c.gold, lineHeight: 1.1 }}>
+                  {isFree ? 'Free' : `$${s.price}`}
+                </div>
+                <div style={{ fontFamily: FONT_UI, fontSize: 11, color: c.textMuted, marginTop: 4 }}>one-time payment</div>
               </div>
-            )}
-            {reviewDone&&<p style={{fontFamily:"Inter",fontSize:13,color:T.green,marginTop:14}}>✓ Review submitted — thank you.</p>}
-          </div>
 
-          {/* Sidebar */}
-          <div style={{width:"min(215px,100%)",flexShrink:0}}>
-            <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:14,padding:20,position:"sticky",top:20}}>
-              <div style={{textAlign:"center",marginBottom:16}}>
-                <div style={{fontFamily:"Inter",fontSize:30,fontWeight:700,color:isFree?T.green:T.gold}}>{isFree?"Free":`$${s.price}`}</div>
-                <div style={{fontFamily:"Inter",fontSize:11,color:T.muted}}>one-time payment</div>
-              </div>
-              {!owned.known&&user
-                ?<div style={{height:40,borderRadius:8,background:T.elevated,marginBottom:8,animation:"twinkle 1.4s ease-in-out infinite alternate","--op":0.6}}/>
-                :canDownload
-                  ?<button onClick={doDownload} data-testid="download-btn" style={{width:"100%",background:`linear-gradient(135deg,${T.green},#2a9a78)`,color:"#fff",border:"none",borderRadius:8,padding:"11px 0",fontFamily:"Inter",fontWeight:700,fontSize:13,cursor:"pointer",marginBottom:8,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}><Ic.Download s={14} c="#fff"/>Download Skill</button>
-                  :<button onClick={doBuy} disabled={buying} data-testid="buy-btn" style={{width:"100%",background:`linear-gradient(135deg,${T.gold},${T.goldDim})`,color:"#fff",border:"none",borderRadius:8,padding:"11px 0",fontFamily:"Inter",fontWeight:700,fontSize:13,cursor:buying?"wait":"pointer",marginBottom:8,opacity:buying?0.7:1}}>{buying?"Opening checkout…":`Buy for $${s.price}`}</button>
+              {/* Ownership unknown → skeleton, so the wrong CTA never flashes */}
+              {!owned.known && user
+                ? <div aria-hidden style={{ height: 42, borderRadius: 10, background: c.elevated, animation: 'twinkle 1.4s ease-in-out infinite alternate', '--op': 0.6 }} />
+                : canDownload
+                  ? <GoldButton full testId="download-btn" onClick={doDownload}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                        <Ic.Download s={14} c={c.onGold} />Download skill
+                      </span>
+                    </GoldButton>
+                  : <GoldButton full testId="buy-btn" disabled={buying} onClick={doBuy}>
+                      {buying ? 'Opening checkout…' : `Buy for $${s.price}`}
+                    </GoldButton>
               }
-              {buyError&&<p style={{fontFamily:"Inter",fontSize:11,color:T.coral,textAlign:"center",margin:"0 0 10px"}}>{buyError}</p>}
-              <div style={{fontFamily:"Inter",fontSize:11,color:T.muted,textAlign:"center",marginBottom:14}}>Secure checkout · Instant download</div>
-              <div style={{borderTop:`1px solid ${T.borderSub}`,paddingTop:14}}>
-                {[["Category",s.category],["Time Saved",`~${s.timeSaved}h est.`],["Downloads",s.downloads],["Rating",`${s.rating}/5`],["Reviews",s.reviews]].map(([k,v])=>(
-                  <div key={k} style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
-                    <span style={{fontFamily:"Inter",fontSize:12,color:T.muted}}>{k}</span>
-                    <span style={{fontFamily:"Inter",fontSize:12,color:k==="Time Saved"?T.gold:T.text,fontWeight:k==="Time Saved"?600:400}}>{v}</span>
+
+              {buyError && <p style={{ fontFamily: FONT_UI, fontSize: 11.5, color: c.coral, textAlign: 'center', margin: '12px 0 0', lineHeight: 1.5 }}>{buyError}</p>}
+              <div style={{ fontFamily: FONT_UI, fontSize: 11, color: c.textMuted, textAlign: 'center', marginTop: 12 }}>Secure checkout · Instant download</div>
+
+              <div style={{ borderTop: `1px solid ${c.border}`, marginTop: 18, paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 9 }}>
+                {stats.map(([k, v, gold]) => (
+                  <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                    <span style={{ fontFamily: FONT_UI, fontSize: 12, color: c.textMuted }}>{k}</span>
+                    <span style={{ fontFamily: FONT_UI, fontSize: 12, fontWeight: gold ? 600 : 400, color: gold ? c.gold : c.text, textAlign: 'right' }}>{v}</span>
                   </div>
                 ))}
               </div>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
     </PageWrap>
+  );
+}
+
+/* A titled block with a hairline rule above it — the page's only section rhythm. */
+function Section({ title, children }) {
+  const { c } = useTheme();
+  return (
+    <div style={{ borderTop: `1px solid ${c.border}`, marginTop: 30, paddingTop: 24 }}>
+      <h2 style={{ fontFamily: FONT_UI, fontSize: 11, fontWeight: 700, color: c.gold, textTransform: 'uppercase', letterSpacing: '0.09em', margin: '0 0 12px' }}>{title}</h2>
+      {children}
+    </div>
+  );
+}
+
+/* One reviewer's own stars. Deliberately not <Stars>, which is an aggregate
+   widget and renders "New" at count 0 — wrong for a single scored review. */
+function ReviewStars({ rating }) {
+  const { c } = useTheme();
+  const r = Math.round(Number(rating) || 0);
+  return (
+    <span aria-label={`${r} out of 5`} style={{ display: 'inline-flex', gap: 2 }}>
+      {[1, 2, 3, 4, 5].map(i => <Ic.Star key={i} s={11} c={c.gold} filled={i <= r} />)}
+    </span>
   );
 }
 

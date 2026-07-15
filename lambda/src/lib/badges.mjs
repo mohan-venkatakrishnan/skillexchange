@@ -52,9 +52,9 @@ export function computeLeaderboards(skills, sellers) {
   const bySeller = {};
   for (const s of skills) {
     if (!s.sellerId) continue;
-    const agg = bySeller[s.sellerId] ||= { downloads: 0, ratings: [], sellerId: s.sellerId };
+    const agg = bySeller[s.sellerId] ||= { downloads: 0, ratings: [], reviews: 0, sellerId: s.sellerId };
     agg.downloads += s.downloadsCount || 0;
-    if ((s.reviewsCount || 0) > 0) agg.ratings.push(s.rating || 0);
+    if ((s.reviewsCount || 0) > 0) { agg.ratings.push(s.rating || 0); agg.reviews += s.reviewsCount; }
   }
 
   const builders = Object.values(bySeller)
@@ -62,21 +62,28 @@ export function computeLeaderboards(skills, sellers) {
       const p = sellers[agg.sellerId] || {};
       return {
         name: p.username || 'unknown',
+        avatarKey: p.avatarKey || null,
         sales: p.salesCount || 0,
         downloads: agg.downloads,
+        // reviews travels with rating: the UI must be able to tell "unrated"
+        // from "rated zero" — without the count it would stamp "New" on the
+        // top seller, or show a rating nobody actually gave.
+        reviews: agg.reviews,
         rating: agg.ratings.length ? round1(agg.ratings.reduce((a, b) => a + b, 0) / agg.ratings.length) : 0,
       };
     })
     .sort((a, b) => b.sales - a.sales || b.downloads - a.downloads)
     .slice(0, 10)
-    .map((b, i) => ({ rank: i + 1, name: b.name, sales: b.sales, rating: b.rating, badge: BUILDER_ICONS[i] || null }));
+    .map((b, i) => ({ rank: i + 1, name: b.name, avatarKey: b.avatarKey, sales: b.sales, rating: b.rating, reviews: b.reviews, badge: BUILDER_ICONS[i] || null }));
 
   const topSkills = [...skills]
     .sort((a, b) => (b.downloadsCount || 0) - (a.downloadsCount || 0))
     .slice(0, 10)
     .map((s, i) => ({
       rank: i + 1, skillId: s.skillId, title: s.title, author: s.sellerUsername,
-      downloads: s.downloadsCount || 0, rating: s.rating || 0, timeSaved: s.timeSavedHours,
+      category: s.category,
+      downloads: s.downloadsCount || 0, rating: s.rating || 0, reviews: s.reviewsCount || 0,
+      timeSaved: s.timeSavedHours,
     }));
 
   return { builders, topSkills };
@@ -86,9 +93,13 @@ export function computeStats(skills, sellers) {
   const downloads = skills.reduce((sum, s) => sum + (s.downloadsCount || 0), 0);
   const rated = skills.filter(s => (s.reviewsCount || 0) > 0);
   const avg = rated.length ? round1(rated.reduce((a, s) => a + (s.rating || 0), 0) / rated.length) : null;
+  const categories = new Set(skills.map(s => s.category).filter(Boolean));
+  // Every value is real or omitted — the home page filters out empties rather
+  // than printing "0 downloads" to a first-time visitor.
   return {
     skills: fmt(skills.length),
-    downloads: fmt(downloads),
+    categories: String(categories.size),
+    downloads: downloads ? fmt(downloads) : '0',
     builders: fmt(Object.keys(sellers).length),
     avgRating: avg ? `${avg}★` : '—',
   };

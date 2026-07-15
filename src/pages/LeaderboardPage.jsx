@@ -1,94 +1,235 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PageWrap, Stars, Bdg, BuilderIcon, TimeSaved, Loading, ErrorBox } from '../components/Shared.jsx';
+import { useTheme, FONT_DISPLAY, FONT_UI } from '../tokens/theme';
+import { PageWrap, Stars, Bdg, BuilderIcon, TimeSaved, Downloads } from '../components/Shared.jsx';
+import { Card, PageTitle, ErrorBox, EmptyState, GhostButton, Avatar } from '../components/ui.jsx';
+import SkillIcon from '../components/SkillIcon.jsx';
+import Loader from '../components/Loader.jsx';
 import { Ic } from '../components/Icons.jsx';
 import * as api from '../lib/api.js';
 import useFetch from '../lib/useFetch.js';
 
-export default function LeaderboardPage({ T }) {
+const TABS = [
+  { id: 'builders', label: 'Top Builders' },
+  { id: 'skills', label: 'Top Skills' },
+];
+
+export default function LeaderboardPage() {
+  const { c } = useTheme();
   const nav = useNavigate();
-  const [tab,setTab]=useState("builders");
+  const [tab, setTab] = useState('builders');
   const lb = useFetch(() => api.getLeaderboard(), []);
+
+  const builders = lb.data?.builders || [];
+  const skills = lb.data?.skills || [];
 
   return (
     <PageWrap>
-      <div style={{padding:"28px clamp(16px,4vw,40px)",maxWidth:760,margin:"0 auto"}}>
-        <h1 style={{fontFamily:"Playfair Display",fontSize:24,color:T.text,margin:"0 0 6px"}}>Leaderboard</h1>
-        <p style={{fontFamily:"Inter",fontSize:13,color:T.muted,marginBottom:24}}>All-time rankings.</p>
-        <div style={{display:"flex",marginBottom:28,background:T.surface,borderRadius:10,padding:3,border:`1px solid ${T.border}`,width:"fit-content"}}>
-          {[["builders","Top Builders"],["skills","Top Skills"]].map(([id,label])=>(
-            <button key={id} onClick={()=>setTab(id)} style={{background:tab===id?T.goldSoft:"transparent",border:`1px solid ${tab===id?T.gold:"transparent"}`,borderRadius:7,padding:"8px 22px",fontFamily:"Inter",fontSize:13,fontWeight:tab===id?600:400,color:tab===id?T.gold:T.muted,cursor:"pointer"}}>{label}</button>
-          ))}
+      <div style={{ maxWidth: 880, margin: '0 auto', padding: '26px clamp(16px,4vw,40px) 48px' }}>
+        <PageTitle eyebrow="All-time" title="Leaderboard"
+          sub="Ranked by real sales and downloads across the exchange. Recomputed nightly — no self-reported numbers." />
+
+        <div className="fade-up" style={{ marginBottom: 26 }}>
+          <Segmented value={tab} onChange={setTab} options={TABS} />
         </div>
 
-        {lb.loading?<Loading T={T} verb="Loading rankings"/>
-          :lb.error?<ErrorBox T={T} message={lb.error} onRetry={lb.retry}/>
-          :<>
-        {tab==="builders"&&((lb.data?.builders||[]).length===0
-          ?<p style={{fontFamily:"Inter",fontSize:13,color:T.muted}}>No builders ranked yet — publish a skill to appear here.</p>
-          :<>
-            <div style={{display:"flex",alignItems:"flex-end",justifyContent:"center",gap:10,marginBottom:32,flexWrap:"wrap"}}>
-              {podiumOrder(lb.data.builders).map((e,i)=>{
-                if(!e) return null;
-                const h=[112,148,88][i];const isFirst=e.rank===1;
-                return (
-                  <div key={e.rank} style={{textAlign:"center",flex:"1 1 100px",maxWidth:155}}>
-                    <div onClick={()=>nav(`/u/${e.name}`)} style={{fontFamily:"Playfair Display",fontSize:isFirst?15:12,color:isFirst?T.gold:T.muted,marginBottom:6,fontWeight:700,cursor:"pointer"}}>{e.name}</div>
-                    <div style={{marginBottom:5}}><Stars rating={e.rating} T={T}/></div>
-                    <div style={{height:h,background:isFirst?T.goldSoft:T.surface,border:`1px solid ${isFirst?T.gold:T.borderSub}`,borderRadius:"8px 8px 0 0",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:4}}>
-                      <BuilderIcon b={e.badge} T={T}/>
-                      <span style={{fontFamily:"Inter",fontSize:isFirst?26:20,fontWeight:700,color:isFirst?T.gold:T.muted}}>#{e.rank}</span>
-                      <span style={{fontFamily:"Inter",fontSize:11,color:T.muted}}>{e.sales} sales</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,overflow:"hidden"}}>
-              {lb.data.builders.map((e,i)=>(
-                <div key={e.rank} style={{display:"flex",alignItems:"center",gap:14,padding:"13px 20px",borderBottom:i<lb.data.builders.length-1?`1px solid ${T.borderSub}`:"none"}}>
-                  <span style={{fontFamily:"Inter",fontSize:12,fontWeight:600,color:i===0?T.gold:T.muted,width:24}}>#{e.rank}</span>
-                  <BuilderIcon b={e.badge} T={T}/>
-                  <span onClick={()=>nav(`/u/${e.name}`)} style={{fontFamily:"Inter",fontWeight:600,color:T.text,flex:1,cursor:"pointer"}} onMouseEnter={ev=>ev.target.style.color=T.gold} onMouseLeave={ev=>ev.target.style.color=T.text}>{e.name}</span>
-                  <span style={{fontFamily:"Inter",fontSize:12,color:T.muted}}>{e.sales} sales</span>
-                  <Stars rating={e.rating} T={T}/>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-        {tab==="skills"&&((lb.data?.skills||[]).length===0
-          ?<p style={{fontFamily:"Inter",fontSize:13,color:T.muted}}>No skills ranked yet.</p>
-          :<div style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,overflow:"hidden"}}>
-            {lb.data.skills.map((s,i)=>(
-              <div key={s.rank} onClick={()=>nav(`/skills/${s.skillId}`)} style={{display:"flex",alignItems:"center",gap:14,padding:"14px 20px",borderBottom:i<lb.data.skills.length-1?`1px solid ${T.borderSub}`:"none",cursor:"pointer"}}
-                onMouseEnter={e=>e.currentTarget.style.background=T.elevated}
-                onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                <span style={{fontFamily:"Inter",fontSize:12,fontWeight:600,color:i===0?T.gold:T.muted,width:24}}>#{s.rank}</span>
-                <div style={{flex:1}}>
-                  <div style={{fontFamily:"Inter",fontWeight:600,color:T.text,fontSize:13}}>{s.title}</div>
-                  <div style={{fontFamily:"Inter",fontSize:11,color:T.muted}}>by <span onClick={e=>{e.stopPropagation();nav(`/u/${s.author}`);}} style={{color:T.gold,cursor:"pointer"}}>{s.author}</span></div>
-                </div>
-                <TimeSaved hours={s.timeSaved} T={T}/>
-                <span style={{fontFamily:"Inter",fontSize:12,color:T.muted}}>{s.downloads} dl</span>
-                <Stars rating={s.rating} T={T}/>
-              </div>
-            ))}
-          </div>
-        )}
-        </>}
+        {lb.loading ? <Loader label="Loading rankings" />
+          : lb.error ? <ErrorBox message={lb.error} onRetry={lb.retry} />
+          : tab === 'builders' ? (
+            builders.length === 0 ? (
+              <EmptyState title="No builders ranked yet"
+                body="The leaderboard fills up as skills sell. Publish one and you could be the first name here."
+                action={<GhostButton onClick={() => nav('/publish')}>Publish a skill</GhostButton>} />
+            ) : (
+              <>
+                <Podium builders={builders} onOpen={u => nav(`/u/${u}`)} />
+                <RankList>
+                  {builders.map((e, i) => (
+                    <BuilderRow key={e.rank ?? e.name} entry={e} last={i === builders.length - 1} onOpen={() => nav(`/u/${e.name}`)} />
+                  ))}
+                </RankList>
+              </>
+            )
+          ) : (
+            skills.length === 0 ? (
+              <EmptyState title="No skills ranked yet"
+                body="Skills enter the ranking once they start being downloaded."
+                action={<GhostButton onClick={() => nav('/marketplace')}>Browse the marketplace</GhostButton>} />
+            ) : (
+              <RankList>
+                {skills.map((s, i) => (
+                  <SkillRow key={s.rank ?? s.skillId} skill={s} last={i === skills.length - 1}
+                    onOpen={() => nav(`/skills/${s.skillId}`)} onAuthor={() => nav(`/u/${s.author}`)} />
+                ))}
+              </RankList>
+            )
+          )}
 
-        <h3 style={{fontFamily:"Playfair Display",fontSize:18,color:T.text,margin:"32px 0 14px"}}>Seller Badges</h3>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:10}}>
-          {[{icon:<Ic.Crown s={12} c={T.coral}/>,label:"Top Seller",desc:"Highest total sales",color:T.coral},{icon:<Ic.Shield s={12} c={T.gold}/>,label:"Verified Creator",desc:"Manually verified by Skill Exchange",color:T.gold}].map(b=>(
-            <div key={b.label} style={{background:T.surface,border:`1px solid ${T.borderSub}`,borderRadius:10,padding:14}}>
-              <Bdg icon={b.icon} label={b.label} color={b.color} T={T}/>
-              <p style={{fontFamily:"Inter",fontSize:12,color:T.muted,margin:"8px 0 0"}}>{b.desc}</p>
-            </div>
+        {/* ── Badge explainer ── */}
+        <h2 style={{ fontFamily: FONT_DISPLAY, fontSize: 19, fontWeight: 600, color: c.text, margin: '40px 0 14px', letterSpacing: '-0.01em' }}>
+          Seller badges
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 12 }}>
+          {[
+            { icon: <Ic.Crown s={10} c={c.coral} />, label: 'Top Seller', color: c.coral, desc: 'Highest total sales on the exchange. Recomputed nightly from real purchases.' },
+            { icon: <Ic.Shield s={10} c={c.gold} />, label: 'Verified Creator', color: c.gold, desc: 'Proof of concept manually reviewed by Skill Exchange. Never automated.' },
+          ].map(b => (
+            <Card key={b.label} className="fade-up">
+              <Bdg icon={b.icon} label={b.label} color={b.color} />
+              <p style={{ fontFamily: FONT_UI, fontSize: 12.5, color: c.textMuted, margin: '10px 0 0', lineHeight: 1.6 }}>{b.desc}</p>
+            </Card>
           ))}
         </div>
       </div>
     </PageWrap>
+  );
+}
+
+/* ── Segmented control ── one track, one active pill; keyboard-navigable tabs. */
+function Segmented({ value, onChange, options }) {
+  const { c } = useTheme();
+  return (
+    <div role="tablist" aria-label="Leaderboard view"
+      style={{ display: 'inline-flex', gap: 2, background: c.elevated, border: `1px solid ${c.border}`, borderRadius: 11, padding: 3 }}>
+      {options.map(o => {
+        const active = o.id === value;
+        return (
+          <button key={o.id} role="tab" aria-selected={active} data-testid={`lb-tab-${o.id}`}
+            onClick={() => onChange(o.id)}
+            style={{
+              background: active ? `linear-gradient(135deg, ${c.gold}, ${c.goldDim})` : 'transparent',
+              border: 'none', borderRadius: 8, padding: '8px 20px', cursor: 'pointer',
+              fontFamily: FONT_UI, fontSize: 13, fontWeight: active ? 700 : 500,
+              color: active ? c.onGold : c.textSub, letterSpacing: '-0.01em',
+              boxShadow: active ? `0 2px 14px ${c.goldGlow}` : 'none',
+              transition: 'color 0.15s, background 0.2s',
+            }}
+            onMouseEnter={e => { if (!active) e.currentTarget.style.color = c.text; }}
+            onMouseLeave={e => { if (!active) e.currentTarget.style.color = c.textSub; }}>
+            {o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ── Podium — renders 2nd · 1st · 3rd, and degrades cleanly below three builders. */
+function Podium({ builders, onOpen }) {
+  const { c } = useTheme();
+  const order = podiumOrder(builders);
+  if (!order.some(Boolean)) return null;
+  const HEIGHTS = [104, 140, 82];
+
+  return (
+    <div className="fade-up" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 12, marginBottom: 30, flexWrap: 'wrap' }}>
+      {order.map((e, i) => {
+        if (!e) return null;
+        const first = e.rank === 1;
+        return (
+          <div key={e.rank ?? e.name} style={{ flex: '1 1 130px', maxWidth: 172, textAlign: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 9 }}>
+              <Avatar name={e.name} src={e.avatarUrl} size={first ? 54 : 42} />
+            </div>
+            <button onClick={() => onOpen(e.name)}
+              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: FONT_DISPLAY, fontSize: first ? 15.5 : 13, fontWeight: 700, color: first ? c.gold : c.text, letterSpacing: '-0.01em', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              onMouseEnter={ev => { ev.currentTarget.style.color = c.gold; }}
+              onMouseLeave={ev => { ev.currentTarget.style.color = first ? c.gold : c.text; }}>
+              {e.name}
+            </button>
+            <div style={{ minHeight: 20, display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '5px 0 8px' }}>
+              <Stars rating={e.rating} count={e.reviews} showEmpty={false} />
+            </div>
+            <div style={{
+              height: HEIGHTS[i],
+              background: first ? `linear-gradient(180deg, ${c.goldSoft}, transparent)` : c.surface,
+              border: `1px solid ${first ? c.gold : c.border}`,
+              borderBottom: 'none', borderRadius: '12px 12px 0 0',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5,
+              boxShadow: first ? `0 -6px 30px ${c.goldGlow}` : 'none',
+            }}>
+              <BuilderIcon b={e.badge} />
+              <span style={{ fontFamily: FONT_DISPLAY, fontSize: first ? 30 : 22, fontWeight: 700, color: first ? c.gold : c.textSub, lineHeight: 1 }}>
+                {e.rank}
+              </span>
+              <span style={{ fontFamily: FONT_UI, fontSize: 11, color: c.textMuted }}>
+                {e.sales?.toLocaleString?.() ?? e.sales} {e.sales === 1 ? 'sale' : 'sales'}
+              </span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ── Ranked list shell — hairline separators, no inner padding on the card. */
+function RankList({ children }) {
+  return <Card className="fade-up" style={{ padding: 0, overflow: 'hidden' }}>{children}</Card>;
+}
+
+function Rank({ n }) {
+  const { c } = useTheme();
+  const top = n <= 3;
+  return (
+    <span style={{ fontFamily: FONT_DISPLAY, fontSize: top ? 15 : 13, fontWeight: 700, color: top ? c.gold : c.textMuted, width: 26, flexShrink: 0, textAlign: 'center' }}>
+      {n}
+    </span>
+  );
+}
+
+const rowStyle = (c, last) => ({
+  display: 'flex', alignItems: 'center', gap: 14,
+  padding: '15px 20px', borderBottom: last ? 'none' : `1px solid ${c.border}`,
+  cursor: 'pointer', transition: 'background 0.14s',
+});
+
+function BuilderRow({ entry: e, last, onOpen }) {
+  const { c } = useTheme();
+  return (
+    <div role="link" tabIndex={0} onClick={onOpen} onKeyDown={ev => { if (ev.key === 'Enter') onOpen(); }}
+      style={rowStyle(c, last)}
+      onMouseEnter={ev => { ev.currentTarget.style.background = c.surfaceHover; }}
+      onMouseLeave={ev => { ev.currentTarget.style.background = 'transparent'; }}>
+      <Rank n={e.rank} />
+      <Avatar name={e.name} src={e.avatarUrl} size={34} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <span style={{ fontFamily: FONT_UI, fontSize: 13.5, fontWeight: 600, color: c.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.name}</span>
+          <BuilderIcon b={e.badge} />
+        </div>
+        <div style={{ marginTop: 3 }}>
+          <Stars rating={e.rating} count={e.reviews} showEmpty={false} />
+        </div>
+      </div>
+      <span style={{ fontFamily: FONT_UI, fontSize: 12.5, color: c.textSub, whiteSpace: 'nowrap' }}>
+        <strong style={{ color: c.text, fontWeight: 600 }}>{e.sales?.toLocaleString?.() ?? e.sales}</strong> {e.sales === 1 ? 'sale' : 'sales'}
+      </span>
+    </div>
+  );
+}
+
+function SkillRow({ skill: s, last, onOpen, onAuthor }) {
+  const { c } = useTheme();
+  return (
+    <div role="link" tabIndex={0} onClick={onOpen} onKeyDown={ev => { if (ev.key === 'Enter') onOpen(); }}
+      style={rowStyle(c, last)}
+      onMouseEnter={ev => { ev.currentTarget.style.background = c.surfaceHover; }}
+      onMouseLeave={ev => { ev.currentTarget.style.background = 'transparent'; }}>
+      <Rank n={s.rank} />
+      <SkillIcon skill={{ id: s.skillId, title: s.title, category: s.category, iconUrl: s.iconUrl }} size={40} radius={10} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontFamily: FONT_UI, fontSize: 13.5, fontWeight: 600, color: c.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</div>
+        <div style={{ marginTop: 3, fontFamily: FONT_UI, fontSize: 11.5, color: c.textMuted }}>
+          by <span onClick={ev => { ev.stopPropagation(); onAuthor(); }} style={{ color: c.gold, cursor: 'pointer' }}>{s.author}</span>
+        </div>
+      </div>
+      <div className="lb-row-meta" style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+        <TimeSaved hours={s.timeSaved} compact />
+        <Downloads count={s.downloads} size={12} />
+        <Stars rating={s.rating} count={s.reviews} showEmpty={false} />
+      </div>
+    </div>
   );
 }
 
