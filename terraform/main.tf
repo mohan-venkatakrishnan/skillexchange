@@ -22,12 +22,13 @@ provider "aws" {
   }
 }
 
-# Amplify apps live in us-west-2: us-east-1 CreateApp is persistently
-# throttled on this account (PeerReview hit the same wall). Region is
-# irrelevant for a static SPA — Amplify serves through CloudFront globally.
+# Amplify lives in us-west-1: this account has a hidden limit of ONE Amplify
+# app per region (launchpad holds us-east-1, peerreview holds us-west-2 —
+# CreateApp elsewhere fails as "Rate exceeded"/"maximum number of apps").
+# Region is irrelevant for a static SPA — Amplify serves through CloudFront.
 provider "aws" {
-  alias  = "uswest2"
-  region = "us-west-2"
+  alias  = "uswest1"
+  region = "us-west-1"
   default_tags {
     tags = {
       Project   = "skillexchange"

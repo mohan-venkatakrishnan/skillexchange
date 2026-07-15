@@ -1,0 +1,10 @@
+import { chromium } from '@playwright/test';
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+await page.goto('https://main.do3drj127kith.amplifyapp.com/');
+await page.waitForTimeout(2500);
+await page.screenshot({ path: 'prod-live.png' });
+await page.goto('https://main.do3drj127kith.amplifyapp.com/marketplace');
+await page.waitForTimeout(2000);
+await page.screenshot({ path: 'prod-marketplace.png' });
+await browser.close();

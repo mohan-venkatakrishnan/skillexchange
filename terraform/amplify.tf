@@ -2,7 +2,7 @@
 # PeerReview pattern; CI pushes dist/ zips via create-deployment).
 # main → skillexchange.tapdot.org, qa → skillexchangeqa.tapdot.org.
 resource "aws_amplify_app" "skillexchange" {
-  provider = aws.uswest2
+  provider = aws.uswest1
   name = "skillexchange"
 
   # SPA rewrites: extensionless routes must return real HTTP 200 (not 404-200
@@ -20,21 +20,21 @@ resource "aws_amplify_app" "skillexchange" {
 }
 
 resource "aws_amplify_branch" "main" {
-  provider = aws.uswest2
+  provider = aws.uswest1
   app_id      = aws_amplify_app.skillexchange.id
   branch_name = "main"
   stage       = "PRODUCTION"
 }
 
 resource "aws_amplify_branch" "qa" {
-  provider = aws.uswest2
+  provider = aws.uswest1
   app_id      = aws_amplify_app.skillexchange.id
   branch_name = "qa"
   stage       = "DEVELOPMENT"
 }
 
 resource "aws_amplify_domain_association" "tapdot" {
-  provider = aws.uswest2
+  provider = aws.uswest1
   app_id                = aws_amplify_app.skillexchange.id
   domain_name           = "tapdot.org"
   wait_for_verification = false

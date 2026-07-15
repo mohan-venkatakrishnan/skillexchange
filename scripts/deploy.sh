@@ -29,28 +29,29 @@ npm run build
 cp customHttp.yml dist/
 
 echo "── Deploying Lambdas ($ENV) ──"
-cd lambda/src && zip -qr ../deploy.zip . && cd "$ROOT"
+# zip may be absent on Windows shells — python zipfile works everywhere
+python -c "import shutil; shutil.make_archive('lambda/deploy', 'zip', 'lambda/src')"
 for fn in public user admin webhook badgesjob presignup postconfirm; do
   aws lambda update-function-code \
     --function-name "skillexchange-$ENV-$fn" \
-    --zip-file "fileb://lambda/deploy.zip" --no-cli-pager >/dev/null
+    --zip-file "fileb://lambda/deploy.zip" >/dev/null
   echo "  updated skillexchange-$ENV-$fn"
 done
 
 echo "── Deploying frontend to Amplify branch $BRANCH ──"
 APP_ID="${AMPLIFY_APP_ID:?AMPLIFY_APP_ID must be set (see .env.deploy.$ENV)}"
-cd dist && zip -qr ../dist.zip . && cd "$ROOT"
+python -c "import shutil; shutil.make_archive('dist', 'zip', 'dist')"
 
-DEPLOY_JSON=$(aws amplify create-deployment --region us-west-2 --app-id "$APP_ID" --branch-name "$BRANCH" --no-cli-pager)
+DEPLOY_JSON=$(aws amplify create-deployment --region us-west-1 --app-id "$APP_ID" --branch-name "$BRANCH")
 JOB_ID=$(echo "$DEPLOY_JSON" | python -c "import sys,json;print(json.load(sys.stdin)['jobId'])")
 UPLOAD_URL=$(echo "$DEPLOY_JSON" | python -c "import sys,json;print(json.load(sys.stdin)['zipUploadUrl'])")
 curl -sf -H "Content-Type: application/zip" --upload-file dist.zip "$UPLOAD_URL"
-aws amplify start-deployment --region us-west-2 --app-id "$APP_ID" --branch-name "$BRANCH" --job-id "$JOB_ID" --no-cli-pager >/dev/null
+aws amplify start-deployment --region us-west-1 --app-id "$APP_ID" --branch-name "$BRANCH" --job-id "$JOB_ID" >/dev/null
 
 echo "── Waiting for Amplify job $JOB_ID ──"
 for i in $(seq 1 40); do
-  STATUS=$(aws amplify get-job --region us-west-2 --app-id "$APP_ID" --branch-name "$BRANCH" --job-id "$JOB_ID" \
-    --query 'job.summary.status' --output text --no-cli-pager)
+  STATUS=$(aws amplify get-job --region us-west-1 --app-id "$APP_ID" --branch-name "$BRANCH" --job-id "$JOB_ID" \
+    --query 'job.summary.status' --output text)
   [[ "$STATUS" == "SUCCEED" ]] && { echo "deploy SUCCEED"; exit 0; }
   [[ "$STATUS" == "FAILED" || "$STATUS" == "CANCELLED" ]] && { echo "deploy $STATUS"; exit 1; }
   sleep 10
