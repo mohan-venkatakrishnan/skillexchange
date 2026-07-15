@@ -1,64 +1,44 @@
-// Seed PRODUCTION with real skills: parses seed-content/*.skill.md
-// (frontmatter + body), uploads each SKILL.md + its real POC screenshot to
-// the prod S3 bucket, then creates seller profiles + skill records via the
-// superadmin API. Honest marketplace: zero downloads, zero reviews — signals
-// accrue for real. Usage: node scripts/seed-prod.mjs <prod-api-url>
-import { readFileSync, readdirSync } from 'node:fs';
-import crypto from 'node:crypto';
+// Seed an environment with the real skill catalogue: parses seed-content/*.skill.md,
+// uploads each SKILL.md + its real POC screenshot to S3, then writes seller
+// profiles and skill records through the superadmin API.
+//
+// Honest by construction: downloads/ratings/reviews start at zero and accrue
+// for real. `featured` is set — that is the platform's own curation, not a
+// fabricated popularity signal.
+//
+// Usage: node scripts/seed-prod.mjs <api-url> [--env prod|qa]
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { USERS, sellerFor, FEATURED } from './seed-personas.mjs';
 
 const API = process.argv[2];
-if (!API) { console.error('usage: node scripts/seed-prod.mjs <prod-api-url>'); process.exit(1); }
+if (!API) { console.error('usage: node scripts/seed-prod.mjs <api-url> [--env prod|qa]'); process.exit(1); }
+const ENV = (process.argv.includes('--env') ? process.argv[process.argv.indexOf('--env') + 1] : 'prod');
 
 const env = Object.fromEntries(readFileSync(new URL('../input.env', import.meta.url), 'utf8')
   .split('\n').filter(l => l.includes('=') && !l.startsWith('#'))
   .map(l => [l.slice(0, l.indexOf('=')), l.slice(l.indexOf('=') + 1).trim()]));
 
-const BUCKET = 'skillexchange-prod-535079144881';
+const BUCKET = `skillexchange-${ENV}-535079144881`;
 const s3 = new S3Client({
   region: 'us-east-1',
   credentials: { accessKeyId: env.AWS_ACCESS_KEY_ID, secretAccessKey: env.AWS_SECRET_ACCESS_KEY },
 });
-
 const HEADERS = {
   'Content-Type': 'application/json',
   'X-Superadmin-Username': env.SUPERADMIN_USERNAME,
   'X-Superadmin-Password': env.SUPERADMIN_PASSWORD,
 };
 
-// Seed seller personas. 'mohan' is intentionally NOT used — the founder
-// claims that username with a real Cognito account.
-const USERS = {
-  tapdot_labs:     { name: 'Tapdot Labs', bio: 'Skills distilled from shipped tapdot products — launch pages, tools, and desktop apps.', location: 'Mumbai, India', verified: true },
-  webcraft_dev:    { name: 'WebCraft Dev', bio: 'End-to-end web app skills from real production SaaS builds on AWS.', location: 'Mumbai, India', verified: true },
-  extension_forge: { name: 'Extension Forge', bio: 'Chrome extension patterns from shipped MV3 products, including on-device AI.', location: 'Remote', verified: true },
-  pipeline_pro:    { name: 'Pipeline Pro', bio: 'Payments, webhooks, and backend workflow skills battle-tested in production.', location: 'Remote', verified: false },
-  oss_distiller:   { name: 'OSS Distiller', bio: 'Original, opinionated guides for building products on popular open-source projects.', location: 'Remote', verified: false },
-};
+const shotName = (url) => createHash('sha1').update(url).digest('hex').slice(0, 16) + '.png';
 
-// filename → seller + screenshot mapping
-const ASSIGN = {
-  'end-to-end-saas-webapp.skill.md':      { user: 'webcraft_dev',    shot: 'launch.tapdot.org.png', featured: true },
-  'node-graph-ui.skill.md':               { user: 'webcraft_dev',    shot: 'launch.tapdot.org.png' },
-  'playwright-regression-suite.skill.md': { user: 'webcraft_dev',    shot: 'launch.tapdot.org.png' },
-  'payment-webhook-integration.skill.md': { user: 'pipeline_pro',    shot: 'peerreview.tapdot.org.png', featured: true },
-  'two-sided-matching-engine.skill.md':   { user: 'pipeline_pro',    shot: 'peerreview.tapdot.org.png' },
-  'chrome-extension-mv3-basics.skill.md': { user: 'extension_forge', shot: 'tapdot.org.png', featured: true },
-  'ondevice-ai-extension.skill.md':       { user: 'extension_forge', shot: 'tapdot.org.png', featured: true },
-  'writing-tools-extension.skill.md':     { user: 'extension_forge', shot: 'tapdot.org.png' },
-  'pdf-generation.skill.md':              { user: 'tapdot_labs',     shot: 'tools.tapdot.org.png', featured: true },
-  'electron-desktop-app.skill.md':        { user: 'tapdot_labs',     shot: 'tools.tapdot.org.png' },
-  'client-side-tools-site.skill.md':      { user: 'tapdot_labs',     shot: 'tools.tapdot.org.png' },
-  'calculator-tools.skill.md':            { user: 'tapdot_labs',     shot: 'tools.tapdot.org.png' },
-  'supabase-saas-backend.skill.md':       { user: 'oss_distiller',   shot: 'github.com-supabase-supabase.png' },
-  'shadcn-ui-design-system.skill.md':     { user: 'oss_distiller',   shot: 'github.com-shadcn-ui-ui.png' },
-  'playwright-e2e-testing.skill.md':      { user: 'oss_distiller',   shot: 'github.com-microsoft-playwright.png' },
-  'fastapi-production-backend.skill.md':  { user: 'oss_distiller',   shot: 'github.com-fastapi-fastapi.png' },
-  'node-red-workflow-automation.skill.md': { user: 'oss_distiller',  shot: 'github.com-node-red-node-red.png' },
-};
-
+/* CRLF-normalised: git's autocrlf rewrites these files on checkout, and a
+   \n-only regex silently matched nothing — the seeder reported success while
+   skipping every committed file. */
 function parseFrontmatter(raw) {
-  const m = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+  const text = raw.replace(/^﻿/, '').replace(/\r\n/g, '\n');
+  const m = text.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
   if (!m) throw new Error('no frontmatter');
   const meta = {};
   for (const line of m[1].split('\n')) {
@@ -66,7 +46,7 @@ function parseFrontmatter(raw) {
     if (i < 0) continue;
     const k = line.slice(0, i).trim();
     let v = line.slice(i + 1).trim();
-    if (v.startsWith('[')) v = v.replace(/[\[\]]/g, '').split(',').map(s => s.trim()).filter(Boolean);
+    if (v.startsWith('[')) v = v.replace(/[[\]]/g, '').split(',').map(s => s.trim()).filter(Boolean);
     meta[k] = v;
   }
   return { meta, body: m[2] };
@@ -74,66 +54,92 @@ function parseFrontmatter(raw) {
 
 async function post(path, body) {
   const res = await fetch(`${API}${path}`, { method: 'POST', headers: HEADERS, body: JSON.stringify(body) });
-  if (!res.ok) throw new Error(`${path} → ${res.status}: ${await res.text()}`);
+  if (!res.ok) throw new Error(`${path} → ${res.status}: ${(await res.text()).slice(0, 300)}`);
   return res.json();
 }
 
-// 1. Users
-const users = Object.entries(USERS).map(([username, u], i) => ({
-  userId: `tapdot-seed-${username}`,
-  username, name: u.name, bio: u.bio, location: u.location,
-  verified: u.verified, badges: u.verified ? ['Verified Creator'] : [],
-  salesCount: 0,
-  createdAt: new Date(Date.now() - (60 - i * 3) * 86400_000).toISOString(),
-}));
+// ── Parse + validate everything BEFORE writing anything ──
+const files = readdirSync('seed-content').filter(f => f.endsWith('.skill.md'));
+const parsed = [];
+const problems = [];
+for (const file of files) {
+  const slug = file.replace('.skill.md', '');
+  try {
+    const { meta, body } = parseFrontmatter(readFileSync(`seed-content/${file}`, 'utf8'));
+    const shot = `seed-content/shots/${shotName(meta.pocUrl)}`;
+    if (!existsSync(shot)) { problems.push(`${file}: no POC screenshot — run scripts/capture-poc-shots.mjs`); continue; }
+    parsed.push({ slug, meta, body, shot, seller: sellerFor(slug, meta.category) });
+  } catch (e) { problems.push(`${file}: ${e.message}`); }
+}
+if (problems.length) {
+  console.error('Refusing to seed — every skill must ship with proof:');
+  problems.forEach(p => console.error('  ' + p));
+  process.exit(1);
+}
+console.log(`${parsed.length} skills parsed, all with a real POC screenshot`);
+
+// ── Sellers (only those actually used) ──
+const used = new Set(parsed.map(p => p.seller));
+const now = Date.now();
+const users = [...used].map((username, i) => {
+  const u = USERS[username];
+  if (!u) throw new Error(`unknown persona: ${username}`);
+  return {
+    userId: `tapdot-seed-${username}`,
+    username, name: u.name, bio: u.bio, location: u.location,
+    verified: u.verified, badges: u.verified ? ['Verified Creator'] : [],
+    salesCount: 0,
+    createdAt: new Date(now - (90 - i * 4) * 86400_000).toISOString(),
+  };
+});
 await post('/admin/seed', { users });
 console.log(`seeded ${users.length} sellers`);
 
-// 2. Skills: upload files to S3, then seed records
-const dir = new URL('../seed-content/', import.meta.url);
-const files = readdirSync(dir).filter(f => f.endsWith('.skill.md'));
-console.log(`found ${files.length} skill files`);
+// ── Skills ──
 const skills = [];
-for (const file of files) {
-  const assign = ASSIGN[file];
-  if (!assign) { console.warn(`SKIP ${file} — no assignment`); continue; }
-  const { meta, body } = parseFrontmatter(readFileSync(new URL(file, dir), 'utf8'));
-  const skillId = `tapdot-${file.replace('.skill.md', '')}`;
+for (const [i, p] of parsed.entries()) {
+  const skillId = `tapdot-${p.slug}`;
   const fileKey = `skills/${skillId}/SKILL.md`;
   const shotKey = `screenshots/${skillId}.png`;
+  await s3.send(new PutObjectCommand({ Bucket: BUCKET, Key: fileKey, Body: p.body, ContentType: 'text/markdown' }));
+  await s3.send(new PutObjectCommand({ Bucket: BUCKET, Key: shotKey, Body: readFileSync(p.shot), ContentType: 'image/png' }));
 
-  await s3.send(new PutObjectCommand({ Bucket: BUCKET, Key: fileKey, Body: body, ContentType: 'text/markdown' }));
-  await s3.send(new PutObjectCommand({
-    Bucket: BUCKET, Key: shotKey,
-    Body: readFileSync(new URL(`shots/${assign.shot}`, dir)), ContentType: 'image/png',
-  }));
-
-  const seller = users.find(u => u.username === assign.user);
+  const seller = users.find(u => u.username === p.seller);
   skills.push({
     skillId,
-    title: meta.title,
-    category: meta.category,
-    description: meta.description,
-    usageInstructions: meta.usage,
-    platforms: Array.isArray(meta.platforms) ? meta.platforms : [meta.platforms],
-    priceCents: Math.round(Number(meta.priceUsd) * 100),
-    timeSavedHours: Number(meta.timeSavedHours),
-    pocUrl: meta.pocUrl,
+    title: p.meta.title,
+    category: p.meta.category,
+    description: p.meta.description,
+    usageInstructions: p.meta.usage,
+    platforms: Array.isArray(p.meta.platforms) ? p.meta.platforms : [p.meta.platforms],
+    priceCents: Math.round(Number(p.meta.priceUsd) * 100),
+    timeSavedHours: Number(p.meta.timeSavedHours),
+    pocUrl: p.meta.pocUrl,
     skillFileKey: fileKey,
     pocScreenshotKey: shotKey,
     status: 'approved',
-    featured: !!assign.featured,
-    downloadsCount: 0, rating: 0, reviewsCount: 0, // honest zero-start
-    createdAt: new Date(Date.now() - Math.floor(Math.random() * 0) ).toISOString(),
+    featured: FEATURED.has(p.slug),
+    // Honest zero-start. These accrue from real activity.
+    downloadsCount: 0, rating: 0, reviewsCount: 0,
+    // Stagger createdAt so "Newest" sorts meaningfully instead of tying.
+    createdAt: new Date(now - i * 3600_000).toISOString(),
     sellerId: seller.userId,
     sellerUsername: seller.username,
     sellerVerified: seller.verified,
     sellerBadges: seller.badges,
   });
-  console.log(`uploaded + staged: ${meta.title} ($${meta.priceUsd}, ${meta.category}) by ${assign.user}`);
+  process.stdout.write('.');
+}
+console.log('');
+
+for (let i = 0; i < skills.length; i += 20) {
+  const r = await post('/admin/seed', { skills: skills.slice(i, i + 20) });
+  console.log(`  seeded skills ${i + 1}-${Math.min(i + 20, skills.length)} (${r.seeded} items)`);
 }
 
-await post('/admin/seed', { skills });
-console.log(`seeded ${skills.length} skills`);
 await post('/admin/run-badges-job', {});
-console.log('badges/stats job run. PROD SEEDED.');
+
+const byCat = {};
+skills.forEach(s => { byCat[s.category] = (byCat[s.category] || 0) + 1; });
+console.log(`\nDONE — ${skills.length} skills · ${users.length} sellers · ${skills.filter(s => s.featured).length} featured`);
+console.log('by category:', JSON.stringify(byCat));

@@ -34,7 +34,11 @@ export default function SkillCard({ skill, className }) {
         </div>
       </div>
 
-      <p style={{ fontFamily: FONT_UI, fontSize: 12.5, color: c.textMuted, margin: 0, lineHeight: 1.55, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', flex: 1 }}>
+      {/* NO flex:1 here — a flex-grown box makes -webkit-line-clamp clip at the
+          box height instead of the line count, letting a third line ghost
+          through. Height is pinned to exactly two lines; the footer is pushed
+          down with margin-top:auto instead. */}
+      <p style={{ fontFamily: FONT_UI, fontSize: 12.5, color: c.textMuted, margin: 0, lineHeight: 1.55, height: '2.8em', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
         {skill.description}
       </p>
 
@@ -45,7 +49,7 @@ export default function SkillCard({ skill, className }) {
         {skill.platforms.length > 2 && <span style={{ fontFamily: FONT_UI, fontSize: 10, color: c.textMuted }}>+{skill.platforms.length - 2}</span>}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, borderTop: `1px solid ${c.border}`, paddingTop: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, borderTop: `1px solid ${c.border}`, paddingTop: 12, marginTop: 'auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
           <Stars rating={skill.rating} count={skill.reviews} />
           <Downloads count={skill.downloads} />

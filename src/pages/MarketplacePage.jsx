@@ -11,7 +11,7 @@ import { CATEGORIES, PLATFORMS } from '../data/constants.js';
 import * as api from '../lib/api.js';
 import useFetch from '../lib/useFetch.js';
 
-const PER_PAGE = 24;
+const PER_PAGE = 12;
 
 const SORTS = [
   { value: 'featured', label: 'Featured' },

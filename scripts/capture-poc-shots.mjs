@@ -1,31 +1,56 @@
-// Capture REAL screenshots of the POC sites referenced by seed skills.
-// No fabricated proof — these are live captures of the actual projects.
+// Capture a REAL screenshot for every distinct pocUrl across the seed
+// catalogue. Nothing is mocked or drawn — each shot is the live page the skill
+// points at. Cached on disk, so re-runs only fetch new URLs.
+//
+// Usage: node scripts/capture-poc-shots.mjs [--force]
 import { chromium } from '@playwright/test';
-import { mkdirSync } from 'node:fs';
+import { readFileSync, readdirSync, mkdirSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 
-const SITES = {
-  'tapdot.org': 'https://tapdot.org',
-  'launch.tapdot.org': 'https://launch.tapdot.org',
-  'tools.tapdot.org': 'https://tools.tapdot.org',
-  'peerreview.tapdot.org': 'https://peerreview.tapdot.org',
-  'github.com-supabase-supabase': 'https://github.com/supabase/supabase',
-  'github.com-shadcn-ui-ui': 'https://github.com/shadcn-ui/ui',
-  'github.com-microsoft-playwright': 'https://github.com/microsoft/playwright',
-  'github.com-fastapi-fastapi': 'https://github.com/fastapi/fastapi',
-  'github.com-node-red-node-red': 'https://github.com/node-red/node-red',
-};
+const FORCE = process.argv.includes('--force');
+const OUT = 'seed-content/shots';
+mkdirSync(OUT, { recursive: true });
 
-mkdirSync('seed-content/shots', { recursive: true });
+export const shotName = (url) => createHash('sha1').update(url).digest('hex').slice(0, 16) + '.png';
+
+const urls = new Set();
+for (const f of readdirSync('seed-content').filter(x => x.endsWith('.skill.md'))) {
+  const raw = readFileSync(`seed-content/${f}`, 'utf8').replace(/\r\n/g, '\n');
+  const m = raw.match(/^---\n([\s\S]*?)\n---/);
+  if (!m) continue;
+  const u = m[1].match(/^pocUrl:\s*(\S+)/m)?.[1];
+  if (u) urls.add(u);
+}
+
+const todo = [...urls].filter(u => FORCE || !existsSync(`${OUT}/${shotName(u)}`));
+console.log(`${urls.size} distinct POC URLs · ${todo.length} to capture`);
+if (!todo.length) process.exit(0);
+
 const browser = await chromium.launch();
-const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-for (const [name, url] of Object.entries(SITES)) {
+const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1 });
+const page = await ctx.newPage();
+let ok = 0; const failed = [];
+
+for (const url of todo) {
   try {
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30_000 });
-    await page.waitForTimeout(2500);
-    await page.screenshot({ path: `seed-content/shots/${name}.png` });
-    console.log('captured', name);
+    await page.waitForTimeout(2200);
+    // GitHub shows a cookie/consent strip for some regions — dismiss if present
+    await page.locator('button:has-text("Accept")').first().click({ timeout: 900 }).catch(() => {});
+    await page.screenshot({ path: `${OUT}/${shotName(url)}` });
+    ok++;
+    process.stdout.write('.');
   } catch (e) {
-    console.error('FAILED', name, e.message);
+    failed.push(`${url} — ${e.message.split('\n')[0]}`);
+    process.stdout.write('x');
   }
 }
 await browser.close();
+
+console.log(`\ncaptured ${ok}/${todo.length}`);
+if (failed.length) {
+  // Loud, not silent: a skill without real proof must not reach a listing.
+  console.error('\nFAILED (these skills cannot be seeded until their POC resolves):');
+  failed.forEach(f => console.error('  ' + f));
+  process.exit(1);
+}
