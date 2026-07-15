@@ -1,0 +1,1 @@
+[{"source":"</^[^.]+$|\\.(?!(css|gif|ico|jpg|jpeg|js|png|svg|txt|map|json|webmanifest)$)([^.]+$)/>","status":"200","target":"/index.html"},{"source":"/<*>","status":"404-200","target":"/index.html"}]
