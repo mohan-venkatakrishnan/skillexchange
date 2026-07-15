@@ -16,3 +16,6 @@ lambda/*.zip
 *.local
 .env.deploy.qa
 .env.deploy.prod
+test-results/
+playwright-report/
+*.png
