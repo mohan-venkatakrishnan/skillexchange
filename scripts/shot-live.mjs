@@ -1,0 +1,20 @@
+import { chromium } from '@playwright/test';
+import { preview } from 'vite';
+const s = await preview({ preview: { port: 5195 } });
+const b = await chromium.launch();
+const p = await b.newPage({ viewport: { width: 1360, height: 1050 } });
+await p.goto('http://localhost:5195/marketplace');
+await p.waitForFunction(() => {
+  const el = document.querySelector('[data-testid="results-count"]');
+  return el && !el.textContent.includes('Loading');
+}, { timeout: 30000 });
+await p.waitForTimeout(1500);
+console.log('count:', (await p.textContent('[data-testid="results-count"]')).trim());
+console.log('pagination:', await p.locator('[data-testid="pagination"]').isVisible());
+console.log('cards on page:', await p.locator('[data-testid="skill-card"]').count());
+await p.screenshot({ path: 'live-market.png' });
+await p.goto('http://localhost:5195/marketplace?cat=AI%2FML');
+await p.waitForTimeout(2500);
+console.log('AI/ML:', (await p.textContent('[data-testid="results-count"]')).trim());
+await p.screenshot({ path: 'live-aiml.png' });
+await b.close(); await s.close(); process.exit(0);

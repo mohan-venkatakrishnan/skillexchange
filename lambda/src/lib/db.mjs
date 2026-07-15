@@ -38,17 +38,22 @@ export const db = {
 
 // ── Entity helpers ──
 
-export function skillToApi(item, seller) {
+/* `list: true` returns the lighter listing projection. Card grids render a
+   generated SkillIcon and never show the POC screenshot or the usage prose, so
+   sending them costs latency for nothing: presigning is a per-item crypto
+   signing op, and at a few hundred skills that alone put /skills at ~2.8s and
+   440KB. Only the detail page presigns. */
+export function skillToApi(item, seller, { list = false } = {}) {
   return {
     skillId: item.skillId,
     title: item.title,
     category: item.category,
     description: item.description,
-    usageInstructions: item.usageInstructions,
+    usageInstructions: list ? undefined : item.usageInstructions,
     priceCents: item.priceCents,
     platforms: item.platforms,
     pocUrl: item.pocUrl,
-    pocScreenshotUrl: item.pocScreenshotUrl, // presigned, filled by caller when needed
+    pocScreenshotUrl: list ? undefined : item.pocScreenshotUrl, // presigned by the caller
     timeSavedHours: item.timeSavedHours,
     downloadsCount: item.downloadsCount || 0,
     rating: item.rating || 0,

@@ -32,8 +32,8 @@ async function listSkills() {
     ExpressionAttributeValues: { ':pk': 'SKILL#approved' },
     ScanIndexForward: false,
   });
-  const skills = await Promise.all(items.map(withScreenshotUrl));
-  return ok({ skills: skills.map(s => skillToApi(s)) });
+  // No presigning here — see skillToApi's `list` note.
+  return ok({ skills: items.map(s => skillToApi(s, null, { list: true })) });
 }
 
 async function getSkill(skillId) {
@@ -69,10 +69,10 @@ async function getPublicProfile(username) {
     ScanIndexForward: false,
   });
   const approved = skills.filter(s => s.status === 'approved');
+  const avatarUrl = profile.avatarKey ? await presignGet(profile.avatarKey, 3600) : null;
   return ok({
-    profile: profileToApi(profile),
-    skills: (await Promise.all(approved.map(withScreenshotUrl)))
-      .map(s => skillToApi(s, profile)),
+    profile: profileToApi(profile, avatarUrl),
+    skills: approved.map(s => skillToApi(s, profile, { list: true })),
   });
 }
 

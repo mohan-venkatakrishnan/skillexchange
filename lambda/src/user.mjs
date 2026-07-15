@@ -58,7 +58,7 @@ async function getMe(me) {
     ScanIndexForward: false,
   });
   const avatarUrl = profile.avatarKey ? await presignGet(profile.avatarKey, 3600) : null;
-  return ok({ profile: profileToApi(profile, avatarUrl), skills: skills.map(s => skillToApi(s, profile)) });
+  return ok({ profile: profileToApi(profile, avatarUrl), skills: skills.map(s => skillToApi(s, profile, { list: true })) });
 }
 
 /* Display name, bio and location are editable. Username is NOT — it is the
@@ -105,7 +105,7 @@ async function getLibrary(me) {
   const skills = [];
   for (const p of purchases) {
     const s = await db.get({ PK: `SKILL#${p.skillId}`, SK: 'META' });
-    if (s) skills.push(skillToApi(s));
+    if (s) skills.push(skillToApi(s, null, { list: true }));
   }
   return ok({ skills });
 }
