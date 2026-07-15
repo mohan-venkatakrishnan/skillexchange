@@ -1,0 +1,19 @@
+# Force LF in the repo and in the working tree. Windows checkouts were getting
+# CRLF via autocrlf, which silently broke the seed-content frontmatter parser
+# (a \n-anchored regex matched nothing, so the seeder "succeeded" having
+# written zero skills). Source and data files stay LF everywhere.
+* text=auto eol=lf
+
+*.md    text eol=lf
+*.mjs   text eol=lf
+*.js    text eol=lf
+*.jsx   text eol=lf
+*.json  text eol=lf
+*.yml   text eol=lf
+*.tf    text eol=lf
+*.sh    text eol=lf
+
+*.png   binary
+*.jpg   binary
+*.ico   binary
+*.zip   binary
