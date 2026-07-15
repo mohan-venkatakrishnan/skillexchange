@@ -1,0 +1,32 @@
+name: Nightly Regression
+on:
+  schedule:
+    - cron: '0 1 * * *' # 01:00 UTC nightly, after the badges job (00:30 UTC)
+  workflow_dispatch:
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - env: qa
+            url: https://skillexchangeqa.tapdot.org
+          - env: prod
+            url: https://skillexchange.tapdot.org
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Regression vs ${{ matrix.env }}
+        run: npm run test:regression
+        env:
+          REGRESSION_URL: ${{ matrix.url }}
+          # Authenticated flow only runs against QA (auto-confirm pool).
+          TEST_USER_EMAIL: ${{ matrix.env == 'qa' && secrets.TEST_USER_EMAIL || '' }}
+          TEST_USER_PASSWORD: ${{ matrix.env == 'qa' && secrets.TEST_USER_PASSWORD || '' }}

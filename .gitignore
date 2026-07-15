@@ -14,3 +14,5 @@ terraform/amplify-retry.log
 lambda/*.zip
 .DS_Store
 *.local
+.env.deploy.qa
+.env.deploy.prod

@@ -1,0 +1,17 @@
+import { chromium } from '@playwright/test';
+import { preview } from 'vite';
+const server = await preview({ preview: { port: 5175 } });
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+await page.goto('http://localhost:5175/');
+await page.waitForTimeout(1200);
+await page.screenshot({ path: 'home.png' });
+await page.goto('http://localhost:5175/marketplace');
+await page.waitForTimeout(800);
+await page.screenshot({ path: 'marketplace.png' });
+await page.goto('http://localhost:5175/skills/1');
+await page.waitForTimeout(800);
+await page.screenshot({ path: 'skill.png', fullPage: false });
+await browser.close();
+await server.close();
+process.exit(0);
