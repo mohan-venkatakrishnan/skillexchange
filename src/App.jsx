@@ -16,6 +16,7 @@ import LibraryPage from './pages/LibraryPage.jsx';
 import MyProfilePage from './pages/MyProfilePage.jsx';
 import PublicProfilePage from './pages/PublicProfilePage.jsx';
 import CreateSkillPage from './pages/CreateSkillPage.jsx';
+import AdminPage from './pages/AdminPage.jsx';
 
 const NAV=[
   {path:"/",label:"Home",pub:true},
@@ -171,6 +172,7 @@ export default function App() {
         <Route path="/profile" element={user?<MyProfilePage T={T} user={user} onLogout={handleLogout} onShowAuth={()=>setShowAuth(true)}/>:<AuthGate T={T} onShowAuth={()=>setShowAuth(true)}/>}/>
         <Route path="/u/:username" element={<PublicProfilePage T={T}/>}/>
         <Route path="/auth/callback" element={<AuthCallback T={T}/>}/>
+        <Route path="/admin" element={<AdminPage T={T}/>}/>
         <Route path="*" element={<Navigate to="/" replace/>}/>
       </Routes>
 
