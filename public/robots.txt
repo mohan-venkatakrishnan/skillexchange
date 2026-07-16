@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Signed-in-only pages have nothing for a crawler and shouldn't compete for
+# the brand's sitelinks.
+Disallow: /library
+Disallow: /profile
+Disallow: /admin
+Disallow: /auth/
+
+Sitemap: https://skillexchange.tapdot.org/sitemap.xml

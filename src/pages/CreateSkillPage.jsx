@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useSeo from '../lib/seo.js';
 import { useTheme, FONT_HEAD, FONT_UI, FONT_MONO } from '../tokens/theme';
 import { PageWrap } from '../components/Shared.jsx';
 import { GoldButton, GhostButton, Card, Label, Input } from '../components/ui.jsx';
@@ -16,6 +17,7 @@ const BENEFITS = [
 ];
 
 export default function CreateSkillPage({ user, onShowAuth }) {
+  useSeo({ title: 'Create a Skill', description: 'Turn a project you already shipped into a sellable SKILL.md. Generate the prompt, run it in your project folder, publish.', path: '/create' });
   const { c } = useTheme();
   const nav = useNavigate();
   const [platform, setPlatform] = useState('Claude');

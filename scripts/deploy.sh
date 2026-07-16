@@ -25,6 +25,9 @@ ENV_FILE=".env.deploy.$ENV"
 echo "── Building frontend ($ENV) ──"
 set -a; source "$ENV_FILE"; set +a
 export VITE_USE_MOCK=false
+# Refresh the sitemap from the live catalogue before building it into dist/.
+# Non-fatal: a stale-but-present sitemap beats failing a deploy over SEO.
+node scripts/gen-sitemap.mjs "${VITE_API_URL}" || echo "sitemap gen skipped"
 npm run build
 cp customHttp.yml dist/
 

@@ -8,6 +8,7 @@ import Loader from '../components/Loader.jsx';
 import { Ic } from '../components/Icons.jsx';
 import * as api from '../lib/api.js';
 import useFetch from '../lib/useFetch.js';
+import useSeo from '../lib/seo.js';
 
 const TABS = [
   { id: 'builders', label: 'Top Builders' },
@@ -15,6 +16,7 @@ const TABS = [
 ];
 
 export default function LeaderboardPage() {
+  useSeo({ title: 'Leaderboard', description: 'The top builders and top skills on Skill Exchange, ranked by real sales and downloads.', path: '/leaderboard' });
   const { c } = useTheme();
   const nav = useNavigate();
   const [tab, setTab] = useState('builders');

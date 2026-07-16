@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useSeo from '../lib/seo.js';
 import { useTheme, FONT_HEAD, FONT_UI } from '../tokens/theme';
 import { PageWrap, TimeSaved, Stars, Downloads, Price } from '../components/Shared.jsx';
 import { Card, PageTitle, ErrorBox, EmptyState, GoldButton, GhostButton } from '../components/ui.jsx';
@@ -10,6 +11,7 @@ import * as api from '../lib/api.js';
 import useFetch from '../lib/useFetch.js';
 
 export default function LibraryPage() {
+  useSeo({ title: 'My Library', description: 'Skills you have purchased or downloaded.', path: '/library', noindex: true });
   const { c } = useTheme();
   const nav = useNavigate();
   const lib = useFetch(() => api.getLibrary(), []);

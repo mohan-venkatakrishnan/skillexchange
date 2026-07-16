@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { useTheme, FONT_HEAD, FONT_UI, FONT_MONO } from '../tokens/theme';
+import useSeo from '../lib/seo.js';
 import { PageWrap, VerifiedStamp } from '../components/Shared.jsx';
 import { GoldButton, GhostButton, Card, Label, Input, Textarea } from '../components/ui.jsx';
 import Select from '../components/Select.jsx';
@@ -19,6 +20,7 @@ const EMPTY_FORM = {
 const CATEGORY_OPTIONS = [{ value: '', label: 'Select category' }, ...CATEGORIES.map(x => ({ value: x, label: x }))];
 
 export default function PublishPage() {
+  useSeo({ title: 'Publish a Skill', description: 'Publish your SKILL.md and earn from every download. Proof of concept required — a live project URL and screenshot. Keep 95%.', path: '/publish' });
   const { c } = useTheme();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(EMPTY_FORM);

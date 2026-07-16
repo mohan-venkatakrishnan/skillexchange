@@ -11,7 +11,42 @@
     <meta property="og:url" content="https://skillexchange.tapdot.org" />
     <meta property="og:image" content="https://skillexchange.tapdot.org/og-image.png" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://skillexchange.tapdot.org/og-image.png" />
+    <link rel="canonical" href="https://skillexchange.tapdot.org/" />
     <title>Skill Exchange — Where AI builders share their edge</title>
+
+    <!-- Organization: powers the brand knowledge panel / logo in results. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Skill Exchange",
+      "url": "https://skillexchange.tapdot.org",
+      "logo": "https://skillexchange.tapdot.org/og-image.png",
+      "description": "The GitHub for AI skills — buy and sell reusable workflows that power real products.",
+      "parentOrganization": { "@type": "Organization", "name": "tapdot", "url": "https://tapdot.org" }
+    }
+    </script>
+
+    <!-- WebSite + SearchAction: this is what makes Google offer the sitelinks
+         search box under the brand result. target must be a real query URL —
+         the marketplace already reads ?q=. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Skill Exchange",
+      "url": "https://skillexchange.tapdot.org",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://skillexchange.tapdot.org/marketplace?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>

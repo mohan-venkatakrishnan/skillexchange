@@ -10,6 +10,7 @@ import { ErrorBox, EmptyState, GhostButton, Checkbox } from '../components/ui.js
 import { CATEGORIES, PLATFORMS } from '../data/constants.js';
 import * as api from '../lib/api.js';
 import useFetch from '../lib/useFetch.js';
+import useSeo from '../lib/seo.js';
 
 const PER_PAGE = 12;
 
@@ -24,6 +25,7 @@ const SORTS = [
 ];
 
 export default function MarketplacePage() {
+  useSeo({ title: 'Browse skills', description: 'Search 100+ AI skill files across coding, design, data, DevOps and more. Filter by assistant, price and category — every skill ships with proof it works.', path: '/marketplace' });
   const { c } = useTheme();
   const [params, setParams] = useSearchParams();
   const skills = useFetch(() => api.listSkills(), [], { key: 'skills' });

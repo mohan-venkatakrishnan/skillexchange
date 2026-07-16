@@ -9,6 +9,7 @@ import AuthModal from './components/AuthModal.jsx';
 import Loader from './components/Loader.jsx';
 import { GoldButton } from './components/ui.jsx';
 import { getSession, signOut, handleOAuthCallback, refreshProfile, AUTH_EVENT } from './lib/auth.js';
+import useSeo from './lib/seo.js';
 import HomePage from './pages/HomePage.jsx';
 import MarketplacePage from './pages/MarketplacePage.jsx';
 import SkillDetailPage from './pages/SkillDetailPage.jsx';
@@ -108,11 +109,19 @@ function AuthCallback() {
 
 function AuthGate({ onShowAuth }) {
   const { c } = useTheme();
+  const { pathname } = useLocation();
+  // /publish is a page we actively want indexed — a signed-out visitor (and a
+  // crawler) should still see it as a real destination with its own title, not
+  // the default. /library and /profile are private, so keep them out of search.
+  const publishGate = pathname === '/publish';
+  useSeo(publishGate
+    ? { title: 'Publish a Skill', description: 'Publish your SKILL.md and earn from every download. Proof of concept required — a live project URL and screenshot. Keep 95%.', path: '/publish' }
+    : { title: 'Sign in', noindex: true });
   return (
     <div style={{ position: 'relative', zIndex: 1, minHeight: 'calc(100vh - 52px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
       <div style={{ textAlign: 'center', fontFamily: FONT_UI }} className="fade-up">
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}><Logo size={44} /></div>
-        <p style={{ color: c.text, fontSize: 16, fontWeight: 600, marginBottom: 6 }}>Sign in to continue</p>
+        <p style={{ color: c.text, fontSize: 16, fontWeight: 600, marginBottom: 6 }}>{publishGate ? 'Sign in to publish' : 'Sign in to continue'}</p>
         <p style={{ color: c.textMuted, fontSize: 13, marginBottom: 20 }}>You'll come straight back to this page.</p>
         <GoldButton onClick={onShowAuth}>Sign In</GoldButton>
       </div>

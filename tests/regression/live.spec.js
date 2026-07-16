@@ -13,6 +13,36 @@ test.describe('Route health', () => {
     });
   }
 
+  test('robots.txt and sitemap.xml are served and wired', async ({ request, baseURL }) => {
+    const robots = await request.get(baseURL + '/robots.txt');
+    expect(robots.status()).toBe(200);
+    expect(await robots.text()).toContain('Sitemap: https://skillexchange.tapdot.org/sitemap.xml');
+
+    const sitemap = await request.get(baseURL + '/sitemap.xml');
+    expect(sitemap.status()).toBe(200);
+    const xml = await sitemap.text();
+    expect(xml).toContain('<urlset');
+    expect(xml).toContain('/marketplace</loc>');
+    expect(xml, 'sitemap must list real skill pages, not just static routes').toMatch(/\/skills\/[^<]+<\/loc>/);
+  });
+
+  test('sitelinks search-box structured data is present', async ({ page }) => {
+    await page.goto('/');
+    const joined = (await page.locator('script[type="application/ld+json"]').allTextContents()).join('\n');
+    expect(joined).toContain('WebSite');
+    expect(joined).toContain('SearchAction');
+    expect(joined).toContain('search_term_string');
+  });
+
+  test('routes carry distinct titles (per-route SEO)', async ({ page }) => {
+    await page.goto('/marketplace');
+    await expect(page).toHaveTitle(/Browse skills/);
+    await page.goto('/leaderboard');
+    await expect(page).toHaveTitle(/Leaderboard/);
+    await page.goto('/');
+    await expect(page).toHaveTitle(/Where AI builders/);
+  });
+
   // Headers must be asserted on the encodings a real browser negotiates, not
   // just the identity one. CloudFront caches per Accept-Encoding (vary), so a
   // brotli copy can be pinned WITHOUT the custom headers while an

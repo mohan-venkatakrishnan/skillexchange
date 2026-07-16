@@ -9,6 +9,7 @@ import Loader from '../components/Loader.jsx';
 import { Ic } from '../components/Icons.jsx';
 import * as api from '../lib/api.js';
 import useFetch from '../lib/useFetch.js';
+import useSeo, { ORIGIN } from '../lib/seo.js';
 
 /* The two-column shell collapses under 880px. On narrow screens the buy card
    moves ABOVE the long-form content (order:-1) — the price and CTA are the
@@ -46,6 +47,38 @@ export default function SkillDetailPage({ user, onShowAuth }) {
     );
     return () => { alive = false; };
   }, [user, id]);
+
+  // SEO runs every render (hooks can't be conditional). A skill page is the
+  // most valuable thing to index — its own title, description and Product
+  // schema are what earn it a standalone snippet in search, with a price and
+  // rating shown inline once reviews exist.
+  const sd = skill.data;
+  useSeo(sd ? {
+    title: sd.title,
+    description: sd.description?.slice(0, 155) || `A ${sd.category} skill on Skill Exchange, with proof it works.`,
+    path: `/skills/${sd.id}`,
+    image: sd.pocScreenshotUrl || undefined,
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: sd.title,
+      description: sd.description,
+      category: sd.category,
+      brand: { '@type': 'Brand', name: sd.author },
+      ...(sd.pocScreenshotUrl ? { image: sd.pocScreenshotUrl } : {}),
+      offers: {
+        '@type': 'Offer',
+        price: (sd.price || 0).toFixed(2),
+        priceCurrency: 'USD',
+        availability: 'https://schema.org/InStock',
+        url: `${ORIGIN}/skills/${sd.id}`,
+      },
+      // Only claim ratings when they are REAL — no reviews, no aggregateRating.
+      ...(sd.reviews > 0 ? {
+        aggregateRating: { '@type': 'AggregateRating', ratingValue: sd.rating, reviewCount: sd.reviews },
+      } : {}),
+    },
+  } : { title: 'Skill' }, [sd?.id, sd?.reviews, sd?.rating]);
 
   if (skill.loading) return <PageWrap><Loader label="Loading skill" /></PageWrap>;
   if (skill.error) return <PageWrap><ErrorBox message={skill.error} onRetry={skill.retry} /></PageWrap>;

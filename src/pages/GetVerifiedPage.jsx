@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTheme, FONT_HEAD, FONT_UI } from '../tokens/theme';
+import useSeo from '../lib/seo.js';
 import { PageWrap, VerifiedStamp } from '../components/Shared.jsx';
 import { Card, Input, Textarea, GoldButton } from '../components/ui.jsx';
 import { Ic } from '../components/Icons.jsx';
@@ -64,6 +65,7 @@ function Step({ step, index, last, submitted }) {
 }
 
 export default function GetVerifiedPage({ user, onShowAuth }) {
+  useSeo({ title: 'Get Verified', description: 'Earn the Verified Creator badge. A human reviews your proof of concept — no automated approvals.', path: '/verify' });
   const { c } = useTheme();
   const [applied, setApplied] = useState(false);
   const [url, setUrl] = useState('');
