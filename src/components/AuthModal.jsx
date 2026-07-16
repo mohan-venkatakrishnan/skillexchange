@@ -4,6 +4,7 @@ import { useTheme, FONT_HEAD, FONT_UI } from '../tokens/theme';
 import Logo from './Logo.jsx';
 import { Ic } from './Icons.jsx';
 import { GoldButton, Input } from './ui.jsx';
+import { LIMITS } from '../data/limits.js';
 import UsernameField, { USERNAME_RE } from './UsernameField.jsx';
 import { signIn, signUp, confirmSignUp, signInWithGoogle, refreshProfile } from '../lib/auth.js';
 
@@ -123,7 +124,7 @@ export default function AuthModal({ onClose, onLogin }) {
             {tab === 'signup' && (
               <>
                 <Input label="Your name" value={name} onChange={e => { setName(e.target.value); setError(''); }}
-                  placeholder="e.g. Mohan Venkatakrishnan" testId="signup-name" />
+                  placeholder="e.g. Mohan Venkatakrishnan" testId="signup-name" maxLength={LIMITS.name} />
                 <UsernameField value={uname} onChange={v => { setUname(v); setError(''); }}
                   hint="Permanent and unique — it becomes your profile URL." />
               </>

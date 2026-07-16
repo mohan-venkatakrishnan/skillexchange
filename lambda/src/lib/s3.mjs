@@ -15,3 +15,22 @@ export function presignPut(key, contentType, expiresIn = 300) {
 export function presignGet(key, expiresIn = 300) {
   return getSignedUrl(s3, new GetObjectCommand({ Bucket: BUCKET, Key: key }), { expiresIn });
 }
+
+/* Presigned GET that DOWNLOADS instead of rendering.
+   S3 serves SKILL.md as text/markdown, which browsers display inline — so the
+   Download button just navigated to a wall of text with a giant signed URL in
+   the address bar. The <a download> attribute can't override it either: that
+   attribute is ignored cross-origin, and S3 is a different origin. The only
+   thing that works is telling S3 itself to send Content-Disposition, which it
+   will do via ResponseContentDisposition on the signed URL. */
+export function presignDownload(key, filename, expiresIn = 300) {
+  // RFC 5987: quote the ASCII fallback, and add filename* for anything else.
+  const ascii = filename.replace(/[^\x20-\x7E]/g, '_').replace(/"/g, '');
+  const disposition = `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(filename)}`;
+  return getSignedUrl(s3, new GetObjectCommand({
+    Bucket: BUCKET,
+    Key: key,
+    ResponseContentDisposition: disposition,
+    ResponseContentType: 'text/markdown; charset=utf-8',
+  }), { expiresIn });
+}

@@ -7,6 +7,7 @@ import { Ic } from '../components/Icons.jsx';
 import LeaderboardPreview from '../components/LeaderboardPreview.jsx';
 import { PageWrap } from '../components/Shared.jsx';
 import { GoldButton, GhostButton, Card, ErrorBox, Reveal, Section, SectionHeading } from '../components/ui.jsx';
+import { SELLER_PCT, COMMISSION_PCT } from '../data/pricing.js';
 import { CATEGORIES } from '../data/constants.js';
 import * as api from '../lib/api.js';
 import useFetch from '../lib/useFetch.js';
@@ -23,13 +24,13 @@ const STEPS_SELL = [
   { n: '01', t: 'Start from a project you already shipped', d: "Already have a SKILL.md? Publish it. If not, Create a Skill gives you a prompt to run inside that project's folder — your assistant reads the code and distils the workflow into one." },
   { n: '02', t: 'Publish with proof', d: 'Project URL and screenshot are mandatory, not optional. That rule is what makes every other listing here worth trusting.' },
   { n: '03', t: 'We review it by hand', d: 'A human checks your proof of concept against your claims. Approved skills go live, usually within 48 hours.' },
-  { n: '04', t: 'Keep 90%', d: 'You set the price. The exchange takes 10% on paid sales — nothing else, ever. Your commission rate is locked at the sale.' },
+  { n: '04', t: `Keep ${SELLER_PCT}`, d: `You set the price. The exchange takes ${COMMISSION_PCT} on paid sales — nothing else, ever. Your commission rate is locked at the sale.` },
 ];
 
 const PRINCIPLES = [
   { icon: (c) => <Ic.Shield s={18} c={c.gold} />, t: 'Proof or it doesn\'t list', d: 'Every skill ships with a live project and a screenshot. Enforced at publish time, checked by a human.' },
   { icon: (c) => <Ic.Bolt s={18} c={c.gold} />, t: 'One-time payments', d: 'Buy a skill, own it forever. No subscriptions and no tiers anywhere on the exchange.' },
-  { icon: (c) => <Ic.Crown s={18} c={c.gold} />, t: 'Sellers keep 90%', d: 'A flat 10% commission on paid sales, stored per transaction so your rate never changes retroactively.' },
+  { icon: (c) => <Ic.Crown s={18} c={c.gold} />, t: `Sellers keep ${SELLER_PCT}`, d: `A flat ${COMMISSION_PCT} commission on paid sales, stored per transaction so your rate never changes retroactively.` },
   { icon: (c) => <Ic.Gem s={18} c={c.gold} />, t: 'Every assistant, not just one', d: 'Claude, ChatGPT, Gemini, Cursor and Copilot. Skills declare what they target; you filter on it.' },
 ];
 
@@ -63,7 +64,7 @@ export default function HomePage({ user, onShowAuth }) {
             Where AI builders<br /><span style={{ color: c.gold }}>share their edge</span>
           </h1>
           <p className="fade-up-d1" style={{ fontFamily: FONT_UI, fontSize: 17, lineHeight: 1.7, color: c.textSub, maxWidth: 540, margin: '0 auto 34px' }}>
-            The GitHub for AI skills — buy and sell the reusable workflows that power real products.
+            The GitHub for AI skills — buy and sell reusable workflows that power real products.
           </p>
           <div className="fade-up-d2" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <GoldButton size="lg" onClick={() => nav('/marketplace')}>Browse skills</GoldButton>
@@ -183,7 +184,7 @@ export default function HomePage({ user, onShowAuth }) {
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}><Logo size={40} /></div>
             <h2 style={{ fontFamily: FONT_DISPLAY, fontSize: 'clamp(22px,3vw,28px)', color: c.text, margin: '0 0 10px' }}>Sell the workflow you already built</h2>
             <p style={{ fontFamily: FONT_UI, fontSize: 14, color: c.textMuted, lineHeight: 1.7, maxWidth: 460, margin: '0 auto 24px' }}>
-              You've already solved it once. Package it as a skill, prove it with the project it shipped, and keep 90% of every sale.
+              You've already solved it once. Package it as a skill, prove it with the project it shipped, and keep {SELLER_PCT} of every sale.
             </p>
             <GoldButton size="lg" onClick={() => (user ? nav('/publish') : onShowAuth())}>
               {user ? 'Publish a skill' : 'Get started — it\'s free'}

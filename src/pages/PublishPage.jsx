@@ -5,6 +5,8 @@ import { GoldButton, GhostButton, Card, Label, Input, Textarea } from '../compon
 import Select from '../components/Select.jsx';
 import { Ic } from '../components/Icons.jsx';
 import { CATEGORIES, PLATFORMS } from '../data/constants.js';
+import { LIMITS } from '../data/limits.js';
+import { SELLER_PCT, sellerEarns } from '../data/pricing.js';
 import * as api from '../lib/api.js';
 
 const MAX_SCREENSHOT_BYTES = 2 * 1024 * 1024; // 2MB, matches the UI copy
@@ -112,7 +114,7 @@ export default function PublishPage() {
               <SectionTitle title="Skill details" sub="What it does, and who it's for." />
 
               <Input label="Skill Title *" value={form.title} onChange={e => set('title', e.target.value)}
-                placeholder="e.g. PDF Generation Skill" testId="pub-title" />
+                placeholder="e.g. PDF Generation Skill" testId="pub-title" maxLength={LIMITS.skillTitle} />
 
               <div style={{ marginBottom: 16 }}>
                 <Label>Category *</Label>
@@ -122,10 +124,10 @@ export default function PublishPage() {
               </div>
 
               <Textarea label="Description *" rows={4} value={form.description} onChange={e => set('description', e.target.value)}
-                placeholder="What does this skill do?" testId="pub-description" />
+                placeholder="What does this skill do?" testId="pub-description" maxLength={LIMITS.skillDescription} />
 
               <Textarea label="How to use this skill *" hint="required" rows={3} value={form.usage} onChange={e => set('usage', e.target.value)}
-                placeholder="Step-by-step instructions..." testId="pub-usage" />
+                placeholder="Step-by-step instructions..." testId="pub-usage" maxLength={LIMITS.skillUsage} />
 
               <div style={{ marginBottom: 16 }}>
                 <Input label="Estimated time saved (hours) *" type="number" min="0.5" step="0.5" value={form.timeSaved}
@@ -182,7 +184,7 @@ export default function PublishPage() {
               <SectionTitle title="Show it working" sub="A live project URL and a screenshot of it in use." />
 
               <Input label="Project URL *" hint="enforced" mono value={form.pocUrl} onChange={e => set('pocUrl', e.target.value)}
-                placeholder="https://yourproject.com" testId="pub-pocurl" style={{ fontSize: 12.5 }} />
+                placeholder="https://yourproject.com" testId="pub-pocurl" maxLength={LIMITS.pocUrl} style={{ fontSize: 12.5 }} />
 
               <Label>Cover Screenshot *</Label>
               <FileDrop file={form.screenshot} accept="image/png,image/jpeg" testId="pub-screenshot" onPick={onScreenshot} tall
@@ -200,7 +202,7 @@ export default function PublishPage() {
         {step === 3 && (
           <div className="fade-up" style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
             <Card style={{ padding: 26 }}>
-              <SectionTitle title="Pricing" sub="One-time payment. You keep 90% of every sale." />
+              <SectionTitle title="Pricing" sub={`One-time payment. You keep ${SELLER_PCT} of every sale.`} />
 
               <div style={{ display: 'flex', gap: 12, marginBottom: form.price === 'paid' ? 22 : 0 }}>
                 {[
@@ -231,7 +233,7 @@ export default function PublishPage() {
                     onChange={e => set('amount', e.target.value)} placeholder="e.g. 5" testId="pub-amount" style={{ maxWidth: 200 }} />
                   {form.amount && (
                     <p style={{ fontFamily: FONT_UI, fontSize: 12.5, color: c.textMuted, margin: '-8px 0 0' }}>
-                      You earn <span style={{ color: c.green, fontFamily: FONT_MONO, fontWeight: 600 }}>${(form.amount * 0.9).toFixed(2)}</span> per sale
+                      You earn <span style={{ color: c.green, fontFamily: FONT_MONO, fontWeight: 600 }}>${sellerEarns(form.amount).toFixed(2)}</span> per sale
                     </p>
                   )}
                 </div>

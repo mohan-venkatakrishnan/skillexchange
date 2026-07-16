@@ -3,6 +3,7 @@ import { useTheme, FONT_HEAD, FONT_UI } from '../tokens/theme';
 import { PageWrap, VerifiedStamp } from '../components/Shared.jsx';
 import { Card, Input, Textarea, GoldButton } from '../components/ui.jsx';
 import { Ic } from '../components/Icons.jsx';
+import { LIMITS } from '../data/limits.js';
 import * as api from '../lib/api.js';
 
 /* Five fixed stages, in order. The first two are satisfied by simply having
@@ -124,10 +125,10 @@ export default function GetVerifiedPage({ user, onShowAuth }) {
             <h2 style={{ fontFamily: FONT_HEAD, fontSize: 17, fontWeight: 700, color: c.text, margin: '0 0 18px', letterSpacing: '-0.01em' }}>Apply for verification</h2>
             <Input label="Your best skill URL" value={url} testId="verify-url"
               onChange={e => { setUrl(e.target.value); setError(''); }}
-              placeholder="Link to your published skill" />
+              placeholder="Link to your published skill" maxLength={LIMITS.verifyUrl} />
             <Textarea label="Note about your work" hint="optional" value={note} rows={3}
               onChange={e => setNote(e.target.value)}
-              placeholder="Tell us about the product you built with this skill…" />
+              placeholder="Tell us about the product you built with this skill…" maxLength={LIMITS.verifyNote} />
             {error && <p style={{ fontFamily: FONT_UI, fontSize: 12.5, color: c.coral, margin: '0 0 14px' }}>{error}</p>}
             <GoldButton onClick={submit} disabled={busy} full testId="verify-submit">
               {busy ? 'Submitting…' : user ? 'Submit Application' : 'Sign in to apply'}

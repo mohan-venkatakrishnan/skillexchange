@@ -113,24 +113,50 @@ export function Label({ children, hint }) {
   );
 }
 
-export function Input({ label, hint, value, onChange, placeholder, mono, type = 'text', style, testId, onKeyDown, max, min, step, autoFocus }) {
+/* Counter shown once the user is close enough to the limit to care — a
+   permanent counter on every field is noise, and a field that silently stops
+   accepting input is worse. Turns amber near the cap. */
+function CharCount({ value = '', limit }) {
+  const { c } = useTheme();
+  if (!limit) return null;
+  const len = String(value).length;
+  if (len < limit * 0.7) return null;
+  const atCap = len >= limit;
+  return (
+    <span style={{ fontFamily: FONT_UI, fontSize: 11, color: atCap ? c.coral : c.textMuted, marginLeft: 'auto' }}>
+      {len}/{limit}
+    </span>
+  );
+}
+
+export function Input({ label, hint, value, onChange, placeholder, mono, type = 'text', style, testId, onKeyDown, max, min, step, autoFocus, maxLength }) {
   const { c } = useTheme();
   return (
     <div style={{ marginBottom: label ? 16 : 0 }}>
-      {label && <Label hint={hint}>{label}</Label>}
+      {(label || maxLength) && (
+        <div style={{ display: 'flex', alignItems: 'baseline' }}>
+          {label && <Label hint={hint}>{label}</Label>}
+          <CharCount value={value} limit={maxLength} />
+        </div>
+      )}
       <input value={value} onChange={onChange} placeholder={placeholder} type={type} data-testid={testId}
-        onKeyDown={onKeyDown} max={max} min={min} step={step} autoFocus={autoFocus}
+        onKeyDown={onKeyDown} max={max} min={min} step={step} autoFocus={autoFocus} maxLength={maxLength}
         style={{ ...fieldBase(c), fontFamily: mono ? FONT_MONO : FONT_UI, ...style }} />
     </div>
   );
 }
 
-export function Textarea({ label, hint, value, onChange, placeholder, rows = 4, style, testId }) {
+export function Textarea({ label, hint, value, onChange, placeholder, rows = 4, style, testId, maxLength }) {
   const { c } = useTheme();
   return (
     <div style={{ marginBottom: label ? 16 : 0 }}>
-      {label && <Label hint={hint}>{label}</Label>}
-      <textarea value={value} onChange={onChange} placeholder={placeholder} rows={rows} data-testid={testId}
+      {(label || maxLength) && (
+        <div style={{ display: 'flex', alignItems: 'baseline' }}>
+          {label && <Label hint={hint}>{label}</Label>}
+          <CharCount value={value} limit={maxLength} />
+        </div>
+      )}
+      <textarea value={value} onChange={onChange} placeholder={placeholder} rows={rows} data-testid={testId} maxLength={maxLength}
         style={{ ...fieldBase(c), resize: 'vertical', lineHeight: 1.6, ...style }} />
     </div>
   );

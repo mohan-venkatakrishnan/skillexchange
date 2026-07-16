@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTheme, FONT_HEAD, FONT_UI, FONT_MONO } from '../tokens/theme';
 import { PageWrap, VerifiedStamp, Stars, Downloads, SkillBdg, PTag, SellerBdg } from '../components/Shared.jsx';
 import { GoldButton, GhostButton, Textarea, ErrorBox } from '../components/ui.jsx';
+import { PLATFORMS } from '../data/constants.js';
 import SkillIcon from '../components/SkillIcon.jsx';
 import Loader from '../components/Loader.jsx';
 import { Ic } from '../components/Icons.jsx';
@@ -154,6 +155,7 @@ export default function SkillDetailPage({ user, onShowAuth }) {
             {/* ── How to use ── */}
             <Section title="How to use this skill">
               <p style={{ fontFamily: FONT_UI, fontSize: 13.5, color: c.textSub, lineHeight: 1.7, margin: 0, whiteSpace: 'pre-wrap' }}>{s.usage}</p>
+              <LoadInAssistant platforms={s.platforms} />
             </Section>
 
             {/* ── Proof of concept — the screenshot is evidence, never cropped ── */}
@@ -232,7 +234,11 @@ export default function SkillDetailPage({ user, onShowAuth }) {
                 <div style={{ fontFamily: FONT_UI, fontSize: 34, fontWeight: 700, letterSpacing: '-0.03em', color: isFree ? c.green : c.gold, lineHeight: 1.1 }}>
                   {isFree ? 'Free' : `$${s.price}`}
                 </div>
-                <div style={{ fontFamily: FONT_UI, fontSize: 11, color: c.textMuted, marginTop: 4 }}>one-time payment</div>
+                {/* "one-time payment" is a fact about a purchase — meaningless on a
+                    free skill, where the honest note is that there's nothing to pay. */}
+                <div style={{ fontFamily: FONT_UI, fontSize: 11, color: c.textMuted, marginTop: 4 }}>
+                  {isFree ? 'Free forever · no payment required' : 'one-time payment'}
+                </div>
               </div>
 
               {/* Ownership unknown → skeleton, so the wrong CTA never flashes */}
@@ -250,7 +256,14 @@ export default function SkillDetailPage({ user, onShowAuth }) {
               }
 
               {buyError && <p style={{ fontFamily: FONT_UI, fontSize: 11.5, color: c.coral, textAlign: 'center', margin: '12px 0 0', lineHeight: 1.5 }}>{buyError}</p>}
-              <div style={{ fontFamily: FONT_UI, fontSize: 11, color: c.textMuted, textAlign: 'center', marginTop: 12 }}>Secure checkout · Instant download</div>
+              {/* Checkout reassurance belongs only under a checkout button. */}
+              {!canDownload && (
+                <div style={{ fontFamily: FONT_UI, fontSize: 11, color: c.textMuted, textAlign: 'center', marginTop: 12 }}>Secure checkout · Instant download</div>
+              )}
+
+              <div style={{ marginTop: 12 }}>
+                <ShareButton skill={s} />
+              </div>
 
               <div style={{ borderTop: `1px solid ${c.border}`, marginTop: 18, paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 9 }}>
                 {stats.map(([k, v, gold]) => (
@@ -265,6 +278,130 @@ export default function SkillDetailPage({ user, onShowAuth }) {
         </div>
       </div>
     </PageWrap>
+  );
+}
+
+/* ── "Load it in your assistant" ──
+   The seller's prose says what the skill does; it almost never says the boring
+   part — where the file goes once it's downloaded. Each line below is a real,
+   documented mechanism for that platform. Anything we're not certain of is
+   phrased generically ("paste the contents") rather than invented: a wrong path
+   here costs the buyer more time than the skill saves. */
+const LOAD_STEPS = {
+  Claude: () => <>Keep the file in your project as <Mono>./SKILL.md</Mono> and reference it at the start of a session. In Claude Code, just tell it to read the file.</>,
+  ChatGPT: () => <>Attach the <Mono>.md</Mono> file to the chat, or paste its contents as your first message.</>,
+  Gemini: () => <>Paste the contents at the start of your session, or attach the file to the chat.</>,
+  Cursor: () => <>Keep it in the project and reference it, or save the contents as a project rule under <Mono>.cursor/rules/</Mono> so it loads automatically.</>,
+  Copilot: () => <>Save the contents as a workspace instruction file at <Mono>.github/copilot-instructions.md</Mono>, or paste them into Copilot Chat.</>,
+};
+
+function Mono({ children }) {
+  const { c } = useTheme();
+  return <code style={{ fontFamily: FONT_MONO, fontSize: 11.5, color: c.gold, background: c.goldSoft, borderRadius: 4, padding: '1px 5px', wordBreak: 'break-all' }}>{children}</code>;
+}
+
+function LoadInAssistant({ platforms }) {
+  const { c } = useTheme();
+  // PLATFORMS order, not the seller's — the list reads the same on every skill.
+  const list = PLATFORMS.filter(p => (platforms || []).includes(p) && LOAD_STEPS[p]);
+  if (!list.length) return null;
+  return (
+    <div style={{ background: c.surface, border: `1px solid ${c.border}`, borderRadius: 12, padding: 16, marginTop: 18 }}>
+      <h3 style={{ fontFamily: FONT_HEAD, fontSize: 13, fontWeight: 600, color: c.text, letterSpacing: 0, margin: '0 0 11px' }}>Load it in your assistant</h3>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {list.map(p => (
+          <div key={p} style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+            <span style={{ flexShrink: 0 }}><PTag p={p} /></span>
+            <span style={{ flex: 1, minWidth: 180, fontFamily: FONT_UI, fontSize: 12.5, color: c.textSub, lineHeight: 1.65 }}>{LOAD_STEPS[p]()}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── Share ──
+   navigator.share is the right answer on mobile — it reaches the apps people
+   actually use. Everywhere else it doesn't exist, so we fall back to a themed
+   popover (same open/close contract as Select.jsx). The share text states only
+   what we know for certain: the title and the category. */
+const SHARE_TARGETS = [
+  { key: 'x', label: 'X', href: (u, t) => `https://twitter.com/intent/tweet?text=${encodeURIComponent(t)}&url=${encodeURIComponent(u)}` },
+  { key: 'linkedin', label: 'LinkedIn', href: (u) => `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(u)}` },
+  { key: 'reddit', label: 'Reddit', href: (u, t) => `https://www.reddit.com/submit?url=${encodeURIComponent(u)}&title=${encodeURIComponent(t)}` },
+  { key: 'hn', label: 'Hacker News', href: (u, t) => `https://news.ycombinator.com/submitlink?u=${encodeURIComponent(u)}&t=${encodeURIComponent(t)}` },
+];
+
+function ShareButton({ skill }) {
+  const { c } = useTheme();
+  const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const ref = useRef(null);
+  const text = `${skill.title} — a skill for ${skill.category} on Skill Exchange`;
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey); };
+  }, [open]);
+  useEffect(() => {
+    if (!copied) return;
+    const t = setTimeout(() => setCopied(false), 1800);
+    return () => clearTimeout(t);
+  }, [copied]);
+
+  const url = typeof window !== 'undefined' ? window.location.href : '';
+
+  const onShare = async () => {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try { await navigator.share({ title: skill.title, text, url }); return; }
+      catch { return; } // cancelled or blocked — never fall through to the popover
+    }
+    setOpen(o => !o);
+  };
+
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(url); setCopied(true); }
+    catch { /* clipboard blocked — the links below still work */ }
+  };
+
+  const row = {
+    display: 'flex', alignItems: 'center', gap: 9, width: '100%', textAlign: 'left',
+    background: 'transparent', border: 'none', borderRadius: 7, padding: '8px 10px',
+    fontFamily: FONT_UI, fontSize: 12.5, color: c.textSub, cursor: 'pointer', textDecoration: 'none',
+  };
+  const hover = {
+    onMouseEnter: e => { e.currentTarget.style.background = c.surfaceHover; e.currentTarget.style.color = c.text; },
+    onMouseLeave: e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = c.textSub; },
+  };
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <GhostButton full size="sm" testId="share-btn" onClick={onShare}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
+          <Ic.Share s={13} c="currentColor" />Share
+        </span>
+      </GhostButton>
+      {open && (
+        <div role="menu" aria-label="Share this skill"
+          style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 120, minWidth: '100%', width: 'max-content', background: c.surface, border: `1px solid ${c.borderGold}`, borderRadius: 10, padding: 5, boxShadow: '0 12px 32px rgba(0,0,0,0.45)', animation: 'spotlightIn 0.14s ease' }}>
+          <button type="button" role="menuitem" onClick={copy} data-testid="share-copy"
+            style={{ ...row, color: copied ? c.green : c.textSub }} {...(copied ? {} : hover)}>
+            {copied ? <Ic.Check s={13} c={c.green} /> : <Ic.Link s={13} c={c.gold} />}
+            {copied ? 'Copied' : 'Copy link'}
+          </button>
+          {SHARE_TARGETS.map(t => (
+            <a key={t.key} role="menuitem" href={t.href(url, text)} target="_blank" rel="noopener noreferrer"
+              data-testid={`share-${t.key}`} onClick={() => setOpen(false)} style={row} {...hover}>
+              {t.label}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

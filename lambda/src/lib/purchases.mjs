@@ -1,6 +1,6 @@
 import { db } from './db.mjs';
 
-export const COMMISSION_RATE = 0.10; // stored per transaction, never recalculated
+export const COMMISSION_RATE = 0.05; // stored per transaction, never recalculated
 
 export function commissionCents(amountCents) {
   return Math.round(amountCents * COMMISSION_RATE);

@@ -18,7 +18,7 @@ const makeDots = (n, seed) => {
     left: r() * 100, top: r() * 100,
     size: 1 + r() * 2.4,
     op: 0.16 + r() * 0.34,
-    dur: 6 + r() * 6,
+    dur: 3 + r() * 3,
     delay: r() * 6,
     gold: r() > 0.42,
   }));
@@ -36,7 +36,7 @@ const makeClusters = (n, seed) => {
       left: leftSide ? edge : 100 - edge - 8,
       top: r() * 94,
       scale: 0.5 + r() * 0.7,
-      dur: 16 + r() * 16,
+      dur: 8 + r() * 8,
       delay: r() * 6,
       drift: ['drift1', 'drift2', 'drift3'][Math.floor(r() * 3)],
       flip: r() > 0.5,
@@ -109,9 +109,9 @@ export default function NodeField() {
       const x = ev.clientX / window.innerWidth - 0.5;
       const y = ev.clientY / window.innerHeight - 0.5;
       // Each depth lags by a different factor — that difference IS the parallax.
-      if (glowRef.current) glowRef.current.style.transform = `translate3d(${x * -14}px, ${y * -9}px, 0)`;
-      if (farRef.current) farRef.current.style.transform = `translate3d(${x * -10}px, ${y * -6}px, 0)`;
-      if (nearRef.current) nearRef.current.style.transform = `translate3d(${x * -30}px, ${y * -19}px, 0)`;
+      if (glowRef.current) glowRef.current.style.transform = `translate3d(${x * -22}px, ${y * -14}px, 0)`;
+      if (farRef.current) farRef.current.style.transform = `translate3d(${x * -16}px, ${y * -10}px, 0)`;
+      if (nearRef.current) nearRef.current.style.transform = `translate3d(${x * -46}px, ${y * -29}px, 0)`;
       if (clusterRef.current) clusterRef.current.style.transform = `translate3d(${x * -46}px, ${y * -29}px, 0)`;
     };
     const onMove = (e) => { ev = e; if (!raf) raf = requestAnimationFrame(apply); };
@@ -123,9 +123,9 @@ export default function NodeField() {
     <div aria-hidden="true" style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
       {/* ambient gold glows — shallowest parallax layer */}
       <div ref={glowRef} style={{ position: 'absolute', inset: 0, willChange: 'transform' }}>
-        <div style={{ position: 'absolute', top: '-8%', left: '18%', width: 520, height: 420, background: `radial-gradient(ellipse, ${c.goldGlow} 0%, transparent 65%)`, animation: anim('drift1', 26) }} />
-        <div style={{ position: 'absolute', bottom: '6%', right: '-6%', width: 430, height: 430, background: `radial-gradient(ellipse, ${c.slate}0d 0%, transparent 65%)`, animation: anim('drift2', 32) }} />
-        <div style={{ position: 'absolute', top: '38%', left: '-6%', width: 380, height: 380, background: `radial-gradient(ellipse, ${c.goldGlow} 0%, transparent 65%)`, animation: anim('drift3', 29) }} />
+        <div style={{ position: 'absolute', top: '-8%', left: '18%', width: 520, height: 420, background: `radial-gradient(ellipse, ${c.goldGlow} 0%, transparent 65%)`, animation: anim('drift1', 13) }} />
+        <div style={{ position: 'absolute', bottom: '6%', right: '-6%', width: 430, height: 430, background: `radial-gradient(ellipse, ${c.slate}0d 0%, transparent 65%)`, animation: anim('drift2', 16) }} />
+        <div style={{ position: 'absolute', top: '38%', left: '-6%', width: 380, height: 380, background: `radial-gradient(ellipse, ${c.goldGlow} 0%, transparent 65%)`, animation: anim('drift3', 14) }} />
       </div>
 
       {/* faint grid — fixed, gives the moving layers something to move against */}
@@ -138,12 +138,12 @@ export default function NodeField() {
       {/* dot field — two depths. Outer div takes the pointer transform, inner
           keeps the CSS drift, so the two never fight over `transform`. */}
       <div ref={farRef} style={{ position: 'absolute', inset: '-60px', willChange: 'transform' }}>
-        <div style={{ position: 'absolute', inset: 0, animation: anim('drift2', 44) }}>
+        <div style={{ position: 'absolute', inset: 0, animation: anim('drift2', 22) }}>
           <DotLayer dots={DOTS_FAR} gold={c.gold} slate={c.slate} lite={lite} scale={0.8} />
         </div>
       </div>
       <div ref={nearRef} style={{ position: 'absolute', inset: '-60px', willChange: 'transform' }}>
-        <div style={{ position: 'absolute', inset: 0, animation: anim('drift1', 30) }}>
+        <div style={{ position: 'absolute', inset: 0, animation: anim('drift1', 15) }}>
           <DotLayer dots={DOTS_NEAR} gold={c.gold} slate={c.slate} lite={lite} />
         </div>
       </div>

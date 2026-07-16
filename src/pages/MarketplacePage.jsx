@@ -100,9 +100,9 @@ export default function MarketplacePage() {
     <PageWrap>
       <div style={{ maxWidth: 1320, margin: '0 auto', padding: '26px clamp(16px,3.5vw,32px) 0' }}>
         {/* ── Search header ── */}
-        <div className="fade-up" style={{ marginBottom: 22 }}>
-          <h1 style={{ fontFamily: FONT_HEAD, fontSize: 'clamp(21px,3vw,27px)', color: c.text, margin: '0 0 14px' }}>Browse skills</h1>
-          <div style={{ position: 'relative', maxWidth: 620 }}>
+        <div className="fade-up" style={{ marginBottom: 26, textAlign: 'center' }}>
+          <h1 style={{ fontFamily: FONT_HEAD, fontSize: 'clamp(21px,3vw,27px)', color: c.text, margin: '0 0 14px', fontWeight: 700, letterSpacing: '-0.02em' }}>Browse skills</h1>
+          <div style={{ position: 'relative', maxWidth: 620, margin: '0 auto', textAlign: 'left' }}>
             <div style={{ position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><Ic.Search s={15} c={c.textMuted} /></div>
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search skills, authors, categories…" data-testid="marketplace-search"
               style={{ width: '100%', background: c.surface, border: `1px solid ${c.border}`, borderRadius: 12, padding: '12px 40px 12px 42px', color: c.text, fontFamily: FONT_UI, fontSize: 13.5, boxSizing: 'border-box', outline: 'none' }} />

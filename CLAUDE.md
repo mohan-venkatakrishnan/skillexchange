@@ -17,7 +17,7 @@ Skill Exchange is a marketplace for reusable AI workflow skill files (SKILL.md-s
 
 ### Core principles (non-negotiable)
 - One-time payments only. No subscriptions, no Pro/Studio tiers.
-- 10% platform commission on paid sales. Sellers keep 90%.
+- 5% platform commission on paid sales. Sellers keep 95%. (Lowered from 10% on 2026-07-16; commission is stored per transaction, so pre-existing sales keep their original rate.)
 - Proof of concept (project URL + screenshot) is **mandatory** at publish time — never optional.
 - Marketplace, Leaderboard, Create a Skill, and Get Verified pages are browsable **without an account**. Sign-in is required only to buy, publish, review, or apply for verification.
 - AI-platform-agnostic: skills can target Claude, ChatGPT, Gemini, Cursor, or Copilot — not Claude-exclusive.
@@ -102,7 +102,7 @@ Mobile nav collapses to a hamburger + dropdown panel below 760px, matching the p
 
 1. Seller sets price (free or paid) at publish time.
 2. Buyer clicks "Buy" → Stripe Connect checkout (or Razorpay checkout if Stripe Connect isn't yet approved) → on success, provider webhook hits an API Gateway endpoint → Lambda writes a `PURCHASE` record and increments `downloadsCount` on the skill.
-3. Commission (10%) is calculated and **stored per transaction** at the time of purchase — not recalculated later — so historical commission rates remain accurate even if the platform rate changes in the future.
+3. Commission (5%) is calculated and **stored per transaction** at the time of purchase — not recalculated later — so historical commission rates remain accurate even if the platform rate changes in the future.
 4. Seller payouts: Stripe Connect (once approved) or Razorpay Route, per the earlier payment provider decision. Track this as a follow-up item — do not block launch on Stripe approval; ship with Razorpay first.
 
 ---

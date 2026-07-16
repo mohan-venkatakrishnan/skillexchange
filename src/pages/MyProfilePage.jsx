@@ -7,6 +7,8 @@ import { Ic } from '../components/Icons.jsx';
 import { PageWrap, VerifiedStamp, SellerBdg, Stars, Downloads } from '../components/Shared.jsx';
 import { Card, GoldButton, GhostButton, Input, Textarea, Avatar, AvatarUpload, ErrorBox, EmptyState } from '../components/ui.jsx';
 import UsernameField, { USERNAME_RE } from '../components/UsernameField.jsx';
+import { LIMITS } from '../data/limits.js';
+import { SELLER_PCT } from '../data/pricing.js';
 import * as api from '../lib/api.js';
 import { refreshProfile } from '../lib/auth.js';
 import useFetch from '../lib/useFetch.js';
@@ -18,6 +20,7 @@ export default function MyProfilePage({ user, onLogout, onShowAuth }) {
   const nav = useNavigate();
   const [showAccount, setShowAccount] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [handleDismissed, setHandleDismissed] = useState(false);
   const me = useFetch(() => api.getMe(), [user?.username]);
 
   if (me.loading) return <PageWrap><Loader label="Loading your profile" /></PageWrap>;
@@ -64,6 +67,28 @@ export default function MyProfilePage({ user, onLogout, onShowAuth }) {
           </GhostButton>
         </div>
 
+        {/* A handle WE invented is a loose end the user never chose. Burying the
+            fix inside a collapsed editor made it undiscoverable — so it gets its
+            own card, above the fold, until it's dealt with. Dismissible: it's a
+            nudge, not a wall. */}
+        {p.usernameAutoDerived && !editing && !handleDismissed && (
+          <Card className="fade-up" style={{ marginBottom: 24, background: `linear-gradient(160deg, ${c.goldSoft}, transparent 70%)`, borderColor: c.gold }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: 240 }}>
+                <div style={{ fontFamily: FONT_UI, fontSize: 14, fontWeight: 700, color: c.text, marginBottom: 5 }}>Pick your username</div>
+                <div style={{ fontFamily: FONT_UI, fontSize: 12.5, color: c.textMuted, lineHeight: 1.6 }}>
+                  We assigned <span style={{ color: c.gold, fontWeight: 600 }}>@{p.username}</span> from your email because Google sign-in never asked.
+                  You can change it <strong style={{ color: c.text }}>once</strong> — it becomes your profile URL and is permanent after that.
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <GoldButton onClick={() => setEditing(true)} testId="claim-handle-cta">Choose a handle</GoldButton>
+                <GhostButton size="sm" onClick={() => setHandleDismissed(true)}>Later</GhostButton>
+              </div>
+            </div>
+          </Card>
+        )}
+
         {editing && <ProfileEditor profile={p} onSaved={() => { setEditing(false); me.retry(); }} onCancel={() => setEditing(false)} />}
 
         {/* ── Stats ── */}
@@ -83,7 +108,7 @@ export default function MyProfilePage({ user, onLogout, onShowAuth }) {
 
         {skills.length === 0 ? (
           <EmptyState title="You haven't published a skill yet"
-            body="Package a workflow you've already built, prove it with the project it shipped, and keep 90% of every sale."
+            body={`Package a workflow you've already built, prove it with the project it shipped, and keep ${SELLER_PCT} of every sale.`}
             action={<GoldButton onClick={() => nav('/publish')}>Publish your first skill</GoldButton>} />
         ) : (
           <>
@@ -176,9 +201,9 @@ function ProfileEditor({ profile, onSaved, onCancel }) {
   return (
     <Card className="fade-up" style={{ marginBottom: 28 }}>
       <div style={{ fontFamily: FONT_UI, fontSize: 11, fontWeight: 700, color: c.gold, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>Edit profile</div>
-      <Input label="Display name" value={name} onChange={e => { setName(e.target.value); setError(''); }} placeholder="Your name" testId="profile-name" />
-      <Input label="Location" hint="optional" value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Mumbai, India" testId="profile-location" />
-      <Textarea label="Bio" hint="optional" rows={3} value={bio} onChange={e => setBio(e.target.value)} placeholder="What do you build?" testId="profile-bio" />
+      <Input label="Display name" value={name} onChange={e => { setName(e.target.value); setError(''); }} placeholder="Your name" testId="profile-name" maxLength={LIMITS.name} />
+      <Input label="Location" hint="optional" value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Mumbai, India" testId="profile-location" maxLength={LIMITS.location} />
+      <Textarea label="Bio" hint="optional" rows={3} value={bio} onChange={e => setBio(e.target.value)} placeholder="What do you build?" testId="profile-bio" maxLength={LIMITS.bio} />
 
       {/* Signing in with Google never asks for a handle, so we derive one from
           the email. That is our choice, not the user's — so they get exactly
@@ -190,10 +215,12 @@ function ProfileEditor({ profile, onSaved, onCancel }) {
             You can change it <strong style={{ color: c.text }}>once</strong> — after that it's permanent.
           </p>
           <UsernameField value={handle} onChange={v => { setHandle(v); setError(''); }} label="Choose your handle" testId="profile-username" />
-          <GhostButton size="sm" disabled={busy || handle === profile.username || !handle} testId="profile-username-save"
+          {/* Primary action — a GhostButton vanished into the gold panel it
+              sits on, and this is the once-only thing people came here for. */}
+          <GoldButton full disabled={busy || handle === profile.username || !handle} testId="profile-username-save"
             onClick={saveHandle}>
-            {busy ? 'Claiming…' : `Claim @${handle || '…'}`}
-          </GhostButton>
+            {busy ? 'Claiming…' : handle && handle !== profile.username ? `Claim @${handle} →` : 'Choose a new handle above'}
+          </GoldButton>
         </div>
       ) : (
         <p style={{ fontFamily: FONT_UI, fontSize: 11.5, color: c.textMuted, margin: '-6px 0 16px' }}>

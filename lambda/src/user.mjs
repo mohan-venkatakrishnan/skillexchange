@@ -3,13 +3,23 @@
 import crypto from 'node:crypto';
 import { CognitoIdentityProviderClient, AdminUpdateUserAttributesCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { db, TABLE, skillToApi, profileToApi } from './lib/db.mjs';
-import { presignPut, presignGet, skillFileKey, screenshotKey, avatarKey } from './lib/s3.mjs';
+import { presignPut, presignGet, presignDownload, skillFileKey, screenshotKey, avatarKey } from './lib/s3.mjs';
 import { ok, bad, forbidden, notFound, conflict, unavailable, parseBody, claims, route } from './lib/http.mjs';
 import { paymentsConfigured, razorpayKeyId, createOrder, verifyCheckoutSignature } from './lib/razorpay.mjs';
 import { recordPurchase, hasPurchase } from './lib/purchases.mjs';
 
 const idp = new CognitoIdentityProviderClient({});
 const USERNAME_RE = /^[a-z0-9_]{3,24}$/;
+
+/* Mirrors src/data/limits.js. maxLength in the browser is a courtesy — anyone
+   can POST past it, so the server is the authority. Over-long input is
+   REJECTED on the fields a buyer reads (a silently truncated title is a lie
+   about what the seller wrote) and clamped only where truncation is harmless. */
+const LIMITS = {
+  name: 60, bio: 400, location: 80,
+  skillTitle: 80, skillDescription: 500, skillUsage: 1000, pocUrl: 500,
+  reviewText: 2000, verifyNote: 600, verifyUrl: 500,
+};
 
 const CATEGORIES = ["Coding","Design","Extension","Desktop","Document","Marketing","Website","Data","DevOps","AI/ML","Testing","Mobile","Other"];
 const PLATFORMS = ["Claude","ChatGPT","Gemini","Cursor","Copilot"];
@@ -76,9 +86,9 @@ async function getMe(me) {
 async function updateProfile(me, body) {
   if (!body) return bad('Invalid request body');
   const name = (body.name || '').trim();
-  if (!name || name.length > 60) return bad('Name is required (max 60 characters)');
-  const bio = (body.bio || '').trim().slice(0, 400);
-  const location = (body.location || '').trim().slice(0, 80);
+  if (!name || name.length > LIMITS.name) return bad(`Name is required (max ${LIMITS.name} characters)`);
+  const bio = (body.bio || '').trim().slice(0, LIMITS.bio);
+  const location = (body.location || '').trim().slice(0, LIMITS.location);
   await ensureProfile(me);
   await db.update({
     Key: { PK: `USER#${me.userId}`, SK: 'PROFILE' },
@@ -241,6 +251,10 @@ async function createSkill(me, body) {
 
 function validateSkill(b) {
   if (!b.title?.trim()) return 'Title is required';
+  if (b.title.trim().length > LIMITS.skillTitle) return `Title must be ${LIMITS.skillTitle} characters or fewer`;
+  if ((b.description || '').trim().length > LIMITS.skillDescription) return `Description must be ${LIMITS.skillDescription} characters or fewer`;
+  if ((b.usageInstructions || '').trim().length > LIMITS.skillUsage) return `Usage instructions must be ${LIMITS.skillUsage} characters or fewer`;
+  if ((b.pocUrl || '').trim().length > LIMITS.pocUrl) return 'Project URL is too long';
   if (!CATEGORIES.includes(b.category)) return 'Invalid category';
   if (!b.description?.trim()) return 'Description is required';
   if (!b.usageInstructions?.trim()) return 'Usage instructions are required';
@@ -282,7 +296,7 @@ async function postReview(me, skillId, body) {
       PK: `SKILL#${skillId}`, SK: `REVIEW#${me.userId}`,
       reviewId: me.userId, skillId,
       buyerId: me.userId, buyerUsername: profile.username,
-      rating: body.rating, text: (body.text || '').trim().slice(0, 2000),
+      rating: body.rating, text: (body.text || '').trim().slice(0, LIMITS.reviewText),
       createdAt: now,
     }, { ConditionExpression: 'attribute_not_exists(PK) OR attribute_not_exists(SK)' });
   } catch (err) {
@@ -359,5 +373,10 @@ async function downloadSkill(me, skillId) {
       sellerId: skill.sellerId, amountCents: 0, provider: 'free',
     });
   }
-  return ok({ url: await presignGet(skill.skillFileKey, 300) });
+  // Force a real download rather than rendering the markdown in the tab: the
+  // <a download> attribute is ignored cross-origin, so S3 must send the
+  // Content-Disposition itself. Name the file after the skill so a library of
+  // them isn't twenty files called SKILL.md.
+  const safe = (skill.title || 'skill').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').slice(0, 60);
+  return ok({ url: await presignDownload(skill.skillFileKey, `${safe}-SKILL.md`, 300) });
 }

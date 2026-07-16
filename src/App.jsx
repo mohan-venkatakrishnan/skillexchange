@@ -21,18 +21,18 @@ import PublicProfilePage from './pages/PublicProfilePage.jsx';
 import CreateSkillPage from './pages/CreateSkillPage.jsx';
 import AdminPage from './pages/AdminPage.jsx';
 
-// `pub: false` = signed-in only. Publish is public in the nav: a visitor
-// clicking it gets the sign-in gate, which is a far better funnel than hiding
-// the one action we most want people to take.
+// `pub: false` = signed-in only.
+// No Home entry — the brand mark is the home affordance, and duplicating it
+// costs a slot. No My Profile either: the username button top-right already
+// goes there. Publish is signed-in only; showing it to a visitor just walks
+// them into a gate.
 const NAV = [
-  { path: '/', label: 'Home', pub: true },
   { path: '/marketplace', label: 'Marketplace', pub: true },
-  { path: '/publish', label: 'Publish a Skill', pub: true },
   { path: '/create', label: 'Create a Skill', pub: true },
   { path: '/leaderboard', label: 'Leaderboard', pub: true },
   { path: '/verify', label: 'Get Verified', pub: true },
+  { path: '/publish', label: 'Publish a Skill', pub: false },
   { path: '/library', label: 'My Library', pub: false },
-  { path: '/profile', label: 'My Profile', pub: false },
 ];
 
 const THEME_KEY = 'se_theme';
@@ -190,8 +190,9 @@ function Shell() {
           </button>
           {user
             ? <button onClick={() => nav('/profile')} data-testid="nav-user"
-                style={{ background: c.goldSoft, border: `1px solid ${c.gold}`, borderRadius: 7, padding: '5px 12px', fontFamily: FONT_UI, fontWeight: 600, fontSize: 12, color: c.gold, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                {user.username}
+                title={`@${user.username}`}
+                style={{ background: c.goldSoft, border: `1px solid ${c.gold}`, borderRadius: 7, padding: '5px 12px', fontFamily: FONT_UI, fontWeight: 600, fontSize: 12, color: c.gold, cursor: 'pointer', whiteSpace: 'nowrap', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {user.name || user.username}
               </button>
             : <button onClick={openAuth} data-testid="nav-signin"
                 style={{ background: `linear-gradient(135deg,${c.gold},${c.goldDim})`, color: c.onGold, border: 'none', borderRadius: 7, padding: '7px 15px', fontFamily: FONT_UI, fontWeight: 700, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>
