@@ -65,10 +65,20 @@ done
 # live HTML references the hash we just built.
 BUNDLE=$(ls dist/assets/index-*.js | head -1 | xargs -n1 basename)
 echo "── Waiting for ${VITE_SITE_URL} to serve $BUNDLE ──"
-for i in $(seq 1 30); do
-  LIVE=$(curl -sS --max-time 15 "${VITE_SITE_URL}/?cachebust=$i" 2>/dev/null || true)
+# Poll EXACTLY as a browser does (Accept-Encoding: br) — never with bare curl.
+# CloudFront caches per encoding, so polling with a different Accept-Encoding
+# during the propagation window mints a *separate* cache entry built from the
+# pre-propagation headers, and Amplify's default s-maxage pins it for a year.
+# The poller must not create variants no real client asked for. `?cachebust`
+# is likewise pointless here: this distribution ignores query strings.
+#
+# 45 x 10s. Generous because a previously-cached document can linger at the
+# edge; with the document now no-cache this normally settles in seconds.
+BROWSER_AE='Accept-Encoding: gzip, deflate, br'
+for i in $(seq 1 45); do
+  LIVE=$(curl -sS --compressed -H "$BROWSER_AE" --max-time 15 "${VITE_SITE_URL}/" 2>/dev/null || true)
   if grep -q "$BUNDLE" <<<"$LIVE"; then
-    if curl -sSI --max-time 15 "${VITE_SITE_URL}/" 2>/dev/null | grep -qi '^strict-transport-security'; then
+    if curl -sSI --compressed -H "$BROWSER_AE" --max-time 15 "${VITE_SITE_URL}/" 2>/dev/null | grep -qi '^strict-transport-security'; then
       echo "live and serving $BUNDLE with security headers"
       exit 0
     fi
