@@ -24,9 +24,11 @@ export const handler = async (event) => {
 
   if (username) {
     // Native flow: claim exists from PreSignUp — bind it to the real sub.
+    // Bind the reservation AND drop its TTL — an owned handle must never be
+    // reaped. Until expiresAt is removed this row is still garbage-collectable.
     await db.update({
       Key: { PK: `USERNAME#${username}`, SK: 'CLAIM' },
-      UpdateExpression: 'SET userId = :u',
+      UpdateExpression: 'SET userId = :u REMOVE expiresAt',
       ExpressionAttributeValues: { ':u': userId },
     });
   } else {

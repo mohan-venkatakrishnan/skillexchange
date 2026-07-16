@@ -22,6 +22,15 @@ resource "aws_dynamodb_table" "main" {
   hash_key     = "PK"
   range_key    = "SK"
 
+  # PreSignUp reserves a USERNAME# claim before Cognito can still reject the
+  # signup, and a trigger gets no rollback. Unbound reservations carry
+  # expiresAt and are reaped here; PostConfirmation removes the attribute when
+  # it binds the claim, making ownership permanent. Only reservations expire.
+  ttl {
+    attribute_name = "expiresAt"
+    enabled        = true
+  }
+
   attribute {
     name = "PK"
     type = "S"

@@ -40,12 +40,17 @@ export const handler = route(async (event) => {
 async function ensureProfile(me) {
   let profile = await db.get({ PK: `USER#${me.userId}`, SK: 'PROFILE' });
   if (profile) return profile;
-  // Safety net for users whose PostConfirmation trigger didn't run.
+  // Safety net for users whose PostConfirmation trigger didn't run (it does
+  // not fire for every federated flow). If WE invent the handle rather than
+  // the user choosing it, mark it auto-derived so they get their one change —
+  // otherwise a Google user is stuck with an email-derived handle forever.
+  const derived = !me.username;
   const username = me.username || `user_${me.userId.slice(0, 8)}`;
   profile = {
     PK: `USER#${me.userId}`, SK: 'PROFILE',
     userId: me.userId, username, email: me.email, name: me.name || username,
     bio: '', location: '', isVerified: false, badges: [], salesCount: 0,
+    usernameAutoDerived: derived,
     createdAt: new Date().toISOString(),
   };
   await db.put(profile, { ConditionExpression: 'attribute_not_exists(PK)' }).catch(() => {});
