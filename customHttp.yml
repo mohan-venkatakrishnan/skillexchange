@@ -1,32 +1,37 @@
+# Security headers served by Amplify Hosting on every response (OWASP A05).
+# Ships INSIDE the deploy artifact (copied into dist/) — LaunchPad/PeerReview pattern.
 customHeaders:
+  # HTML must never be cached — it points at the hashed JS bundle, so a stale
+  # index.html serves an old build. The homepage is requested as '/', NOT as
+  # '/index.html': a lone 'index.html' pattern matches nothing, which is how
+  # this shipped with Amplify's default s-maxage=31536000 and let CloudFront
+  # pin a header-less brotli variant of the document for a year.
+  - pattern: '**/*.html'
+    headers:
+      - key: Cache-Control
+        value: 'no-cache, no-store, must-revalidate'
+  - pattern: '/'
+    headers:
+      - key: Cache-Control
+        value: 'no-cache, no-store, must-revalidate'
+  - pattern: '/assets/**'
+    headers:
+      - key: Cache-Control
+        value: 'public, max-age=31536000, immutable'
   - pattern: '**'
     headers:
       - key: Strict-Transport-Security
-        value: max-age=31536000; includeSubDomains
+        value: 'max-age=31536000; includeSubDomains'
       - key: X-Frame-Options
-        value: DENY
+        value: 'DENY'
       - key: X-Content-Type-Options
-        value: nosniff
+        value: 'nosniff'
       - key: Referrer-Policy
-        value: strict-origin-when-cross-origin
+        value: 'strict-origin-when-cross-origin'
       - key: Permissions-Policy
-        value: camera=(), microphone=(), geolocation=()
+        value: 'camera=(), microphone=(), geolocation=(), payment=()'
+      # script-src needs Razorpay's checkout; connect-src needs the API,
+      # Cognito and Razorpay's telemetry host. 'unsafe-inline' on style-src is
+      # required by the inline <style> blocks the theme renders.
       - key: Content-Security-Policy
-        value: >-
-          default-src 'self';
-          script-src 'self' 'unsafe-inline' https://checkout.razorpay.com;
-          style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-          font-src 'self' https://fonts.gstatic.com;
-          img-src 'self' data: blob: https:;
-          connect-src 'self' https://*.amazonaws.com https://*.amazoncognito.com https://api.razorpay.com https://lumberjack.razorpay.com;
-          frame-src https://api.razorpay.com https://checkout.razorpay.com;
-          object-src 'none';
-          base-uri 'self'
-  - pattern: 'index.html'
-    headers:
-      - key: Cache-Control
-        value: no-cache
-  - pattern: 'assets/**'
-    headers:
-      - key: Cache-Control
-        value: public, max-age=31536000, immutable
+        value: "default-src 'self'; script-src 'self' https://checkout.razorpay.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.execute-api.us-east-1.amazonaws.com https://*.amazoncognito.com https://cognito-idp.us-east-1.amazonaws.com https://*.s3.us-east-1.amazonaws.com https://api.razorpay.com https://lumberjack.razorpay.com; frame-src https://api.razorpay.com https://checkout.razorpay.com; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self' https://*.amazoncognito.com https://accounts.google.com"

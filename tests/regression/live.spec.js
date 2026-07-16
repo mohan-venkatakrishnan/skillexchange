@@ -13,13 +13,30 @@ test.describe('Route health', () => {
     });
   }
 
-  test('security headers are present', async ({ request, baseURL }) => {
-    const res = await request.get(baseURL + '/');
-    const h = res.headers();
-    expect(h['strict-transport-security']).toContain('max-age');
-    expect(h['x-content-type-options']).toBe('nosniff');
-    expect(h['x-frame-options']).toBe('DENY');
-    expect(h['content-security-policy']).toContain("default-src 'self'");
+  // Headers must be asserted on the encodings a real browser negotiates, not
+  // just the identity one. CloudFront caches per Accept-Encoding (vary), so a
+  // brotli copy can be pinned WITHOUT the custom headers while an
+  // uncompressed `curl -I` still looks perfectly fine — which is exactly how
+  // this shipped to production once.
+  for (const enc of ['gzip, deflate, br', 'gzip', 'identity']) {
+    test(`security headers are present [Accept-Encoding: ${enc}]`, async ({ request, baseURL }) => {
+      const res = await request.get(baseURL + '/', { headers: { 'Accept-Encoding': enc } });
+      const h = res.headers();
+      expect(h['strict-transport-security'], 'HSTS').toContain('max-age');
+      expect(h['x-content-type-options'], 'nosniff').toBe('nosniff');
+      expect(h['x-frame-options'], 'clickjacking').toBe('DENY');
+      expect(h['content-security-policy'], 'CSP').toContain("default-src 'self'");
+      expect(h['referrer-policy']).toBe('strict-origin-when-cross-origin');
+    });
+  }
+
+  test('the HTML document is never cached by the CDN', async ({ request, baseURL }) => {
+    // index.html points at the hashed bundle; a long-lived s-maxage on it
+    // pins an old build (and its headers) at the edge.
+    const res = await request.get(baseURL + '/', { headers: { 'Accept-Encoding': 'gzip, deflate, br' } });
+    const cc = res.headers()['cache-control'] || '';
+    expect(cc, `document Cache-Control was "${cc}"`).toMatch(/no-cache|no-store|max-age=0/);
+    expect(cc).not.toMatch(/s-maxage=\d{4,}/);
   });
 });
 
@@ -38,7 +55,7 @@ test.describe('Pages render real content', () => {
 
   test('leaderboard loads without error', async ({ page }) => {
     await page.goto('/leaderboard');
-    await expect(page.getByText('All-time rankings.')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Leaderboard' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Retry' })).toHaveCount(0, { timeout: 15_000 });
   });
 
@@ -141,10 +158,9 @@ test.describe('Authenticated flow', () => {
     await expect(page.getByTestId('nav-user')).toBeVisible({ timeout: 15_000 });
 
     await page.getByRole('button', { name: 'My Library' }).click();
-    await expect(page.getByText("Skills you've purchased or downloaded.")).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'My Library' })).toBeVisible();
 
     await page.getByTestId('nav-user').click();
-    await expect(page.getByRole('button', { name: 'Account' })).toBeVisible();
     await page.getByTestId('account-btn').click();
     await page.getByTestId('sign-out').click();
     await expect(page.getByTestId('nav-signin')).toBeVisible();
