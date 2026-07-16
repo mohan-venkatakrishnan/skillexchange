@@ -8,7 +8,7 @@ resource "aws_amplify_app" "skillexchange" {
   # SPA rewrites: extensionless routes must return real HTTP 200 (not 404-200
   # fallback alone) so crawlers/unfurlers see 200s.
   custom_rule {
-    source = "</^[^.]+$|\\.(?!(css|gif|ico|jpg|jpeg|js|png|svg|txt|map|json|webmanifest)$)([^.]+$)/>"
+    source = "</^[^.]+$|\\.(?!(css|gif|ico|jpg|jpeg|js|png|svg|txt|xml|map|json|webmanifest)$)([^.]+$)/>"
     status = "200"
     target = "/index.html"
   }
