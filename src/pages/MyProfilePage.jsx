@@ -77,8 +77,8 @@ export default function MyProfilePage({ user, onLogout, onShowAuth }) {
               <div style={{ flex: 1, minWidth: 240 }}>
                 <div style={{ fontFamily: FONT_UI, fontSize: 14, fontWeight: 700, color: c.text, marginBottom: 5 }}>Pick your username</div>
                 <div style={{ fontFamily: FONT_UI, fontSize: 12.5, color: c.textMuted, lineHeight: 1.6 }}>
-                  We assigned <span style={{ color: c.gold, fontWeight: 600 }}>@{p.username}</span> from your email because Google sign-in never asked.
-                  You can change it <strong style={{ color: c.text }}>once</strong> — it becomes your profile URL and is permanent after that.
+                  We gave you <span style={{ color: c.gold, fontWeight: 600 }}>@{p.username}</span> as a unique starter handle when you signed up.
+                  Make it yours — you can change it <strong style={{ color: c.text }}>once</strong>, then it's your permanent profile URL.
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 8 }}>

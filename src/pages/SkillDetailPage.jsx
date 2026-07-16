@@ -320,16 +320,26 @@ function LoadInAssistant({ platforms }) {
   );
 }
 
-/* ── Share ──
-   navigator.share is the right answer on mobile — it reaches the apps people
-   actually use. Everywhere else it doesn't exist, so we fall back to a themed
-   popover (same open/close contract as Select.jsx). The share text states only
-   what we know for certain: the title and the category. */
+/* ── Share (Product Hunt style) ──
+   ALWAYS a themed popover with named networks + copy-link — never the OS share
+   sheet. navigator.share on desktop opens the system dialog (the Mail popup
+   the user saw), which is exactly what we don't want here. The share text
+   states only what we know for certain: the title and the category. */
+const brandColor = { x: '#000000', linkedin: '#0A66C2', reddit: '#FF4500', facebook: '#1877F2', whatsapp: '#25D366', hn: '#FF6600', telegram: '#26A5E4' };
+
 const SHARE_TARGETS = [
-  { key: 'x', label: 'X', href: (u, t) => `https://twitter.com/intent/tweet?text=${encodeURIComponent(t)}&url=${encodeURIComponent(u)}` },
-  { key: 'linkedin', label: 'LinkedIn', href: (u) => `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(u)}` },
-  { key: 'reddit', label: 'Reddit', href: (u, t) => `https://www.reddit.com/submit?url=${encodeURIComponent(u)}&title=${encodeURIComponent(t)}` },
-  { key: 'hn', label: 'Hacker News', href: (u, t) => `https://news.ycombinator.com/submitlink?u=${encodeURIComponent(u)}&t=${encodeURIComponent(t)}` },
+  { key: 'x', label: 'X', href: (u, t) => `https://twitter.com/intent/tweet?text=${encodeURIComponent(t)}&url=${encodeURIComponent(u)}`,
+    icon: (s, c) => <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><path d="M18.9 1.15h3.68l-8.04 9.19L24 22.85h-7.41l-5.8-7.58-6.64 7.58H.46l8.6-9.83L0 1.15h7.6l5.24 6.93zm-1.29 19.5h2.04L6.48 3.24H4.29z"/></svg> },
+  { key: 'linkedin', label: 'LinkedIn', href: (u) => `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(u)}`,
+    icon: (s, c) => <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.55V9h3.57zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg> },
+  { key: 'reddit', label: 'Reddit', href: (u, t) => `https://www.reddit.com/submit?url=${encodeURIComponent(u)}&title=${encodeURIComponent(t)}`,
+    icon: (s, c) => <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><path d="M24 11.78a2.34 2.34 0 0 0-4-1.63 11.5 11.5 0 0 0-6.19-1.97l1.05-4.95 3.44.73a1.68 1.68 0 1 0 .18-.86l-3.84-.82a.4.4 0 0 0-.48.31l-1.17 5.5a11.55 11.55 0 0 0-6.28 1.96 2.34 2.34 0 1 0-2.58 3.84 4.6 4.6 0 0 0-.06.73c0 3.7 4.31 6.7 9.63 6.7s9.63-3 9.63-6.7a4.6 4.6 0 0 0-.06-.72A2.34 2.34 0 0 0 24 11.78zM7 13.5a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0zm8.44 4.24a5.2 5.2 0 0 1-3.44 1.07 5.2 5.2 0 0 1-3.44-1.07.37.37 0 0 1 .52-.53 4.46 4.46 0 0 0 2.92.9 4.46 4.46 0 0 0 2.92-.9.37.37 0 1 1 .51.53zm-.55-2.74a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg> },
+  { key: 'whatsapp', label: 'WhatsApp', href: (u, t) => `https://wa.me/?text=${encodeURIComponent(`${t} ${u}`)}`,
+    icon: (s, c) => <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><path d="M17.5 14.4c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.9-.8-1.5-1.77-1.67-2.07-.17-.3-.02-.46.13-.6.13-.14.3-.35.44-.53.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.5l-.57-.01c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.7.63.71.22 1.36.19 1.87.12.57-.09 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.07-.13-.27-.2-.57-.35zM12.05 21.5h-.01a9.4 9.4 0 0 1-4.8-1.32l-.34-.2-3.57.93.96-3.48-.22-.36a9.4 9.4 0 1 1 8 4.9zM20.05 3.9A11.36 11.36 0 0 0 2.13 17.6L.5 23.5l6.05-1.59a11.35 11.35 0 0 0 5.5 1.4h.01a11.36 11.36 0 0 0 8-19.42z"/></svg> },
+  { key: 'hn', label: 'Hacker News', href: (u, t) => `https://news.ycombinator.com/submitlink?u=${encodeURIComponent(u)}&t=${encodeURIComponent(t)}`,
+    icon: (s, c) => <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><path d="M0 0v24h24V0zm12.9 13.3v4.4h-1.8v-4.4L7.4 6.3h2l2.6 5.2 2.6-5.2h2z"/></svg> },
+  { key: 'telegram', label: 'Telegram', href: (u, t) => `https://t.me/share/url?url=${encodeURIComponent(u)}&text=${encodeURIComponent(t)}`,
+    icon: (s, c) => <svg width={s} height={s} viewBox="0 0 24 24" fill={c}><path d="M11.94 24a12 12 0 1 0 0-24 12 12 0 0 0 0 24zM5.5 11.74l11.57-4.46c.54-.2 1.01.13.83.94l-1.97 9.28c-.15.71-.57.88-1.16.55l-3.2-2.36-1.54 1.49c-.17.17-.31.31-.64.31l.23-3.26 5.94-5.37c.26-.23-.06-.36-.4-.13L7.5 12.87l-3.16-.99c-.68-.21-.7-.68.14-1z"/></svg> },
 ];
 
 function ShareButton({ skill }) {
@@ -355,50 +365,57 @@ function ShareButton({ skill }) {
 
   const url = typeof window !== 'undefined' ? window.location.href : '';
 
-  const onShare = async () => {
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      try { await navigator.share({ title: skill.title, text, url }); return; }
-      catch { return; } // cancelled or blocked — never fall through to the popover
-    }
-    setOpen(o => !o);
-  };
-
   const copy = async () => {
     try { await navigator.clipboard.writeText(url); setCopied(true); }
-    catch { /* clipboard blocked — the links below still work */ }
-  };
-
-  const row = {
-    display: 'flex', alignItems: 'center', gap: 9, width: '100%', textAlign: 'left',
-    background: 'transparent', border: 'none', borderRadius: 7, padding: '8px 10px',
-    fontFamily: FONT_UI, fontSize: 12.5, color: c.textSub, cursor: 'pointer', textDecoration: 'none',
-  };
-  const hover = {
-    onMouseEnter: e => { e.currentTarget.style.background = c.surfaceHover; e.currentTarget.style.color = c.text; },
-    onMouseLeave: e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = c.textSub; },
+    catch {
+      // clipboard blocked (insecure context / permissions) — select-fallback
+      const ta = document.createElement('textarea');
+      ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); setCopied(true); } catch { /* nothing more we can do */ }
+      ta.remove();
+    }
   };
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <GhostButton full size="sm" testId="share-btn" onClick={onShare}>
+      <GhostButton full size="sm" testId="share-btn" onClick={() => setOpen(o => !o)}>
         <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
           <Ic.Share s={13} c="currentColor" />Share
         </span>
       </GhostButton>
       {open && (
         <div role="menu" aria-label="Share this skill"
-          style={{ position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 120, minWidth: '100%', width: 'max-content', background: c.surface, border: `1px solid ${c.borderGold}`, borderRadius: 10, padding: 5, boxShadow: '0 12px 32px rgba(0,0,0,0.45)', animation: 'spotlightIn 0.14s ease' }}>
-          <button type="button" role="menuitem" onClick={copy} data-testid="share-copy"
-            style={{ ...row, color: copied ? c.green : c.textSub }} {...(copied ? {} : hover)}>
-            {copied ? <Ic.Check s={13} c={c.green} /> : <Ic.Link s={13} c={c.gold} />}
-            {copied ? 'Copied' : 'Copy link'}
-          </button>
-          {SHARE_TARGETS.map(t => (
-            <a key={t.key} role="menuitem" href={t.href(url, text)} target="_blank" rel="noopener noreferrer"
-              data-testid={`share-${t.key}`} onClick={() => setOpen(false)} style={row} {...hover}>
-              {t.label}
-            </a>
-          ))}
+          style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, zIndex: 120, width: 'min(280px, 78vw)', background: c.surface, border: `1px solid ${c.borderGold}`, borderRadius: 12, padding: 14, boxShadow: '0 16px 40px rgba(0,0,0,0.5)', animation: 'spotlightIn 0.14s ease' }}>
+          <div style={{ fontFamily: FONT_UI, fontSize: 11, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Share this skill</div>
+
+          {/* Network tiles — a grid of round brand icons, Product Hunt style. */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 14 }}>
+            {SHARE_TARGETS.map(t => (
+              <a key={t.key} role="menuitem" href={t.href(url, text)} target="_blank" rel="noopener noreferrer"
+                data-testid={`share-${t.key}`} onClick={() => setOpen(false)} title={t.label}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, textDecoration: 'none', padding: '4px 0' }}>
+                <span style={{ width: 42, height: 42, borderRadius: '50%', display: 'grid', placeItems: 'center', background: `${brandColor[t.key]}18`, border: `1px solid ${brandColor[t.key]}40`, transition: 'transform 0.12s, background 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = `${brandColor[t.key]}2e`; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.background = `${brandColor[t.key]}18`; }}>
+                  {t.icon(19, brandColor[t.key] === '#000000' ? c.text : brandColor[t.key])}
+                </span>
+                <span style={{ fontFamily: FONT_UI, fontSize: 10.5, color: c.textMuted }}>{t.label}</span>
+              </a>
+            ))}
+          </div>
+
+          {/* Copy link — the readonly field + button pattern people expect. */}
+          <div style={{ display: 'flex', gap: 6, alignItems: 'stretch' }}>
+            <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', background: c.elevated, border: `1px solid ${c.border}`, borderRadius: 8, padding: '0 10px', fontFamily: FONT_MONO, fontSize: 11, color: c.textSub, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+              {url.replace(/^https?:\/\//, '')}
+            </div>
+            <button type="button" onClick={copy} data-testid="share-copy"
+              style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 6, background: copied ? c.greenSoft : c.goldSoft, border: `1px solid ${copied ? c.green : c.gold}`, color: copied ? c.green : c.gold, borderRadius: 8, padding: '8px 12px', fontFamily: FONT_UI, fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'background 0.15s, border-color 0.15s, color 0.15s' }}>
+              {copied ? <Ic.Check s={13} c={c.green} /> : <Ic.Link s={13} c={c.gold} />}
+              {copied ? 'Copied' : 'Copy'}
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -1,0 +1,11 @@
+import { chromium } from '@playwright/test';
+import { preview } from 'vite';
+const s = await preview({ preview: { port: 5201 } });
+const b = await chromium.launch();
+const p = await b.newPage({ viewport: { width: 1200, height: 900 } });
+await p.goto('http://localhost:5201/skills/1');
+await p.waitForTimeout(1500);
+await p.getByTestId('share-btn').click();
+await p.waitForTimeout(500);
+await p.screenshot({ path: 'share-popover.png', clip: { x: 700, y: 100, width: 500, height: 500 } });
+await b.close(); await s.close(); process.exit(0);

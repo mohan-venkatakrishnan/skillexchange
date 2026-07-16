@@ -47,7 +47,13 @@ export default function AuthModal({ onClose, onLogin }) {
       await finish(session);
     } catch (e) {
       if (e.code?.includes('UserNotConfirmed')) setNeedsConfirm(true);
-      else setError(friendlyAuthError(e));
+      // "Account already exists" on a SIGN-UP is a wrong-tab mistake, not a
+      // dead end — flip them straight to Sign In with the email prefilled,
+      // rather than telling them to do it themselves.
+      else if (tab === 'signup' && e.code?.includes('UsernameExists')) {
+        setTab('signin');
+        setError('You already have an account with this email — signed you over to sign-in. Enter your password.');
+      } else setError(friendlyAuthError(e));
     } finally { setBusy(false); }
   };
 
