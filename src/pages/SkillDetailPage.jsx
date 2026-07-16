@@ -64,14 +64,28 @@ export default function SkillDetailPage({ user, onShowAuth }) {
       name: sd.title,
       description: sd.description,
       category: sd.category,
+      sku: sd.id,                                     // recommended id — quiets the merchant-listing warning
       brand: { '@type': 'Brand', name: sd.author },
-      ...(sd.pocScreenshotUrl ? { image: sd.pocScreenshotUrl } : {}),
+      // image is a recommended field; always give one (POC shot, else the brand card).
+      image: sd.pocScreenshotUrl || `${ORIGIN}/og-image.png`,
       offers: {
         '@type': 'Offer',
         price: (sd.price || 0).toFixed(2),
         priceCurrency: 'USD',
         availability: 'https://schema.org/InStock',
         url: `${ORIGIN}/skills/${sd.id}`,
+        // Digital good: delivered instantly, no shipping/returns. Declaring
+        // free zero-cost shipping satisfies the merchant-listing check
+        // truthfully rather than leaving it flagged.
+        shippingDetails: {
+          '@type': 'OfferShippingDetails',
+          shippingRate: { '@type': 'MonetaryAmount', value: '0', currency: 'USD' },
+          deliveryTime: {
+            '@type': 'ShippingDeliveryTime',
+            handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 0, unitCode: 'DAY' },
+            transitTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 0, unitCode: 'DAY' },
+          },
+        },
       },
       // Only claim ratings when they are REAL — no reviews, no aggregateRating.
       ...(sd.reviews > 0 ? {
