@@ -193,7 +193,11 @@ function ProfileEditor({ profile, onSaved, onCancel }) {
   const save = async () => {
     if (!name.trim()) { setError('Name cannot be empty.'); return; }
     setBusy(true); setError('');
-    try { await api.updateProfile({ name: name.trim(), bio: bio.trim(), location: location.trim() }); onSaved(); }
+    try {
+      await api.updateProfile({ name: name.trim(), bio: bio.trim(), location: location.trim() });
+      await refreshProfile(); // the nav reads the session, not this form
+      onSaved();
+    }
     catch (e) { setError(e.message); }
     finally { setBusy(false); }
   };

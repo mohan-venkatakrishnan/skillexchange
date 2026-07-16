@@ -8,7 +8,7 @@ import NodeField from './components/NodeField.jsx';
 import AuthModal from './components/AuthModal.jsx';
 import Loader from './components/Loader.jsx';
 import { GoldButton } from './components/ui.jsx';
-import { getSession, signOut, handleOAuthCallback, AUTH_EVENT } from './lib/auth.js';
+import { getSession, signOut, handleOAuthCallback, refreshProfile, AUTH_EVENT } from './lib/auth.js';
 import HomePage from './pages/HomePage.jsx';
 import MarketplacePage from './pages/MarketplacePage.jsx';
 import SkillDetailPage from './pages/SkillDetailPage.jsx';
@@ -87,10 +87,13 @@ function AuthCallback() {
     if (!code) { nav('/', { replace: true }); return; }
     const back = sessionStorage.getItem('se_return_to') || '/';
     sessionStorage.removeItem('se_return_to');
-    handleOAuthCallback(code).then(
-      () => nav(back, { replace: true }),
-      e => setError(e.message),
-    );
+    // Resolve the DB profile before navigating: the ID token's `name` is
+    // Google's copy and `custom:username` may predate a handle change, so
+    // landing straight on the app would flash the wrong identity in the nav.
+    handleOAuthCallback(code)
+      .then(() => refreshProfile().catch(() => {}))
+      .then(() => nav(back, { replace: true }))
+      .catch(e => setError(e.message));
   }, [nav]);
   if (error) {
     return (
@@ -133,6 +136,16 @@ function Shell() {
     window.addEventListener(AUTH_EVENT, sync);
     window.addEventListener('storage', sync);
     return () => { window.removeEventListener(AUTH_EVENT, sync); window.removeEventListener('storage', sync); };
+  }, []);
+
+  // Self-heal a session whose identity was never resolved against the DB (any
+  // session minted before profileResolved existed, or by a flow that skipped
+  // it). Without this, an already-signed-in user keeps seeing Google's name
+  // and their pre-change handle until they sign out and back in.
+  useEffect(() => {
+    const s = getSession();
+    if (!s || s.profileResolved) return;
+    refreshProfile().then(next => { if (next) setUser(next); }).catch(() => {});
   }, []);
 
   // Remember where the user was, so sign-in returns them there (incl. the

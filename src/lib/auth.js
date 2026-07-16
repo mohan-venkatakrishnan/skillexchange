@@ -69,6 +69,13 @@ function sessionFromTokens({ IdToken, AccessToken, RefreshToken, ExpiresIn }, pr
   const claims = decodeJwtPayload(IdToken);
   const handle = (claims['custom:username'] || '').toLowerCase() || null;
   const emailLocal = claims.email ? claims.email.split('@')[0].toLowerCase().replace(/[^a-z0-9_]/g, '') : '';
+
+  // DynamoDB wins on identity, ALWAYS. The `name` claim is whatever Google
+  // holds ("mohan venkat"); the profile is what the user actually typed
+  // ("Mohan"). Letting the claim take precedence meant every token refresh
+  // silently reverted the display name to Google's copy. Same for the handle:
+  // a token minted before a username change still carries the old one.
+  const resolved = prev.profileResolved;
   return {
     idToken: IdToken,
     accessToken: AccessToken,
@@ -76,10 +83,11 @@ function sessionFromTokens({ IdToken, AccessToken, RefreshToken, ExpiresIn }, pr
     expiresAt: Date.now() + (ExpiresIn ? ExpiresIn * 1000 : 24 * 3600 * 1000) - 60_000,
     userId: claims.sub,
     email: claims.email,
-    username: handle || prev.username || emailLocal || 'you',
-    name: claims.name || prev.name || handle || emailLocal || 'You',
+    username: resolved ? prev.username : (handle || prev.username || emailLocal || 'you'),
+    name: resolved ? prev.name : (claims.name || prev.name || handle || emailLocal || 'You'),
     avatarUrl: prev.avatarUrl,
     handleResolved: !!handle,
+    profileResolved: !!resolved,
   };
 }
 
@@ -95,7 +103,16 @@ export async function refreshProfile() {
     if (!res.ok) return s;
     const { profile } = await res.json();
     if (!profile?.username) return s;
-    const next = { ...s, username: profile.username, name: profile.name || profile.username, avatarUrl: profile.avatarUrl || null, handleResolved: true };
+    const next = {
+      ...s,
+      username: profile.username,
+      name: profile.name || profile.username,
+      avatarUrl: profile.avatarUrl || null,
+      handleResolved: true,
+      // From here on the session carries the profile the USER owns, and a
+      // token refresh must not overwrite it with Google's stale copy.
+      profileResolved: true,
+    };
     saveSession(next);
     return next;
   } catch { return s; }
