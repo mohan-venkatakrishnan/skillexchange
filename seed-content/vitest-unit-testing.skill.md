@@ -86,25 +86,10 @@ describe('chargeCard', () => {
       expect.objectContaining({ amount: 1250, currency: 'usd' })
     )
   })
-
-  it('surfaces a declined charge as a typed error', async () => {
-    postChargeMock.mockResolvedValue({ status: 'declined', code: 'insufficient_funds' })
-    await expect(chargeCard({ amountUsd: 12.5, token: 'tok_x' }))
-      .rejects.toMatchObject({ name: 'CardDeclinedError', code: 'insufficient_funds' })
-  })
 })
 ```
 
-`vi.mock` replaces the *whole* module; every export you forget becomes `undefined`, and the failure points at a line 40 files away. Override one thing instead:
-
-```ts
-vi.mock('./gateway', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('./gateway')>()),
-  postCharge: postChargeMock,
-}))
-```
-
-Better still, for the 80% case, keep the real module and spy: `vi.spyOn(gateway, 'postCharge').mockResolvedValue(...)`.
+`vi.mock` replaces the *whole* module; every export you forget becomes `undefined`, and the failure points at a line 40 files away. Spread the real module and override exactly one thing: `vi.mock('./gateway', async (importOriginal) => ({ ...(await importOriginal<typeof import('./gateway')>()), postCharge: postChargeMock }))`. Better still, for the 80% case, skip `vi.mock` and spy — `vi.spyOn(gateway, 'postCharge').mockResolvedValue(...)` keeps the real module and reverts under `restoreMocks`.
 
 Path matching is literal. `vi.mock('./gateway')` does not intercept `../billing/gateway.js` imported elsewhere. When a mock "doesn't work," check the specifier before anything else.
 
@@ -140,81 +125,27 @@ describe('fetchWithRetry', () => {
     await expect(promise).resolves.toEqual({ ok: true })
     expect(attempt).toHaveBeenCalledTimes(3)
   })
-
-  it('gives up after the retry budget and rethrows', async () => {
-    const attempt = vi.fn().mockRejectedValue(new Error('ECONNRESET'))
-    const promise = fetchWithRetry(attempt, { retries: 2, baseMs: 100 })
-    const assertion = expect(promise).rejects.toThrow('ECONNRESET')  // attach handler FIRST
-    await vi.advanceTimersByTimeAsync(1000)
-    await assertion
-  })
 })
 ```
 
-Attach the `rejects` assertion *before* advancing the clock, or you get an unhandled rejection and a flaky pass. And pin the wall clock whenever a test touches `Date` — `vi.setSystemTime(new Date('2026-03-01T12:00:00Z'))` — or the test that formats "3 days ago" fails the week someone runs it near a DST boundary.
+Attach any `rejects` assertion *before* advancing the clock — `const a = expect(p).rejects.toThrow(); await vi.advanceTimersByTimeAsync(1000); await a` — or you get an unhandled rejection and a flaky pass. And pin the wall clock whenever a test touches `Date` via `vi.setSystemTime(new Date('2026-03-01T12:00:00Z'))`, or the test that formats "3 days ago" fails the week someone runs it near a DST boundary.
 
-### 3.4 `test.concurrent`: the sharp edge is the `expect`
-
-Concurrent tests share the file's module state and the global `expect`. Use the imported `expect` inside one and failure attribution scrambles — a failed assertion gets reported against a sibling. Use the fixture-provided one:
-
-```ts
-// Pure, no shared state, no mocks → safe to run concurrently
-it.concurrent('parses a multi-line invoice with tax', async ({ expect }) => {
-  expect(parseInvoice(FIXTURE_TAXED).total).toBe(4914)
-})
-```
-
-Where it bites: any test using `vi.useFakeTimers`, `vi.setSystemTime`, `vi.spyOn` on a shared module, or a module-level counter. Siblings read that state mid-flight and you get a failure that reproduces once in nine runs. Honest heuristic — `concurrent` is for pure functions with I/O-shaped waits, and buys little on a CPU-bound suite that already parallelizes at the file level for free.
-
-### 3.5 Pools: threads, forks, and when it matters
+### 3.4 Pools: threads, forks, and when it matters
 
 - **threads** (default) — `worker_threads`. Roughly 20-40ms per-file startup vs 80-150ms for a fork. Correct default.
 - **forks** — child processes. The only safe option when your code touches native modules (`better-sqlite3`, `sharp`, `canvas`), calls `process.chdir`, or crashes the worker. Symptoms that tell you to switch: segfaults, `undefined` inside a native binding, a worker that dies with no stack.
 
-```ts
-test: {
-  pool: 'threads',
-  poolOptions: { threads: { useAtomics: true }, forks: { isolate: true } },
-}
-```
+Set it per project — `test: { pool: 'threads', poolOptions: { threads: { useAtomics: true } } }` — and switch the whole suite, not one file, since the pool is process-wide.
 
 `isolate: false` is a real 30-50% win on a large suite and a real footgun: module state now persists across files in the same worker. It is safe only for a suite with zero module-level mutable state — which yours does not have, until proven. Turn it on last; turn it off the first time a test only fails in CI.
 
-### 3.6 In-source testing, and coverage that means something
+### 3.5 In-source tests, and coverage that means something
 
-For leaf helpers, keeping the test beside the code removes import ceremony and makes deletion atomic:
-
-```ts
-// src/lib/slug.ts
-export function slugify(input: string): string {
-  return input.trim().toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60)
-}
-
-if (import.meta.vitest) {
-  const { it, expect } = import.meta.vitest
-  it('collapses punctuation, trims dashes, caps length', () => {
-    expect(slugify('Hello,   World!!')).toBe('hello-world')
-    expect(slugify('  --React Anti-patterns--  ')).toBe('react-anti-patterns')
-    expect(slugify('a'.repeat(80))).toHaveLength(60)
-  })
-}
-```
-
-Requires `includeSource: ['src/**/*.ts']` and, non-negotiably, `define: { 'import.meta.vitest': 'undefined' }` in your build config so the block is eliminated from the production bundle. Leaf utilities only — once a file needs mocks or fixtures, the in-source block has outgrown its welcome.
+For leaf helpers, an `if (import.meta.vitest) { const { it, expect } = import.meta.vitest; ... }` block at the bottom of the source file removes the import ceremony and makes deletion atomic. It requires `includeSource: ['src/**/*.ts']` and, non-negotiably, `define: { 'import.meta.vitest': 'undefined' }` in your build config so the block is dead-code-eliminated from the production bundle — omit that and you ship your tests to users. Leaf utilities only: once a file needs mocks or fixtures, the in-source block has outgrown its welcome.
 
 Coverage, decided: **v8** collects from the engine at near-zero cost — right for every push. **istanbul** instruments the source, runs ~2-3x slower, and accounts branches more faithfully; v8 has historically been generous about ternaries and default parameters, so its branch number reads a few points above the truth. Run v8 by default, istanbul in the one nightly job where you actually study the report.
 
-```ts
-coverage: {
-  provider: 'v8',
-  reporter: ['text', 'html', 'lcov'],
-  exclude: ['**/*.config.*', '**/mocks/**', '**/*.d.ts'],
-  thresholds: { lines: 70, autoUpdate: true },   // ratchet up, never regress
-}
-```
-
-Do not set a 90% gate on a codebase at 62%. You will get 28 points of `expect(true).toBe(true)`.
+Configure it as `coverage: { provider: 'v8', reporter: ['text', 'html', 'lcov'], exclude: ['**/*.config.*', '**/mocks/**', '**/*.d.ts'], thresholds: { lines: 70, autoUpdate: true } }` — `autoUpdate` ratchets the floor up as you improve and never lets it regress. Do not set a 90% gate on a codebase at 62%. You will get 28 points of `expect(true).toBe(true)`.
 
 ## 4. Anti-patterns
 
@@ -224,7 +155,7 @@ Do not set a 90% gate on a codebase at 62%. You will get 28 points of `expect(tr
 - **`environment: 'jsdom'` set globally.** Every pure-function file boots a DOM. On 400 files that's 20-30 wasted seconds per run, forever.
 - **Asserting call counts of internal helpers.** `expect(formatRow).toHaveBeenCalledTimes(3)` tests your loop, not your output.
 - **Giant `toMatchSnapshot()` on markup.** Nobody reviews a 300-line diff; they run `-u` and move on. Snapshot narrow semantic values where the diff is legible.
-- **`test.concurrent` on tests touching fake timers or spies.** Shared mutable state under concurrency: passes eight times, fails the ninth, in CI, on someone else's PR.
+- **`test.concurrent` on tests touching fake timers, `setSystemTime`, or a shared spy.** Concurrent siblings share module state and the global `expect`, so a failed assertion gets attributed to the wrong test. Passes eight times, fails the ninth, in CI, on someone else's PR — and it buys little on a suite that already parallelizes per file. When you do use it, take `expect` from the test's own argument, never the import.
 - **Chasing a coverage percentage.** A team told to hit 90% hits it by testing getters. Coverage says where you haven't looked; never that the looking was good.
 - **`isolate: false` as a first optimization.** You traded a correctness guarantee for 30% of a number you should have fixed by deleting the DOM from 300 files.
 - **A `beforeEach` that builds the world.** Forty objects constructed for the two tests needing three is why the suite takes 40 seconds. Factory functions, called where needed.
