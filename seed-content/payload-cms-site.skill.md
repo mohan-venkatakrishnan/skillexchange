@@ -4,7 +4,7 @@ category: Website
 description: Build content sites where the CMS is TypeScript in your repo, not clicks in someone else's admin panel. Covers collections and globals, access control as real authorization, block-based page building, drafts and preview, hooks, and the Local API for server rendering with zero network hops.
 usage: Load this skill before asking your AI assistant to design or extend any Payload-backed site. Say "use the Payload CMS site skill" and describe your content model and who edits what; the assistant will produce config-as-code collections, access functions, and block schemas instead of a WYSIWYG dump in a rich-text field named "content".
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 8
+priceUsd: 0
 timeSavedHours: 22
 pocUrl: https://github.com/payloadcms/payload
 ---

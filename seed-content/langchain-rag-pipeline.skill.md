@@ -4,7 +4,7 @@ category: AI/ML
 description: Build RAG systems with LangChain that survive real users, not just a demo notebook — LCEL composition, hybrid retrieval with reciprocal rank fusion, reranking, and citation grounding that refuses to invent sources. Covers the chunking, context-budgeting, and retry patterns that separate a 60%-accurate prototype from something you can put in front of paying customers.
 usage: Load this skill before asking your AI assistant to design, build, or debug any LangChain retrieval pipeline. Say "use the LangChain RAG pipeline skill" and describe your corpus and query patterns; the assistant will produce LCEL chains, a chunking strategy, and a grounded answer contract instead of the standard load-split-embed-query tutorial.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 7
+priceUsd: 0
 timeSavedHours: 24
 pocUrl: https://github.com/langchain-ai/langchain
 ---

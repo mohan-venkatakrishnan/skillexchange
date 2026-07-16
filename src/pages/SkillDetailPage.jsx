@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useTheme, FONT_DISPLAY, FONT_UI, FONT_MONO } from '../tokens/theme';
+import { useTheme, FONT_HEAD, FONT_UI, FONT_MONO } from '../tokens/theme';
 import { PageWrap, VerifiedStamp, Stars, Downloads, SkillBdg, PTag, SellerBdg } from '../components/Shared.jsx';
 import { GoldButton, GhostButton, Textarea, ErrorBox } from '../components/ui.jsx';
 import SkillIcon from '../components/SkillIcon.jsx';
@@ -119,7 +119,7 @@ export default function SkillDetailPage({ user, onShowAuth }) {
                   <span style={{ fontFamily: FONT_UI, fontSize: 10, fontWeight: 700, color: c.slate, textTransform: 'uppercase', letterSpacing: '0.09em' }}>{s.category}</span>
                   {s.skillBadge && <SkillBdg label={s.skillBadge} />}
                 </div>
-                <h1 style={{ fontFamily: FONT_DISPLAY, fontSize: 'clamp(23px,3.4vw,32px)', fontWeight: 700, color: c.text, letterSpacing: '-0.02em', lineHeight: 1.18, margin: 0 }}>{s.title}</h1>
+                <h1 style={{ fontFamily: FONT_HEAD, fontSize: 'clamp(23px,3.4vw,32px)', fontWeight: 700, color: c.text, letterSpacing: '-0.02em', lineHeight: 1.18, margin: 0 }}>{s.title}</h1>
               </div>
               {s.verified && <VerifiedStamp size={34} />}
             </div>
@@ -173,7 +173,7 @@ export default function SkillDetailPage({ user, onShowAuth }) {
 
             {/* ── Reviews ── */}
             <div style={{ borderTop: `1px solid ${c.border}`, marginTop: 34, paddingTop: 30 }}>
-              <h2 style={{ fontFamily: FONT_DISPLAY, fontSize: 20, fontWeight: 700, color: c.text, letterSpacing: '-0.02em', margin: '0 0 16px' }}>
+              <h2 style={{ fontFamily: FONT_HEAD, fontSize: 20, fontWeight: 700, color: c.text, letterSpacing: '-0.02em', margin: '0 0 16px' }}>
                 Reviews {reviewList.length > 0 && <span style={{ fontFamily: FONT_UI, fontSize: 13, fontWeight: 400, color: c.textMuted }}>({reviewList.length})</span>}
               </h2>
 

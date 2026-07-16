@@ -4,7 +4,7 @@ category: Coding
 description: Structure a FastAPI service that survives contact with production — not a 300-line main.py. Covers layered project layout, Pydantic v2 schemas as contracts, dependency injection, async SQLAlchemy without connection leaks, JWT auth, and a lean Docker deploy.
 usage: Load this skill before asking your AI assistant to scaffold or extend a FastAPI service. Describe your resources and auth requirements; the assistant will generate the layered layout, typed schemas, and async session handling from this skill instead of tutorial-grade single-file apps.
 platforms: [Claude, ChatGPT, Cursor, Gemini]
-priceUsd: 7
+priceUsd: 0
 timeSavedHours: 18
 pocUrl: https://github.com/fastapi/fastapi
 ---

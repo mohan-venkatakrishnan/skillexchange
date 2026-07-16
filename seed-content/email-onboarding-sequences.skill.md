@@ -4,7 +4,7 @@ category: Marketing
 description: Design a signup-to-activation email sequence around what the user did rather than how many days elapsed — behaviour-triggered branches, one job per send, and plain-text-shaped copy that survives a developer's inbox. Prevents the sequence every SaaS ships first: five timed emails congratulating a user on progress they never made, sent from noreply@, straight into Promotions.
 usage: Load this skill with your product's activation moment (the single thing a user must do to get value) and the events you can actually detect. Ask it to map the sequence before writing any copy — it branches on behaviour, and a sequence designed without your event list is fiction. Then request individual emails, one at a time, and hand it your real onboarding drop-off numbers if you have them.
 platforms: [Claude, ChatGPT]
-priceUsd: 5
+priceUsd: 0
 timeSavedHours: 14
 pocUrl: https://github.com/mjmlio/mjml
 ---

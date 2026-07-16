@@ -4,7 +4,7 @@ category: Design
 description: Build Listbox, Combobox, Dialog, Menu, and Tabs that behave correctly for keyboard and screen-reader users instead of divs with click handlers. Covers data-attribute styling, the `as` prop, focus management, async Combobox filtering, and the accessibility gaps Headless UI deliberately leaves to you.
 usage: Load this skill before asking your AI assistant to build any interactive widget — dropdown, autocomplete, modal, tab set — in a Headless UI project. Describe the interaction and your Tailwind tokens; the assistant will reach for the right primitive, style it through `data-*` attributes, and flag the labels and announcements Headless UI will not supply on your behalf.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 5
+priceUsd: 0
 timeSavedHours: 12
 pocUrl: https://github.com/tailwindlabs/headlessui
 ---

@@ -4,7 +4,7 @@ category: Desktop
 description: Use SQLite as the actual backbone of a desktop app — not a toy key-value store — with the pragmas, transaction patterns, and migration scheme that survive a year of real user data. Includes FTS5 search, online backups, the native-module rebuild errors that eat an afternoon in Electron, and what to change now if you might add sync later.
 usage: Load this skill when a desktop app (Electron, Tauri, or a plain Node CLI) needs local persistent storage. Apply section 3.1's connection setup verbatim as the first code you write — those pragmas are not tunables. Use section 4 as a review checklist over every write path before shipping.
 platforms: [Claude, Cursor]
-priceUsd: 7
+priceUsd: 0
 timeSavedHours: 20
 pocUrl: https://github.com/WiseLibs/better-sqlite3
 ---

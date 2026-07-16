@@ -4,7 +4,7 @@ category: Other
 description: Find the security holes in a design before you build it — a ninety-minute STRIDE pass over a data-flow diagram that produces tracked, ranked, fixable threats instead of a compliance PDF. Built for teams with no security engineer, where the threat model has to pay for itself in the same sprint or it never happens again.
 usage: Load this skill before building any feature that touches auth, money, uploads, or other people's data. Describe the flow — actors, data stores, and every boundary a request crosses — and your assistant will draft the DFD, walk STRIDE per element, and return ranked threats each with a concrete mitigation and a test that proves it.
 platforms: [Claude, Cursor]
-priceUsd: 9
+priceUsd: 0
 timeSavedHours: 16
 pocUrl: https://github.com/OWASP/threat-dragon
 ---

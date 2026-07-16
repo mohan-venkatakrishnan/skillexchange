@@ -4,7 +4,7 @@ category: Website
 description: Turn a Vite app into a genuinely installable, offline-capable PWA that updates without breaking the session your user is in the middle of. Covers the manifest fields that actually gate the install prompt, Workbox caching strategies per resource type, the update lifecycle, offline write queues, and the iOS divergences nobody warns you about.
 usage: Load this skill before asking your AI assistant to add PWA support, fix an install prompt that won't appear, or debug a service worker serving stale assets. Say "use the Vite PWA offline skill" and describe your app and its offline requirements; the assistant will produce plugin config and update UX that follow these patterns instead of copy-pasted defaults.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 14
 pocUrl: https://github.com/vite-pwa/vite-plugin-pwa
 ---

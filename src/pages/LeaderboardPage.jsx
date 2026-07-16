@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme, FONT_DISPLAY, FONT_UI } from '../tokens/theme';
+import { useTheme, FONT_HEAD, FONT_UI } from '../tokens/theme';
 import { PageWrap, Stars, Bdg, BuilderIcon, TimeSaved, Downloads } from '../components/Shared.jsx';
 import { Card, PageTitle, ErrorBox, EmptyState, GhostButton, Avatar } from '../components/ui.jsx';
 import SkillIcon from '../components/SkillIcon.jsx';
@@ -18,7 +18,7 @@ export default function LeaderboardPage() {
   const { c } = useTheme();
   const nav = useNavigate();
   const [tab, setTab] = useState('builders');
-  const lb = useFetch(() => api.getLeaderboard(), []);
+  const lb = useFetch(() => api.getLeaderboard(), [], { key: 'leaderboard' });
 
   const builders = lb.data?.builders || [];
   const skills = lb.data?.skills || [];
@@ -42,7 +42,14 @@ export default function LeaderboardPage() {
                 action={<GhostButton onClick={() => nav('/publish')}>Publish a skill</GhostButton>} />
             ) : (
               <>
-                <Podium builders={builders} onOpen={u => nav(`/u/${u}`)} />
+                <Podium entries={builders}
+                  keyOf={e => e.rank ?? e.name}
+                  icon={(e, size) => <Avatar name={e.name} src={e.avatarUrl} size={size} />}
+                  title={e => e.name}
+                  sub={e => <Stars rating={e.rating} count={e.reviews} showEmpty={false} />}
+                  badge={e => <BuilderIcon b={e.badge} />}
+                  metric={e => (e.sales ? `${e.sales.toLocaleString()} ${e.sales === 1 ? 'sale' : 'sales'}` : null)}
+                  onOpen={e => nav(`/u/${e.name}`)} />
                 <RankList>
                   {builders.map((e, i) => (
                     <BuilderRow key={e.rank ?? e.name} entry={e} last={i === builders.length - 1} onOpen={() => nav(`/u/${e.name}`)} />
@@ -56,17 +63,26 @@ export default function LeaderboardPage() {
                 body="Skills enter the ranking once they start being downloaded."
                 action={<GhostButton onClick={() => nav('/marketplace')}>Browse the marketplace</GhostButton>} />
             ) : (
-              <RankList>
-                {skills.map((s, i) => (
-                  <SkillRow key={s.rank ?? s.skillId} skill={s} last={i === skills.length - 1}
-                    onOpen={() => nav(`/skills/${s.skillId}`)} onAuthor={() => nav(`/u/${s.author}`)} />
-                ))}
-              </RankList>
+              <>
+                <Podium entries={skills} titleClamp={2}
+                  keyOf={s => s.rank ?? s.skillId}
+                  icon={(s, size) => <SkillIcon skill={skillShape(s)} size={size} radius={size > 48 ? 13 : 10} />}
+                  title={s => s.title}
+                  sub={s => <PodiumAuthor name={s.author} onOpen={() => nav(`/u/${s.author}`)} />}
+                  metric={s => <Downloads count={s.downloads} />}
+                  onOpen={s => nav(`/skills/${s.skillId}`)} />
+                <RankList>
+                  {skills.map((s, i) => (
+                    <SkillRow key={s.rank ?? s.skillId} skill={s} last={i === skills.length - 1}
+                      onOpen={() => nav(`/skills/${s.skillId}`)} onAuthor={() => nav(`/u/${s.author}`)} />
+                  ))}
+                </RankList>
+              </>
             )
           )}
 
         {/* ── Badge explainer ── */}
-        <h2 style={{ fontFamily: FONT_DISPLAY, fontSize: 19, fontWeight: 600, color: c.text, margin: '40px 0 14px', letterSpacing: '-0.01em' }}>
+        <h2 style={{ fontFamily: FONT_HEAD, fontSize: 19, fontWeight: 600, color: c.text, margin: '40px 0 14px', letterSpacing: '-0.01em' }}>
           Seller badges
         </h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 12 }}>
@@ -114,10 +130,13 @@ function Segmented({ value, onChange, options }) {
   );
 }
 
-/* ── Podium — renders 2nd · 1st · 3rd, and degrades cleanly below three builders. */
-function Podium({ builders, onOpen }) {
+/* ── Podium — renders 2nd · 1st · 3rd, and degrades cleanly below three entries.
+   Slot props keep both tabs on identical geometry while letting each supply its
+   own mark (Avatar vs SkillIcon), subtitle and metric. Columns are bottom-aligned,
+   so a two-line skill title never knocks the pedestals out of line. */
+function Podium({ entries, keyOf, icon, title, sub, badge, metric, onOpen, titleClamp = 1 }) {
   const { c } = useTheme();
-  const order = podiumOrder(builders);
+  const order = podiumOrder(entries);
   if (!order.some(Boolean)) return null;
   const HEIGHTS = [104, 140, 82];
 
@@ -127,18 +146,18 @@ function Podium({ builders, onOpen }) {
         if (!e) return null;
         const first = e.rank === 1;
         return (
-          <div key={e.rank ?? e.name} style={{ flex: '1 1 130px', maxWidth: 172, textAlign: 'center' }}>
+          <div key={keyOf(e)} style={{ flex: '1 1 130px', maxWidth: 172, textAlign: 'center' }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 9 }}>
-              <Avatar name={e.name} src={e.avatarUrl} size={first ? 54 : 42} />
+              {icon(e, first ? 54 : 42)}
             </div>
-            <button onClick={() => onOpen(e.name)}
-              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: FONT_DISPLAY, fontSize: first ? 15.5 : 13, fontWeight: 700, color: first ? c.gold : c.text, letterSpacing: '-0.01em', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+            <button onClick={() => onOpen(e)}
+              style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: FONT_HEAD, fontSize: first ? 15.5 : 13, fontWeight: 700, color: first ? c.gold : c.text, letterSpacing: '-0.01em', lineHeight: 1.35, maxWidth: '100%', overflow: 'hidden', display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: titleClamp, wordBreak: 'break-word' }}
               onMouseEnter={ev => { ev.currentTarget.style.color = c.gold; }}
               onMouseLeave={ev => { ev.currentTarget.style.color = first ? c.gold : c.text; }}>
-              {e.name}
+              {title(e)}
             </button>
             <div style={{ minHeight: 20, display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '5px 0 8px' }}>
-              <Stars rating={e.rating} count={e.reviews} showEmpty={false} />
+              {sub?.(e)}
             </div>
             <div style={{
               height: HEIGHTS[i],
@@ -148,12 +167,12 @@ function Podium({ builders, onOpen }) {
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5,
               boxShadow: first ? `0 -6px 30px ${c.goldGlow}` : 'none',
             }}>
-              <BuilderIcon b={e.badge} />
-              <span style={{ fontFamily: FONT_DISPLAY, fontSize: first ? 30 : 22, fontWeight: 700, color: first ? c.gold : c.textSub, lineHeight: 1 }}>
+              {badge?.(e)}
+              <span style={{ fontFamily: FONT_HEAD, fontSize: first ? 30 : 22, fontWeight: 700, color: first ? c.gold : c.textSub, lineHeight: 1 }}>
                 {e.rank}
               </span>
               <span style={{ fontFamily: FONT_UI, fontSize: 11, color: c.textMuted }}>
-                {e.sales?.toLocaleString?.() ?? e.sales} {e.sales === 1 ? 'sale' : 'sales'}
+                {metric?.(e)}
               </span>
             </div>
           </div>
@@ -162,6 +181,23 @@ function Podium({ builders, onOpen }) {
     </div>
   );
 }
+
+/* Author line under a podium skill title — a sibling of the title button, never
+   nested inside it. */
+function PodiumAuthor({ name, onOpen }) {
+  const { c } = useTheme();
+  return (
+    <span style={{ fontFamily: FONT_UI, fontSize: 11.5, color: c.textMuted }}>
+      by <button onClick={onOpen}
+        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: FONT_UI, fontSize: 11.5, color: c.gold }}>
+        {name}
+      </button>
+    </span>
+  );
+}
+
+// Leaderboard rows and the SkillIcon plate disagree on the id field; normalise once.
+const skillShape = (s) => ({ id: s.skillId, title: s.title, category: s.category, iconUrl: s.iconUrl });
 
 /* ── Ranked list shell — hairline separators, no inner padding on the card. */
 function RankList({ children }) {
@@ -172,7 +208,7 @@ function Rank({ n }) {
   const { c } = useTheme();
   const top = n <= 3;
   return (
-    <span style={{ fontFamily: FONT_DISPLAY, fontSize: top ? 15 : 13, fontWeight: 700, color: top ? c.gold : c.textMuted, width: 26, flexShrink: 0, textAlign: 'center' }}>
+    <span style={{ fontFamily: FONT_HEAD, fontSize: top ? 15 : 13, fontWeight: 700, color: top ? c.gold : c.textMuted, width: 26, flexShrink: 0, textAlign: 'center' }}>
       {n}
     </span>
   );
@@ -217,7 +253,7 @@ function SkillRow({ skill: s, last, onOpen, onAuthor }) {
       onMouseEnter={ev => { ev.currentTarget.style.background = c.surfaceHover; }}
       onMouseLeave={ev => { ev.currentTarget.style.background = 'transparent'; }}>
       <Rank n={s.rank} />
-      <SkillIcon skill={{ id: s.skillId, title: s.title, category: s.category, iconUrl: s.iconUrl }} size={40} radius={10} />
+      <SkillIcon skill={skillShape(s)} size={40} radius={10} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontFamily: FONT_UI, fontSize: 13.5, fontWeight: 600, color: c.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.title}</div>
         <div style={{ marginTop: 3, fontFamily: FONT_UI, fontSize: 11.5, color: c.textMuted }}>
@@ -233,7 +269,7 @@ function SkillRow({ skill: s, last, onOpen, onAuthor }) {
   );
 }
 
-// Podium renders 2nd, 1st, 3rd — gracefully handles fewer than 3 builders.
-function podiumOrder(builders) {
-  return [builders[1], builders[0], builders[2]];
+// Podium renders 2nd, 1st, 3rd — gracefully handles fewer than 3 entries.
+function podiumOrder(entries) {
+  return [entries[1], entries[0], entries[2]];
 }

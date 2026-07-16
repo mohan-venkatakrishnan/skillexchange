@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeBadges, computeLeaderboards, computeStats } from '../../lambda/src/lib/badges.mjs';
+import { computeBadges, computeLeaderboards, computeStats, floorPlus } from '../../lambda/src/lib/badges.mjs';
 
 const NOW = new Date('2026-07-15T00:00:00Z');
 const skill = (over = {}) => ({
@@ -90,6 +90,39 @@ describe('computeLeaderboards', () => {
     ];
     const { builders } = computeLeaderboards(skills, { u1: { username: 'mohan', salesCount: 1 } });
     expect(builders[0].rating).toBe(4.5);
+  });
+});
+
+describe('floorPlus', () => {
+  // The "+" must be EARNED: the real number is always strictly greater than
+  // the number we print, so no headline stat can ever overstate the catalogue.
+  it('steps back on an exact boundary so "+" is never a lie', () => {
+    expect(floorPlus(100)).toBe('90+');   // not "100+" — that claims >100
+    expect(floorPlus(20)).toBe('15+');
+    expect(floorPlus(200)).toBe('150+');
+  });
+
+  it('rounds down to a friendly step', () => {
+    expect(floorPlus(16)).toBe('15+');
+    expect(floorPlus(13)).toBe('10+');
+    expect(floorPlus(7)).toBe('5+');
+    expect(floorPlus(101)).toBe('100+');
+  });
+
+  it('shows small counts exactly rather than a meaningless "+"', () => {
+    expect(floorPlus(0)).toBe('0');
+    expect(floorPlus(3)).toBe('3');
+    expect(floorPlus(5)).toBe('5');
+    expect(floorPlus(9)).toBe('5+');
+  });
+
+  it('never claims more than reality', () => {
+    for (let n = 0; n < 500; n++) {
+      const out = floorPlus(n);
+      if (!out.endsWith('+')) continue;
+      const claimed = Number(out.replace(/[+,]/g, ''));
+      expect(claimed).toBeLessThan(n);
+    }
   });
 });
 

@@ -4,7 +4,7 @@ category: Testing
 description: Stop hand-picking the three inputs you already thought of and let the runner hunt for the one you didn't — round-trip properties, invariants, model-based state machines, and shrinking that hands you a two-character counterexample instead of a 400-element blob. Prevents the whole class of bug that lives in the gaps between your example tests: the empty string, the lone surrogate, the negative zero, the reordering that only breaks on the fourth operation.
 usage: Load this skill before asking your AI assistant to write fast-check properties for a parser, serializer, reducer, or any pure transform. Give it the invariant in plain English ("parse(format(x)) always equals x") and it will produce tight arbitraries, an `fc.assert(fc.property(...))` harness, and a committed regression test for any counterexample it finds.
 platforms: [Claude, Cursor]
-priceUsd: 7
+priceUsd: 0
 timeSavedHours: 12
 pocUrl: https://github.com/dubzzz/fast-check
 ---

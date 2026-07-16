@@ -4,7 +4,7 @@ category: Design
 description: Build product dashboards that read honestly at a glance instead of chart-junk in the default docs purple. Covers ResponsiveContainer sizing traps, chart-type selection, color as tokens, custom tooltips, axis formatting, empty and loading states, accessible data-table fallbacks, and performance past a few thousand points.
 usage: Load this skill before asking your AI assistant to build any chart or dashboard in a React project using Recharts. Describe the question the chart must answer and the shape of your data; the assistant will pick the chart type, wire tokenized colors, and ship the loading, empty, and accessibility states in the same pass instead of leaving them for later.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 16
 pocUrl: https://github.com/recharts/recharts
 ---

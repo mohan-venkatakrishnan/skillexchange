@@ -4,7 +4,7 @@ category: Coding
 description: Structure a Laravel application so it survives its second year: container bindings against interfaces, Form Requests that own validation and authorization, Eloquent that does not N+1, and queues that tolerate being run twice. Includes the chunk() correctness bug and why env() returns null in production.
 usage: Load this skill before asking your AI assistant to build a controller, model, job, or API endpoint in a Laravel codebase. Say "use the Laravel architecture skill" and describe the feature; the assistant will produce Form Requests, Policies, API Resources, and jobs that follow these patterns rather than putting everything in the controller.
 platforms: [Claude, Cursor, Copilot]
-priceUsd: 5
+priceUsd: 0
 timeSavedHours: 18
 pocUrl: https://github.com/laravel/framework
 ---

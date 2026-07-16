@@ -4,7 +4,7 @@ category: AI/ML
 description: Run Qdrant collections that stay fast and honest at millions of vectors — HNSW tuning against a real recall curve, payload indexes that keep filtered search from falling off a cliff, and quantization with the memory math worked out. Covers the multitenancy, batching, and snapshot patterns that decide whether your vector database is a line item or an incident.
 usage: Load this skill before asking your AI assistant to design, tune, or debug a Qdrant deployment. Say "use the Qdrant vector search skill" and describe your vector count, dimensions, filters, and tenancy model; the assistant will produce a collection config, the payload indexes it requires, and a recall benchmark to prove the tuning rather than assert it.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 18
 pocUrl: https://github.com/qdrant/qdrant
 ---

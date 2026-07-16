@@ -49,7 +49,18 @@ export function detectFx() {
 
 /* Font stacks — always with real fallbacks. A bare "Playfair Display" silently
    renders as Times if the webfont is slow, which is what made the type look
-   amateur in the first build. */
+   amateur in the first build.
+
+   Typography rule: Inter does ALL the reading work. An editorial serif set at
+   15px across a dense card grid is genuinely harder to scan — every storefront
+   worth copying (Chrome Web Store, the App Store, GitHub) sets listings in a
+   UI sans for exactly this reason. FONT_DISPLAY is now reserved for the brand
+   wordmark and the big hero/section statements, where it reads as deliberate
+   rather than as friction. */
 export const FONT_DISPLAY = "'Playfair Display', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif";
 export const FONT_UI = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 export const FONT_MONO = "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+
+/* Headings inside pages/cards — sans, tightened. Use FONT_DISPLAY only for
+   the wordmark and hero-scale type. */
+export const FONT_HEAD = FONT_UI;

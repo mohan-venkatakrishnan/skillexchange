@@ -4,7 +4,7 @@ category: Other
 description: Design HTTP APIs the spec-first way — write the contract, generate the types and mocks, then implement against it — so clients start on day one and drift becomes a CI failure instead of a support ticket. Covers resource modelling, error shapes, pagination that survives inserts, versioning you can actually deprecate, and the linting rules that stop a 4,000-line spec from rotting.
 usage: Load this skill before designing or reviewing an HTTP API. Describe the domain and the operations you need, and your assistant will produce an OpenAPI 3.1 document with reusable components, RFC 9457 errors, and cursor pagination — then generate types, a mock, and contract tests from the same file rather than hand-writing any of them.
 platforms: [Claude, Cursor]
-priceUsd: 8
+priceUsd: 0
 timeSavedHours: 20
 pocUrl: https://github.com/OAI/OpenAPI-Specification
 ---

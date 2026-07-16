@@ -4,7 +4,7 @@ category: Coding
 description: Take a Django project from tutorial-shaped to production-shaped: settings split by environment, a custom user model set before the first migrate, N+1 queries eliminated, and migrations that deploy without locking a table. Covers managers, transactions and row locking, pgbouncer, DRF serializer performance, Celery boundaries, and why signals are usually a trap.
 usage: Load this skill before asking your AI assistant to write Django models, views, serializers, or migrations. Say "use the Django production backend skill" and describe the feature; the assistant will write querysets that don't N+1, migrations that are reversible and lock-safe, and business logic in managers rather than fat views.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 22
 pocUrl: https://github.com/django/django
 ---

@@ -4,7 +4,7 @@ category: AI/ML
 description: Stop hand-tuning prompt strings and start compiling them against a metric you actually trust. Covers signatures and modules, building a dev set before you write a prompt, LLM-as-judge calibration, optimizer economics, and the eval leakage that makes your numbers a lie.
 usage: Load this skill before asking your AI assistant to build or improve any LLM pipeline where quality matters more than a demo. Say "use the DSPy eval-driven skill" and describe the task; the assistant will demand a dev set and a metric before it writes a single prompt.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 7
+priceUsd: 0
 timeSavedHours: 26
 pocUrl: https://github.com/stanfordnlp/dspy
 ---

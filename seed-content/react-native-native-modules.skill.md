@@ -4,7 +4,7 @@ category: Mobile
 description: Bridge real platform capability into JavaScript with Turbo Native Modules — a typed spec that generates both sides, correct threading on iOS and Android, and events that don't leak listeners. Written for the moment a JS library isn't enough and you have to open Xcode and Android Studio without turning your app into two divergent codebases.
 usage: Load this skill before asking your assistant to write, port, or debug a React Native native module. Name the platform API and the JS surface you want ("expose the iOS keychain and Android EncryptedSharedPreferences as getSecret/setSecret"), and it will emit the TypeScript spec first, then the Objective-C++ and Kotlin implementations, with threading and nullability that survive the New Architecture's codegen.
 platforms: [Claude, Cursor]
-priceUsd: 8
+priceUsd: 0
 timeSavedHours: 20
 pocUrl: https://github.com/facebook/react-native
 ---

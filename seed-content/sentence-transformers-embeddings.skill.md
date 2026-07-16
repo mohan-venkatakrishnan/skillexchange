@@ -4,7 +4,7 @@ category: AI/ML
 description: Build retrieval that actually retrieves — model selection, prefixes, normalization, truncation traps, and a cross-encoder rerank stage that fixes what bi-encoders get wrong. Includes fine-tuning on in-domain pairs and an evaluation harness so you stop guessing whether your changes helped.
 usage: Load this skill before asking your AI assistant to build a semantic search, RAG retrieval layer, or deduplication pipeline. Say "use the sentence-transformers embeddings skill" and describe your corpus and query style; the assistant will pick a model, wire the correct prefixes, and add a rerank stage instead of dumping a naive cosine-similarity loop.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 5
+priceUsd: 0
 timeSavedHours: 16
 pocUrl: https://github.com/UKPLab/sentence-transformers
 ---

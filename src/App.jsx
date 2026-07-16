@@ -21,9 +21,13 @@ import PublicProfilePage from './pages/PublicProfilePage.jsx';
 import CreateSkillPage from './pages/CreateSkillPage.jsx';
 import AdminPage from './pages/AdminPage.jsx';
 
+// `pub: false` = signed-in only. Publish is public in the nav: a visitor
+// clicking it gets the sign-in gate, which is a far better funnel than hiding
+// the one action we most want people to take.
 const NAV = [
   { path: '/', label: 'Home', pub: true },
   { path: '/marketplace', label: 'Marketplace', pub: true },
+  { path: '/publish', label: 'Publish a Skill', pub: true },
   { path: '/create', label: 'Create a Skill', pub: true },
   { path: '/leaderboard', label: 'Leaderboard', pub: true },
   { path: '/verify', label: 'Get Verified', pub: true },
@@ -170,17 +174,17 @@ function Shell() {
       <NodeField />
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} onLogin={handleLogin} />}
 
-      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: c.bg, borderBottom: `1px solid ${c.border}`, display: 'flex', alignItems: 'center', padding: '0 clamp(12px,3vw,22px)', height: 52, gap: 10 }}>
+      <nav className="nav-grid" style={{ position: 'sticky', top: 0, zIndex: 100, background: c.bg, borderBottom: `1px solid ${c.border}`, padding: '0 clamp(12px,3vw,22px)', height: 52 }}>
         <button onClick={() => nav('/')} aria-label="Skill Exchange home"
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginRight: 6, display: 'flex', alignItems: 'center', gap: 9, flexShrink: 0 }}>
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 9, flexShrink: 0, justifySelf: 'start' }}>
           <Logo size={26} />
           <span className="nav-brand-text" style={{ fontFamily: FONT_DISPLAY, fontSize: 15, fontWeight: 700, color: c.gold, whiteSpace: 'nowrap', letterSpacing: '-0.01em' }}>Skill Exchange</span>
         </button>
 
         <div className="nav-desktop-links">{visibleNav.map(n => navBtn(n))}</div>
 
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginLeft: 'auto', flexShrink: 0 }}>
-          <button onClick={() => setIsDark(d => !d)} aria-label="Toggle theme" data-tip={isDark ? 'Light theme' : 'Dark theme'}
+        <div className="nav-actions">
+          <button onClick={() => setIsDark(d => !d)} aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
             style={{ background: 'none', border: `1px solid ${c.border}`, borderRadius: 7, padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
             {isDark ? <Ic.Sun s={13} c={c.textSub} /> : <Ic.Moon s={13} c={c.textSub} />}
           </button>

@@ -4,7 +4,7 @@ category: Data
 description: Build Airflow pipelines that survive backfills, source-database pressure, and 3am pages instead of DAGs that quietly re-run the same rows twice. Covers idempotent tasks keyed on the data interval, the TaskFlow API, deferrable operators, pools, XCom discipline, and the top-level-code parse loop that takes down production APIs.
 usage: Load this skill before asking your AI assistant to write, review, or refactor any Airflow DAG. Say "use the Airflow ETL orchestration skill" and describe your source, sink, and schedule; the assistant will produce DAGs that are idempotent, parse-cheap, and concurrency-bounded instead of the tutorial DAG that works once and stampedes on the first backfill.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 8
+priceUsd: 0
 timeSavedHours: 26
 pocUrl: https://github.com/apache/airflow
 ---

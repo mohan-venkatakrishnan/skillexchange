@@ -4,7 +4,7 @@ category: Testing
 description: Write load tests that measure your server instead of your laptop, with arrival-rate executors, per-endpoint thresholds, and CI gates that actually fail the build. Prevents the classic disasters: a "passing" test that saturated the load generator, a p95 hiding a bimodal distribution, and a suite that reports averages nobody can act on.
 usage: Load this skill before asking your AI assistant to write or review a k6 script. Describe the endpoint, the expected traffic shape ("300 checkouts/min, spiking to 900 at 9am"), and your SLO, and it will produce an arrival-rate scenario with tagged, per-endpoint thresholds rather than a VU loop with a sleep in it.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 8
+priceUsd: 0
 timeSavedHours: 14
 pocUrl: https://github.com/grafana/k6
 ---

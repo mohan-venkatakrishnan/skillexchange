@@ -4,7 +4,7 @@ category: Mobile
 description: Scaffold an iOS + Android app that actually reaches a store — config-as-code, development builds instead of Expo Go, EAS profiles that separate simulator from TestFlight, and the permission strings Apple rejects you for omitting. Covers the two failure modes that eat a launch week: a project pinned to Expo Go that can't add a native dependency, and a first binary bounced by App Store review for a purpose string nobody wrote.
 usage: Load this skill before asking your assistant to scaffold an Expo app, add a native dependency, or set up EAS Build. Tell it the SDK version, whether you need custom native code, and your target stores ("Expo SDK 53, needs BLE, iOS + Android internal testing first") and it will produce app.config.ts, eas.json, and a build path that survives store review rather than a demo that only runs in Expo Go.
 platforms: [Claude, Cursor]
-priceUsd: 7
+priceUsd: 0
 timeSavedHours: 16
 pocUrl: https://github.com/expo/expo
 ---

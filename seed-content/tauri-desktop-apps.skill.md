@@ -4,7 +4,7 @@ category: Desktop
 description: Ship a 10MB desktop app with a Rust backend and a web frontend — without discovering the webview fragmentation tax three weeks in. Covers Tauri v2's capabilities/permissions ACL, command and event plumbing, state, sidecars, and the honest list of cases where Electron is still the correct answer.
 usage: Load this skill when building or migrating a desktop app with Tauri v2. Run section 3.1's webview-risk check before writing any frontend code — it decides whether Tauri is viable at all. Then follow 3.2–3.8 as the implementation order and use section 4 as a pre-ship review checklist.
 platforms: [Claude, Cursor]
-priceUsd: 8
+priceUsd: 0
 timeSavedHours: 24
 pocUrl: https://github.com/tauri-apps/tauri
 ---

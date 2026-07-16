@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useTheme, FONT_DISPLAY, FONT_UI } from '../tokens/theme';
+import { useTheme, FONT_HEAD, FONT_UI } from '../tokens/theme';
 import SkillIcon from './SkillIcon.jsx';
 import { VerifiedStamp, Stars, SkillBdg, PTag, TimeSaved, Downloads, Price } from './Shared.jsx';
 
@@ -20,7 +20,7 @@ export default function SkillCard({ skill, className }) {
         <SkillIcon skill={skill} size={52} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-            <h3 style={{ fontFamily: FONT_DISPLAY, fontSize: 15.5, fontWeight: 600, color: c.text, margin: 0, lineHeight: 1.32, flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+            <h3 style={{ fontFamily: FONT_HEAD, fontSize: 15.5, fontWeight: 600, color: c.text, margin: 0, lineHeight: 1.32, flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
               {skill.title}
             </h3>
             {skill.verified && <VerifiedStamp size={20} animate={false} />}

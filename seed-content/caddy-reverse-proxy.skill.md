@@ -4,7 +4,7 @@ category: DevOps
 description: Put a production reverse proxy in front of your services with automatic HTTPS, health-checked upstreams, and correct client IP handling. Covers Caddyfile structure, ACME rate limits and DNS challenges, HSTS, zero-downtime reloads, and running behind a CDN.
 usage: Load this skill before asking your AI assistant to write or debug a Caddyfile, terminate TLS, or front a service with a proxy. Say "use the Caddy reverse proxy skill" and describe your topology — domains, upstreams, and whatever sits in front — and the assistant will produce a Caddyfile with a correct trust boundary instead of a copy-pasted starter config.
 platforms: [Claude, ChatGPT, Cursor, Copilot]
-priceUsd: 5
+priceUsd: 0
 timeSavedHours: 10
 pocUrl: https://github.com/caddyserver/caddy
 ---

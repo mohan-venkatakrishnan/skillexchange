@@ -4,7 +4,7 @@ category: Coding
 description: Build a Go REST API with Gin that survives production — layered without ceremony, cancellable end to end, and shut down cleanly. Covers project layout, the middleware you actually need, struct-tag validation with custom validators, a central error mapper, and the context traps that leak goroutines.
 usage: Load this skill before asking your AI assistant to scaffold or extend a Gin service. Say "use the Go Gin REST API skill" and describe your endpoints and domain; the assistant will produce handler/service/repo code, middleware, and tests that follow these patterns instead of the single-file tutorial style Gin examples encourage.
 platforms: [Claude, Cursor, ChatGPT]
-priceUsd: 5
+priceUsd: 0
 timeSavedHours: 14
 pocUrl: https://github.com/gin-gonic/gin
 ---

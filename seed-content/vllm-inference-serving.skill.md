@@ -4,7 +4,7 @@ category: AI/ML
 description: Run a self-hosted LLM endpoint that survives real traffic — PagedAttention and continuous batching as the mental model, KV-cache sizing math, prefix caching for shared system prompts, tensor parallelism, and quantization trade-offs. Includes the load-testing methodology that stops teams from benchmarking at concurrency 1 and drawing the wrong conclusion.
 usage: Load this skill before asking your AI assistant to deploy, tune, or debug a vLLM server. Say "use the vLLM serving skill" and give your model, GPU, and traffic shape; the assistant will size the KV cache from arithmetic, pick flags with reasons attached, and tell you which latency metric you are actually optimizing.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 8
+priceUsd: 0
 timeSavedHours: 28
 pocUrl: https://github.com/vllm-project/vllm
 ---

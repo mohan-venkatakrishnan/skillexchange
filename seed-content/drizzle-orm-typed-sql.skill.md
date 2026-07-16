@@ -4,7 +4,7 @@ category: Coding
 description: Use Drizzle as what it is — SQL with a type checker attached — instead of pretending it is an object mapper. Covers schema-in-TypeScript, insert vs select inference, relations() versus real joins, prepared statements, the drizzle-kit workflow, and the serverless pooling traps.
 usage: Load this skill before asking your AI assistant to write Drizzle schema or queries. Say "use the typed SQL with Drizzle skill" and describe the table or query you need; the assistant will produce schema, migrations, and queries that stay close to the SQL you would have written by hand, with types derived rather than declared.
 platforms: [Claude, Cursor]
-priceUsd: 5
+priceUsd: 0
 timeSavedHours: 12
 pocUrl: https://github.com/drizzle-team/drizzle-orm
 ---

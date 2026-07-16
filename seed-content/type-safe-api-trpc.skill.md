@@ -4,7 +4,7 @@ category: Coding
 description: Build a tRPC layer where auth is enforced by middleware, inputs are validated by Zod, and the client gets end-to-end types with no codegen step. Covers router composition, context, TRPCError to HTTP mapping, superjson, React Query invalidation and optimistic updates, and the cases where tRPC is the wrong tool entirely.
 usage: Load this skill before asking your AI assistant to add or refactor a tRPC procedure. Say "use the type-safe tRPC skill" and describe the endpoint and who may call it; the assistant will pick the right base procedure, write the Zod schemas, and produce the matching React Query call with correct invalidation instead of a generic mutation.
 platforms: [Claude, Cursor]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 18
 pocUrl: https://github.com/trpc/trpc
 ---

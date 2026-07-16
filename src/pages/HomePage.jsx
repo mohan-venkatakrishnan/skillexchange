@@ -4,8 +4,9 @@ import Logo from '../components/Logo.jsx';
 import SkillCard from '../components/SkillCard.jsx';
 import Loader from '../components/Loader.jsx';
 import { Ic } from '../components/Icons.jsx';
-import { PageWrap, Stars, BuilderIcon } from '../components/Shared.jsx';
-import { GoldButton, GhostButton, Card, ErrorBox, Reveal, Section, SectionHeading, Avatar } from '../components/ui.jsx';
+import LeaderboardPreview from '../components/LeaderboardPreview.jsx';
+import { PageWrap } from '../components/Shared.jsx';
+import { GoldButton, GhostButton, Card, ErrorBox, Reveal, Section, SectionHeading } from '../components/ui.jsx';
 import { CATEGORIES } from '../data/constants.js';
 import * as api from '../lib/api.js';
 import useFetch from '../lib/useFetch.js';
@@ -19,7 +20,7 @@ const STEPS_BUY = [
   { n: '04', t: 'Paste and ship', d: 'Drop the SKILL.md into Claude Code, ChatGPT, Cursor, Gemini or Copilot at the start of a session. Your assistant now knows the whole workflow.' },
 ];
 const STEPS_SELL = [
-  { n: '01', t: 'Write it — or generate it', d: 'Already have a SKILL.md? Publish it. If not, the Create a Skill generator writes the prompt that builds one for your platform.' },
+  { n: '01', t: 'Start from a project you already shipped', d: "Already have a SKILL.md? Publish it. If not, Create a Skill gives you a prompt to run inside that project's folder — your assistant reads the code and distils the workflow into one." },
   { n: '02', t: 'Publish with proof', d: 'Project URL and screenshot are mandatory, not optional. That rule is what makes every other listing here worth trusting.' },
   { n: '03', t: 'We review it by hand', d: 'A human checks your proof of concept against your claims. Approved skills go live, usually within 48 hours.' },
   { n: '04', t: 'Keep 90%', d: 'You set the price. The exchange takes 10% on paid sales — nothing else, ever. Your commission rate is locked at the sale.' },
@@ -35,10 +36,21 @@ const PRINCIPLES = [
 export default function HomePage({ user, onShowAuth }) {
   const { c } = useTheme();
   const nav = useNavigate();
-  const stats = useFetch(() => api.getStats(), []);
-  const skills = useFetch(() => api.listSkills(), []);
-  const lb = useFetch(() => api.getLeaderboard(), []);
-  const featured = (skills.data || []).filter(s => s.featured).slice(0, 6);
+  const stats = useFetch(() => api.getStats(), [], { key: 'stats' });
+  const skills = useFetch(() => api.listSkills(), [], { key: 'skills' });
+  const lb = useFetch(() => api.getLeaderboard(), [], { key: 'leaderboard' });
+  // Always render a COMPLETE row of 6: a 3+2 grid reads as a mistake. If
+  // fewer than six are flagged featured, top up with the most recent so the
+  // shelf is full without inventing anything.
+  const featured = (() => {
+    const all = skills.data || [];
+    const picked = all.filter(s => s.featured);
+    if (picked.length >= 6) return picked.slice(0, 6);
+    const ids = new Set(picked.map(s => s.id));
+    const rest = [...all].filter(s => !ids.has(s.id))
+      .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+    return [...picked, ...rest].slice(0, 6);
+  })();
   const catCounts = (skills.data || []).reduce((m, s) => { m[s.category] = (m[s.category] || 0) + 1; return m; }, {});
 
   return (
@@ -68,7 +80,7 @@ export default function HomePage({ user, onShowAuth }) {
       {/* ── Stats ── */}
       <div style={{ position: 'relative', zIndex: 1, borderTop: `1px solid ${c.border}`, borderBottom: `1px solid ${c.border}`, background: c.surface }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', justifyContent: 'center', gap: 'clamp(24px,5vw,72px)', padding: '22px clamp(16px,4vw,40px)', flexWrap: 'wrap' }}>
-          {[[stats.data?.skills, 'Skills published'], [stats.data?.categories, 'Categories'], [stats.data?.builders, 'Builders'], [stats.data?.avgRating, 'Average rating']]
+          {[[stats.data?.skills, 'Skills published'], [stats.data?.categories, 'Categories'], [stats.data?.builders, 'Builders'], [stats.data?.avgTimeSaved, 'Saved per skill'], [stats.data?.avgRating, 'Average rating']]
             .filter(([v]) => v && v !== '0' && v !== '—')
             .map(([v, l]) => (
               <div key={l} style={{ textAlign: 'center' }}>
@@ -134,7 +146,7 @@ export default function HomePage({ user, onShowAuth }) {
       <Section id="categories" style={{ paddingTop: 12 }}>
         <SectionHeading eyebrow="Browse" title="Every domain you build in" />
         <Reveal>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 10 }}>
+          <div className="cat-grid" style={{ display: 'grid', gap: 10 }}>
             {CATEGORIES.map(cat => (
               <button key={cat} onClick={() => nav(`/marketplace?cat=${encodeURIComponent(cat)}`)}
                 style={{ background: c.surface, border: `1px solid ${c.border}`, borderRadius: 10, padding: '15px 12px', cursor: 'pointer', fontFamily: FONT_UI, fontSize: 13, fontWeight: 500, color: c.textSub, transition: 'all 0.18s', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}
@@ -148,32 +160,19 @@ export default function HomePage({ user, onShowAuth }) {
         </Reveal>
       </Section>
 
-      {/* ── Top builders ── */}
+      {/* ── Leaderboard preview — builders and skills, five each ── */}
       <Section id="builders" style={{ paddingTop: 12 }}>
-        <SectionHeading eyebrow="Leaderboard" title="Top builders" />
+        <SectionHeading eyebrow="Leaderboard" title="Top of the exchange" />
         {lb.loading ? <Loader label="Loading leaderboard" />
           : lb.error ? <ErrorBox message={lb.error} onRetry={lb.retry} />
-          : (lb.data?.builders || []).length === 0 ? null
+          : (lb.data?.builders || []).length === 0 && (lb.data?.skills || []).length === 0 ? null
           : (
-            <Reveal>
-              <Card style={{ padding: 0, overflow: 'hidden', maxWidth: 720, margin: '0 auto' }}>
-                {lb.data.builders.slice(0, 5).map((e, i, arr) => (
-                  <div key={e.rank} onClick={() => nav(`/u/${e.name}`)}
-                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px', borderBottom: i < arr.length - 1 ? `1px solid ${c.border}` : 'none', cursor: 'pointer', transition: 'background 0.15s' }}
-                    onMouseEnter={ev => ev.currentTarget.style.background = c.surfaceHover}
-                    onMouseLeave={ev => ev.currentTarget.style.background = 'transparent'}>
-                    <span style={{ fontFamily: FONT_UI, fontSize: 12, fontWeight: 700, color: i === 0 ? c.gold : c.textMuted, width: 22 }}>#{e.rank}</span>
-                    <Avatar name={e.name} src={e.avatarUrl} size={30} />
-                    <span style={{ fontFamily: FONT_UI, fontWeight: 600, fontSize: 13.5, color: c.text, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{e.name}</span>
-                    <BuilderIcon b={e.badge} />
-                    <Stars rating={e.rating} count={e.ratingCount} showEmpty={false} />
-                  </div>
-                ))}
-              </Card>
-              <div style={{ textAlign: 'center', marginTop: 22 }}>
+            <>
+              <LeaderboardPreview builders={lb.data?.builders} skills={lb.data?.skills} />
+              <Reveal style={{ textAlign: 'center', marginTop: 22 }}>
                 <GhostButton onClick={() => nav('/leaderboard')}>Full leaderboard →</GhostButton>
-              </div>
-            </Reveal>
+              </Reveal>
+            </>
           )}
       </Section>
 

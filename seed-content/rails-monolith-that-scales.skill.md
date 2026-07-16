@@ -4,7 +4,7 @@ category: Coding
 description: Build a Rails app that stays fast and maintainable past 100k lines without shattering it into microservices. Covers service objects, the real difference between includes/preload/eager_load, zero-downtime migrations, counter caches, idempotent jobs, and Hotwire as the default UI answer.
 usage: Load this skill before asking your AI assistant to add a feature, write a migration, or refactor a controller in a Rails codebase. Say "use the Rails monolith skill" and describe the feature; the assistant will produce models, service objects, and migrations that follow these patterns instead of scaffold output.
 platforms: [Claude, Cursor, ChatGPT]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 20
 pocUrl: https://github.com/rails/rails
 ---

@@ -4,7 +4,7 @@ category: DevOps
 description: Turn Node-RED from a toy for blinking LEDs into a maintainable automation layer for webhooks, integrations, and ops glue. Covers flow architecture, message design, error handling with catch nodes, custom function nodes, and version-controlled deployment.
 usage: Load this skill before asking your AI assistant to design or debug Node-RED automations. Describe the trigger, the systems involved, and the desired outcome; the assistant will produce flow structure, function-node code, and error/retry wiring that follow these conventions instead of a spaghetti canvas.
 platforms: [Claude, ChatGPT, Gemini]
-priceUsd: 4
+priceUsd: 0
 timeSavedHours: 10
 pocUrl: https://github.com/node-red/node-red
 ---

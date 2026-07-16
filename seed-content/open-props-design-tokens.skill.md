@@ -4,7 +4,7 @@ category: Design
 description: Build a real token architecture on Open Props instead of sprinkling --size-3 through your stylesheets. Covers the sub-atomic/semantic two-layer alias system, adaptive light/dark theming, motion and elevation tokens, and shipping a themeable product in plain CSS with zero framework lock-in.
 usage: Load this skill before asking your AI assistant to set up theming or write CSS in an Open Props project. Describe your brand hue, density, and whether you need dark mode; the assistant will produce a semantic alias layer first, then write components that consume only your aliases — never raw Open Props values.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 4
+priceUsd: 0
 timeSavedHours: 9
 pocUrl: https://github.com/argyleink/open-props
 ---

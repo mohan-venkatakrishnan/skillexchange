@@ -4,7 +4,7 @@ category: Desktop
 description: Get a desktop app past Gatekeeper and SmartScreen without losing a week to certificate portals and opaque rejection emails. Covers Developer ID vs App Store certs, hardened runtime and the entitlements Electron actually needs, notarytool, stapling, deep signing, Windows EV vs OV and the SmartScreen reputation ramp, cloud signing, CI secrets, and what each path really costs in money and calendar days.
 usage: Load this skill when a desktop app must be distributed outside an app store without triggering malware warnings. Work section 3 in order — the certificate decisions in 3.1 and 3.7 have multi-week lead times and gate everything else. Use 3.9 to decode real signing errors and section 4 as the pre-release checklist.
 platforms: [Claude, Cursor]
-priceUsd: 9
+priceUsd: 0
 timeSavedHours: 30
 pocUrl: https://github.com/electron-userland/electron-builder
 ---

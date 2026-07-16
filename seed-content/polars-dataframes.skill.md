@@ -4,7 +4,7 @@ category: Data
 description: Write Polars that is actually fast instead of pandas wearing a Polars costume. Covers the lazy API, the expression system, why apply destroys performance, reading query plans, the streaming engine for larger-than-RAM data, window expressions, asof joins, and the dtype traps that silently cost 10x.
 usage: Load this skill before asking your AI assistant to write, review, or speed up any Polars code, or to port a pandas pipeline. Say "use the Polars dataframes skill" and describe your data and transformation; the assistant will produce lazy, expression-based code and tell you which line of the query plan proves the optimization landed.
 platforms: [Claude, ChatGPT, Cursor, Copilot]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 14
 pocUrl: https://github.com/pola-rs/polars
 ---

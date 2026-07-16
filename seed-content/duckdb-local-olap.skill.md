@@ -4,7 +4,7 @@ category: Data
 description: Run warehouse-grade analytics on your laptop by querying Parquet and CSV directly, without loading anything into a database first. Covers columnar execution, pushdown, EXPLAIN ANALYZE, memory limits and spilling, joins that OOM, and the single-writer model that surprises everyone.
 usage: Load this skill before asking your AI assistant to write analytical SQL, build a local data pipeline, or debug a slow or crashing DuckDB query. Say "use the DuckDB local OLAP skill" and describe your files and the question you want answered; the assistant will produce queries that read pushdown-friendly and stay inside your memory budget.
 platforms: [Claude, ChatGPT, Cursor, Copilot]
-priceUsd: 7
+priceUsd: 0
 timeSavedHours: 16
 pocUrl: https://github.com/duckdb/duckdb
 ---

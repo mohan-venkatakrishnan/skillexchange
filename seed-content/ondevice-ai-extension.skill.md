@@ -4,7 +4,7 @@ category: Extension
 description: Ship Chrome extensions that run Gemini Nano locally via Chrome's built-in AI APIs — zero API cost, private by design, works offline. Distilled from two shipped products (CommentIQ, Quill): the offscreen-document pattern, session cloning, honest capability detection, structured-output chunking, and the graceful-fallback architecture for the majority of devices where the model isn't there.
 usage: Load this skill when building or debugging any feature on Chrome's built-in AI (Prompt API / LanguageModel, Rewriter, Summarizer, Writer, Proofreader). Tell the AI which context your code runs in (service worker, content script, extension page) and what the model should produce; it will pick the right host context, session strategy, and fallback path. Paste model errors (kErrorUnknown, QuotaExceededError, hangs) for diagnosis against section 4.
 platforms: [Claude, Cursor]
-priceUsd: 8
+priceUsd: 6
 timeSavedHours: 20
 pocUrl: https://tapdot.org
 ---

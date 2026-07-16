@@ -4,7 +4,7 @@ category: Website
 description: Build content-driven sites that ship almost no JavaScript, without giving up React components where you actually need them. Covers islands architecture, typed content collections, image optimization, and the hydration decisions that separate a 40KB site from a 400KB one.
 usage: Load this skill before asking your AI assistant to scaffold or extend an Astro site. Say "use the Astro content site skill" and describe your content model; the assistant will produce collection schemas, correctly-chosen client directives, and layouts that default to zero JS instead of copying React habits into .astro files.
 platforms: [Claude, ChatGPT, Cursor, Copilot]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 16
 pocUrl: https://github.com/withastro/astro
 ---

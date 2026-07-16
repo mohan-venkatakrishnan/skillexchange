@@ -4,7 +4,7 @@ category: Marketing
 description: Write engineering posts that earn a top-five position and bring people who convert — intent-matched topic selection, a structure that survives a skim, and the specificity that separates a post someone bookmarks from the 900th "Getting Started With" tutorial. Built around the failure nobody talks about: the post that hit #1 for a term with buyers who were never going to buy.
 usage: Load this skill and give it a topic candidate, a working title, or a rough draft plus what your product actually does. Ask it to qualify the topic first ("is this worth writing, and who lands on it?") before asking for an outline or a rewrite — it will push back on terms with no commercial path. It marks every unverifiable claim as [NEEDS: benchmark] rather than inventing numbers.
 platforms: [Claude, ChatGPT]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 12
 pocUrl: https://developers.google.com/search/docs
 ---

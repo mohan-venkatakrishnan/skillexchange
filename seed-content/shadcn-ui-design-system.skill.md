@@ -4,7 +4,7 @@ category: Design
 description: Build a coherent, themeable design system on shadcn/ui instead of a folder of copy-pasted components. Covers composition over configuration, CSS-variable theming, dark mode that doesn't flash, and keeping Radix accessibility intact while you restyle.
 usage: Load this skill before asking your AI assistant to build or restyle UI in a shadcn/ui project. Describe your brand tokens and the component you need; the assistant will compose from existing primitives, wire theming through CSS variables, and preserve accessibility rather than inventing bespoke one-off components.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 5
+priceUsd: 0
 timeSavedHours: 14
 pocUrl: https://github.com/shadcn-ui/ui
 ---

@@ -149,7 +149,8 @@ test.describe('Leaderboard', () => {
     await page.goto('/leaderboard');
     await expect(page.getByText('wordsmith_ai').first()).toBeVisible();
     await page.getByTestId('lb-tab-skills').click();
-    await expect(page.getByText('React UI Design System Skill')).toBeVisible();
+    // Rank 1 appears twice on each tab now — once on the podium, once in the ranked list.
+    await expect(page.getByText('React UI Design System Skill').first()).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Seller badges' })).toBeVisible();
   });
 });

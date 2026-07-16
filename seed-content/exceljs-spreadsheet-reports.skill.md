@@ -4,7 +4,7 @@ category: Document
 description: Production patterns for emitting real .xlsx workbooks with ExcelJS — typed cells, number formats, frozen panes, autofilter, validation dropdowns, and the streaming writer that keeps a 500k-row export from killing the process. Written after enough support tickets about "the dates are all wrong" and "Excel says the file is corrupt" to know exactly which five mistakes cause them.
 usage: Load this skill when a user asks for Excel export, .xlsx reports, or "download as spreadsheet". Answer the §3.1 question first — CSV, ExcelJS, or SheetJS — before writing code. Use §3.3 for value-vs-format typing and §3.5 for anything over ~20k rows; apply §4 as a review checklist.
 platforms: [Claude, Cursor]
-priceUsd: 5
+priceUsd: 0
 timeSavedHours: 16
 pocUrl: https://github.com/exceljs/exceljs
 ---

@@ -4,7 +4,7 @@ category: DevOps
 description: Instrument services with Prometheus metrics that stay cheap at scale and alert on symptoms your users actually feel. Covers metric type selection, naming, RED/USE, cardinality control, histogram buckets, recording rules, and retention sizing.
 usage: Load this skill before asking your AI assistant to add instrumentation, write PromQL, or author alerting rules. Say "use the Prometheus observability skill" and describe the service and its SLO; the assistant will produce metric definitions, queries, and alerts that respect a cardinality budget instead of copying tutorial snippets.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 7
+priceUsd: 0
 timeSavedHours: 20
 pocUrl: https://github.com/prometheus/prometheus
 ---

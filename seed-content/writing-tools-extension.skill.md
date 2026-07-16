@@ -4,7 +4,7 @@ category: Extension
 description: Build extension features that read and act on text selections inside arbitrary web pages — textareas, inputs, contenteditable, rich editors — with floating UI anchored to the selection that survives hostile site CSS. Distilled from Quill, a shipped writing-tools extension running on every page, including the selection-snapshot model, anchoring math, and Trusted-Types-safe DOM rules that made it possible.
 usage: Load this skill when building any "select text, act on it" extension feature — rewriters, translators, annotators, grammar tools. Describe the actions your product offers and the AI will generate the selection-capture layer, floating UI, and entry points in the right order (context menu first, floating pill opt-in). Paste selection bugs ("works in textareas, dies in Gmail") for diagnosis against section 4.
 platforms: [Claude, Cursor]
-priceUsd: 7
+priceUsd: 5
 timeSavedHours: 16
 pocUrl: https://tapdot.org
 ---

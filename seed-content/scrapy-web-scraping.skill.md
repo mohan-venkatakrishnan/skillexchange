@@ -4,7 +4,7 @@ category: Data
 description: Build Scrapy crawlers that finish, resume, and stay welcome — instead of the script that gets IP-banned on day two and loses 400k items to an OOM kill on day three. Covers spider/item/pipeline architecture, AutoThrottle, retry and backoff on 429s, resumable JOBDIRs, hunting the JSON endpoint before reaching for a browser, and pipelines that land in Postgres or Parquet.
 usage: Load this skill before asking your AI assistant to write or debug a Scrapy spider. Say "use the Scrapy web scraping skill" and describe the target site and the fields you need; the assistant will produce a throttled, resumable, validated crawler with a real pipeline, and will push you to find the site's JSON API before it writes a single CSS selector.
 platforms: [Claude, ChatGPT, Cursor, Copilot]
-priceUsd: 5
+priceUsd: 0
 timeSavedHours: 12
 pocUrl: https://github.com/scrapy/scrapy
 ---

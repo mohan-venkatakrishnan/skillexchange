@@ -4,7 +4,7 @@ category: Extension
 description: Ship Rust/WASM inside a Manifest V3 extension without fighting the CSP, the service worker lifecycle, or the review team. Covers wasm-pack target selection, why wasm-unsafe-eval is required and what it actually permits, instantiating from a bundled .wasm in a worker vs an offscreen document, detached-ArrayBuffer bugs across worker restarts, binary size, and justifying an opaque blob at review.
 usage: Load this skill before adding WASM to an extension, or when a working wasm-pack build breaks the moment it is loaded as one. Describe the workload — what it computes, roughly how long, what triggers it — and the AI will pick the target, write the manifest CSP and resource declarations, and generate the loader with the right lifecycle. Paste a CSP error or a detached-buffer exception and it will diagnose against sections 3.2 and 3.7.
 platforms: [Claude, Cursor]
-priceUsd: 8
+priceUsd: 0
 timeSavedHours: 20
 pocUrl: https://github.com/rustwasm/wasm-bindgen
 ---

@@ -4,7 +4,7 @@ category: DevOps
 description: Run real infrastructure as code with OpenTofu without the 3am state-lock panic or the plan that silently destroys your database. Covers remote state and locking, plan/apply discipline in CI, module interfaces, for_each vs count, moved blocks, drift, and provider pinning.
 usage: Load this skill before asking your AI assistant to write, refactor, or review any OpenTofu configuration. Say "use the OpenTofu IaC skill" and describe the infrastructure you want; the assistant will produce HCL that pins providers, uses for_each, guards stateful resources, and never hands you a `state mv` where a `moved` block belongs.
 platforms: [Claude, ChatGPT, Cursor, Copilot]
-priceUsd: 8
+priceUsd: 0
 timeSavedHours: 30
 pocUrl: https://github.com/opentofu/opentofu
 ---

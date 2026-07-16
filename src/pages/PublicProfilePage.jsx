@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useTheme, FONT_DISPLAY, FONT_UI } from '../tokens/theme';
+import { useTheme, FONT_HEAD, FONT_UI } from '../tokens/theme';
 import SkillCard from '../components/SkillCard.jsx';
 import { PageWrap, VerifiedStamp, SellerBdg, Stars, Downloads } from '../components/Shared.jsx';
 import { Avatar, ErrorBox, EmptyState, GhostButton } from '../components/ui.jsx';
@@ -53,7 +53,7 @@ export default function PublicProfilePage() {
           <Avatar name={p.name} src={p.avatarUrl} size={82} />
           <div className="profile-head-body" style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 5 }}>
-              <h1 style={{ fontFamily: FONT_DISPLAY, fontSize: 'clamp(21px,3vw,27px)', fontWeight: 700, color: c.text, margin: 0, letterSpacing: '-0.02em', lineHeight: 1.2 }}>{p.name}</h1>
+              <h1 style={{ fontFamily: FONT_HEAD, fontSize: 'clamp(21px,3vw,27px)', fontWeight: 700, color: c.text, margin: 0, letterSpacing: '-0.02em', lineHeight: 1.2 }}>{p.name}</h1>
               {p.verified && <VerifiedStamp size={22} />}
             </div>
             <p style={{ fontFamily: FONT_UI, fontSize: 12.5, color: c.gold, margin: '0 0 10px' }}>
@@ -87,7 +87,7 @@ export default function PublicProfilePage() {
         )}
 
         {/* ── Published skills ── */}
-        <h2 className="fade-up-d1" style={{ fontFamily: FONT_DISPLAY, fontSize: 19, fontWeight: 700, color: c.text, margin: '0 0 16px', letterSpacing: '-0.01em' }}>
+        <h2 className="fade-up-d1" style={{ fontFamily: FONT_HEAD, fontSize: 19, fontWeight: 700, color: c.text, margin: '0 0 16px', letterSpacing: '-0.01em' }}>
           Published skills
         </h2>
         {skills.length === 0 ? (

@@ -4,7 +4,7 @@ category: Coding
 description: Build a fair two-sided matching engine on DynamoDB and Lambda — sparse-GSI pool, race-proof transactional assignment, lifecycle states with TTL expiry, and match notifications. Distilled from the production matcher pairing product builders for mutual reviews at peerreview.tapdot.org.
 usage: Load this skill when building any system that pairs two sides of a marketplace — reviewers to products, mentors to mentees, drivers to riders, graders to submissions. Describe your two entities and fairness rules; the AI will apply the pool-index, transactional-claim, and lifecycle patterns to your schema and generate the matcher Lambda plus its triggers.
 platforms: [Claude, Cursor, ChatGPT]
-priceUsd: 8
+priceUsd: 6
 timeSavedHours: 20
 pocUrl: https://peerreview.tapdot.org
 ---

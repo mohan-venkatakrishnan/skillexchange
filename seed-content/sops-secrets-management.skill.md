@@ -4,7 +4,7 @@ category: DevOps
 description: Keep encrypted secrets in the same git repo as the code they configure, with diffs that still review cleanly and keys that rotate when people leave. Covers .sops.yaml creation rules, age versus cloud KMS, CI decryption via OIDC, key rotation, and the plaintext-commit drill.
 usage: Load this skill before asking your AI assistant to set up secrets handling, write a .sops.yaml, or wire decryption into CI. Say "use the SOPS secrets skill" and describe your environments and team size; the assistant will produce creation rules, a key backend choice with reasoning, and a CI job that never stores a long-lived decryption key.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 7
+priceUsd: 0
 timeSavedHours: 12
 pocUrl: https://github.com/getsops/sops
 ---

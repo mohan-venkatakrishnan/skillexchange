@@ -4,7 +4,7 @@ category: Other
 description: Write incident reviews that change the system instead of naming a culprit, and runbooks the on-call can actually execute at 3am. Includes a full postmortem template, a contributing-factors method that survives "human error," and action items with owners, dates, and a bar that stops "be more careful" from ever being filed again.
 usage: Load this skill after an incident, before you open the doc. Give your assistant the raw timeline, the alerts, and what people did, and it will draft the postmortem with a real contributing-factors section and action items sorted by whether they prevent, detect, or mitigate — then flag every item that's secretly just "try harder."
 platforms: [Claude, Cursor]
-priceUsd: 7
+priceUsd: 0
 timeSavedHours: 14
 pocUrl: https://sre.google/sre-book/postmortem-culture/
 ---

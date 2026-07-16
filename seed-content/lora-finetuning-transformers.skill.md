@@ -4,7 +4,7 @@ category: AI/ML
 description: Fine-tune open-weight LLMs with LoRA and QLoRA on a single consumer GPU without burning a week on failed runs. Covers when fine-tuning is the wrong tool, dataset construction, chat templates, rank/alpha choices, completion-only loss masking, and evaluation that catches quality regressions.
 usage: Load this skill before asking your AI assistant to plan or write any fine-tuning code. Say "use the LoRA fine-tuning skill" and describe your base model, your data, and what behaviour you want to change; the assistant will first challenge whether fine-tuning is appropriate, then produce a dataset spec, training config, and eval plan that follow these patterns.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 9
+priceUsd: 0
 timeSavedHours: 40
 pocUrl: https://github.com/huggingface/transformers
 ---

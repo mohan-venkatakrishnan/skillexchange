@@ -4,7 +4,7 @@ category: Desktop
 description: Turn an existing web tool into a signed-or-honestly-unsigned desktop app with auto-update, secure IPC, and one-command cross-platform builds. Distilled from shipping tapdot Desktop — a real Electron app wrapping 90+ browser tools — including the copy-pipeline, CSP, and electron-builder + GitHub Releases setup that actually worked.
 usage: Load this skill when packaging a web app or static site as a desktop application with Electron. Follow the security defaults in section 3.2 verbatim — they are non-negotiable — then adapt the packaging pipeline and release workflow to your repo layout. Use section 4 as a pre-ship review checklist.
 platforms: [Claude, ChatGPT, Gemini]
-priceUsd: 7
+priceUsd: 5
 timeSavedHours: 20
 pocUrl: https://tools.tapdot.org
 ---

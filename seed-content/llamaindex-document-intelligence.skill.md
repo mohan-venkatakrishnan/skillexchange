@@ -4,7 +4,7 @@ category: AI/ML
 description: Turn a messy document corpus into a queryable knowledge system with LlamaIndex — incremental ingestion with content-hash dedup, metadata that actually filters, and hierarchical retrieval that returns whole ideas instead of orphaned fragments. Covers the response synthesizer and index-type choices that quietly turn a $40/month system into a $4,000/month one.
 usage: Load this skill before asking your AI assistant to build or debug a LlamaIndex ingestion or query system. Say "use the LlamaIndex document intelligence skill" and describe your documents and who queries them; the assistant will produce an ingestion pipeline with a docstore, a metadata schema designed for filtering, and a query engine whose cost you can predict.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 20
 pocUrl: https://github.com/run-llama/llama_index
 ---

@@ -4,7 +4,7 @@ category: Testing
 description: Turn Playwright into a product immune system — a three-layer test pyramid topped by a live regression suite that runs against production as a release gate and nightly cron. Includes the sentinel test classes (CSS truncation, security headers, deep-link 200s, styled-chrome probes), zero-cost AI-provider mocking, and the determinism rules proven on a shipped SaaS.
 usage: Load this skill when setting up or hardening tests for a deployed web app. Start with Section 5 to stand up the two configs and global-setup, then add the Section 3 sentinel tests one class at a time — each one is copy-adaptable. Whenever a user reports a bug, return to this skill and encode the bug's CLASS as a new sentinel.
 platforms: [Claude, Cursor]
-priceUsd: 8
+priceUsd: 5
 timeSavedHours: 30
 pocUrl: https://launch.tapdot.org
 ---

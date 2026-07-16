@@ -4,7 +4,7 @@ category: Testing
 description: Build a unit suite that runs in seconds and still catches real bugs — correct environment choice, mock hoisting that doesn't bite, fake timers that don't deadlock, and coverage numbers you can act on. Prevents the two classic outcomes: a suite so slow nobody runs it pre-push, and a suite so mock-saturated it stays green while production burns.
 usage: Load this skill before asking your AI assistant to write, port, or speed up Vitest tests. Give it the module and the behavior you want pinned ("test the retry backoff in fetchWithRetry, including the timer path") and it will produce tests against the real module boundary, with `vi.mock` placed correctly and async-aware timer advancement instead of sleeps.
 platforms: [Claude, ChatGPT, Cursor, Copilot]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 10
 pocUrl: https://github.com/vitest-dev/vitest
 ---

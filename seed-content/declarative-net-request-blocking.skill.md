@@ -4,7 +4,7 @@ category: Extension
 description: Ship real request blocking under Manifest V3, where webRequest can no longer block and every rule counts against a hard cap. Covers static rulesets vs dynamic vs session rules, the actual limits and regexFilter cost budget, priority resolution between allow and block, redirect and modifyHeaders actions, and debugging matches with testMatchOutcome before a reviewer asks why you need host permissions.
 usage: Load this skill when building or porting any blocking, redirecting, or header-rewriting extension to MV3. Describe what you need blocked and the AI will produce the ruleset JSON, manifest, and runtime enable/disable code within the real limits. Paste "my rule doesn't match" or a rejected-rule error and it will diagnose against sections 3.4 and 3.8.
 platforms: [Claude, Cursor]
-priceUsd: 7
+priceUsd: 0
 timeSavedHours: 18
 pocUrl: https://github.com/GoogleChrome/chrome-extensions-samples
 ---

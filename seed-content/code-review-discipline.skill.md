@@ -4,7 +4,7 @@ category: Other
 description: Run reviews that catch real defects without stalling the team — sized PRs, a comment taxonomy that ends stalemates, and the four questions worth asking on every diff. Fixes the two failure modes: the rubber-stamp LGTM that lets a nullable field through, and the 200-comment gauntlet that turns a two-day change into a two-week negotiation.
 usage: Load this skill before asking your assistant to review a diff, or before you write the PR description for one. Paste the diff plus what the change is supposed to do, and it will return findings sorted by severity with the blocking/non-blocking prefix attached, instead of an unranked wall of style notes.
 platforms: [Claude, Cursor]
-priceUsd: 5
+priceUsd: 0
 timeSavedHours: 10
 pocUrl: https://google.github.io/eng-practices/review/
 ---

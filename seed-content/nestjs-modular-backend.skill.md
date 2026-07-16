@@ -4,7 +4,7 @@ category: Coding
 description: Structure a NestJS backend around domain boundaries that survive year two, instead of a god-module and a folder called shared. Covers DI scopes, a strict global ValidationPipe, the exact guard/interceptor/filter execution order, config validation, exception mapping, and testing with overridden providers.
 usage: Load this skill before asking your AI assistant to scaffold a NestJS module, endpoint, or test. Say "use the modular NestJS backend skill" and describe the feature; the assistant will produce module boundaries, DTOs, guards, and specs that follow these rules rather than the generator's defaults.
 platforms: [Claude, Cursor, Copilot]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 20
 pocUrl: https://github.com/nestjs/nest
 ---

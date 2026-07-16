@@ -35,8 +35,15 @@ export function claims(event) {
   return {
     userId: c.sub,
     email: c.email,
+    // NEVER fall back to cognito:username — for a federated user Cognito sets
+    // it to "Google_<sub>", which is not a handle anyone should ever see.
     username: (c['custom:username'] || '').toLowerCase() || null,
     name: c.name || null,
+    // iss is https://cognito-idp.<region>.amazonaws.com/<poolId>
+    poolId: (c.iss || '').split('/').pop() || null,
+    // The Cognito-side identifier (an email for native users, Google_<sub> for
+    // federated) — required to write attributes back with the admin API.
+    cognitoUsername: c['cognito:username'] || null,
   };
 }
 

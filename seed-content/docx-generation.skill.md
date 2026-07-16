@@ -4,7 +4,7 @@ category: Document
 description: Practical patterns for building real .docx files from data with the `docx` npm library — the Document/Paragraph/TextRun tree, named styles, numbering, DXA table widths, headers/footers, and the TOC field that will not populate the way you expect. Written for the moment someone asks for "the offer letter, but as an editable Word file, not a PDF" and you discover Word's unit system is twentieths of a point.
 usage: Load this skill when a user asks for .docx output, Word export, offer letters, contracts, or "editable version". Read §3.1 units first — half the bugs in this space are unit-conversion bugs. Build with named styles (§3.3), not inline formatting, and apply §4 as a review checklist.
 platforms: [Claude, Cursor]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 12
 pocUrl: https://github.com/dolanmiu/docx
 ---

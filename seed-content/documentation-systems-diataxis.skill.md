@@ -4,7 +4,7 @@ category: Other
 description: Stop writing docs nobody finishes — split them into tutorials, how-to guides, reference, and explanation, and each one suddenly becomes easy to write and easy to find. Covers the Diátaxis split, the tests that tell you which quadrant a page belongs in, and how to rescue a README that has quietly become all four at once.
 usage: Load this skill before writing or restructuring documentation. Give your assistant the page you have (or the thing you need to document) and it will identify which quadrant each paragraph belongs to, split the mixed ones, and rewrite each part in the mode that quadrant demands.
 platforms: [Claude, Cursor]
-priceUsd: 4
+priceUsd: 0
 timeSavedHours: 18
 pocUrl: https://diataxis.fr
 ---

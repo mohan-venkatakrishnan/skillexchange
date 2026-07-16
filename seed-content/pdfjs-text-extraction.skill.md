@@ -4,7 +4,7 @@ category: Document
 description: Hard-won patterns for pulling text and layout back out of existing PDFs in the browser with pdf.js — worker setup, glyph-run reassembly, reading order, column detection, and the font traps that silently corrupt your output. Written for people who discovered that getTextContent() returns positioned fragments, not sentences, and that a PDF with no text layer is an OCR problem wearing a PDF costume.
 usage: Load this skill when a user asks to read, search, parse, or extract text/tables from PDFs client-side. Run the §3.1 triage first — confirm the PDF even has a text layer before writing extraction code. Use §3.4 as the line-reconstruction reference implementation and §4 as a review checklist.
 platforms: [Claude, Cursor]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 14
 pocUrl: https://github.com/mozilla/pdf.js
 ---

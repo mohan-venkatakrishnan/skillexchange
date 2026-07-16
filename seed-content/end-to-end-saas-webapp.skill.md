@@ -4,7 +4,7 @@ category: Coding
 description: Build a complete production SaaS — React/Vite SPA, Cognito auth, API Gateway + Lambda + DynamoDB, all in Terraform — with the exact gotcha fixes (24h tokens, CORS on error responses, SPA rewrites, billing alarms) that cost real debugging days on a shipped product. Distilled from launch.tapdot.org, a live solo-built SaaS running on this exact stack for under $5/month.
 usage: Load this skill at the start of any session where you're building or extending a serverless SaaS. Tell the AI your product name and entities, then work through Section 5's steps in order — infrastructure first, auth second, features third. Every pattern here maps to a real file the AI should generate.
 platforms: [Claude, Cursor]
-priceUsd: 9
+priceUsd: 6
 timeSavedHours: 40
 pocUrl: https://launch.tapdot.org
 ---

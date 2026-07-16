@@ -4,7 +4,7 @@ category: Mobile
 description: Turn a two-hour manual release ritual into one green CI job — API-key auth instead of expiring 2FA sessions, shared signing that doesn't require a designated laptop, and staged rollouts on both stores. Written around the things that break at 6pm on a Friday: an expired session, a keychain prompt on a headless runner, and a build number App Store Connect has already seen.
 usage: Load this skill before asking your assistant to set up or repair Fastlane lanes. Give it your platforms, your CI, and what a release means to you ("tag → TestFlight + Play internal, manual promote to production") and it will produce Fastfile, Appfile, Matchfile, and the CI job with credential handling that works headlessly rather than only on your machine.
 platforms: [Claude, Cursor]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 24
 pocUrl: https://github.com/fastlane/fastlane
 ---

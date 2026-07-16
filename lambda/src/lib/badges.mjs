@@ -94,15 +94,34 @@ export function computeStats(skills, sellers) {
   const rated = skills.filter(s => (s.reviewsCount || 0) > 0);
   const avg = rated.length ? round1(rated.reduce((a, s) => a + (s.rating || 0), 0) / rated.length) : null;
   const categories = new Set(skills.map(s => s.category).filter(Boolean));
+  const timed = skills.filter(s => Number(s.timeSavedHours) > 0);
+  const avgSaved = timed.length ? Math.round(timed.reduce((a, s) => a + Number(s.timeSavedHours), 0) / timed.length) : null;
   // Every value is real or omitted — the home page filters out empties rather
-  // than printing "0 downloads" to a first-time visitor.
+  // than printing "0 downloads" to a first-time visitor. Headline counts are
+  // rounded DOWN to a "+" figure (100 -> "90+"), which is both nicer to read
+  // and never overstates: the real number is always at least what we claim.
   return {
-    skills: fmt(skills.length),
-    categories: String(categories.size),
+    skills: floorPlus(skills.length),
+    categories: floorPlus(categories.size),
     downloads: downloads ? fmt(downloads) : '0',
-    builders: fmt(Object.keys(sellers).length),
+    builders: floorPlus(Object.keys(sellers).length),
     avgRating: avg ? `${avg}★` : '—',
+    avgTimeSaved: avgSaved ? `~${avgSaved}h` : null,
   };
+}
+
+/* 100 -> "90+", 16 -> "15+", 13 -> "10+", 7 -> "5+", 3 -> "3".
+   Rounds DOWN to a friendly step, and uses (n-1) so an exact boundary steps
+   back: with 100 skills, "100+" would claim MORE than 100 — the "+" has to be
+   earned. This way the real number is always strictly greater than the claim. */
+export function floorPlus(n) {
+  if (n < 5) return String(n);
+  // Step stays at 5 right up to 100 — an earlier version widened it at 20,
+  // which rendered 20 as "10+" and undersold the catalogue by half.
+  const step = n < 100 ? 5 : n < 200 ? 10 : n < 1000 ? 50 : 100;
+  const floored = Math.floor((n - 1) / step) * step;
+  if (floored < step) return String(n); // too small for a meaningful "+"
+  return `${floored.toLocaleString()}+`;
 }
 
 function round1(n) { return Math.round(n * 10) / 10; }

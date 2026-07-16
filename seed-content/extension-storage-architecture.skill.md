@@ -4,7 +4,7 @@ category: Extension
 description: Settings architecture for browser extensions that survives the sync quota, the worker restart, and the two-devices-editing-at-once race. Covers the real chrome.storage.sync limits (100KB total, 8KB per item, 512 items, write-rate ceilings), a typed defaults + schema-migration module, and storage.onChanged as the single source of truth across popup, options page, and background.
 usage: Load this skill before designing or refactoring an extension's settings layer. Describe your settings — what they are, which must roam across devices, which are secrets — and the AI will produce the typed module, defaults, migration ladder, and onChanged wiring. Paste "settings randomly revert" or a QUOTA_BYTES error and it will diagnose against sections 3.2 and 3.5.
 platforms: [Claude, Cursor]
-priceUsd: 5
+priceUsd: 0
 timeSavedHours: 12
 pocUrl: https://github.com/wxt-dev/wxt
 ---

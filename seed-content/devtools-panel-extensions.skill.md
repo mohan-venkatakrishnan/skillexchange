@@ -4,7 +4,7 @@ category: Extension
 description: Build a real Chrome DevTools panel — the surface with four JavaScript contexts, none of which can talk to each other directly. Covers the devtools_page bootstrap, message routing through the background keyed by inspectedWindow.tabId, escaping the eval sandbox to reach page globals, surviving navigation and panel-close, theme detection, and keeping a high-frequency event stream from melting the panel.
 usage: Load this skill before building any DevTools panel or debugging one that goes blank on reload. Describe what your panel inspects and the AI will produce the manifest, devtools page, background router, and page bridge with the tabId plumbing already correct. Paste "my panel is empty after refresh" or "sendMessage from the panel does nothing" and it will diagnose against sections 3.3 and 3.6.
 platforms: [Claude, Cursor]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 14
 pocUrl: https://github.com/reduxjs/redux-devtools
 ---

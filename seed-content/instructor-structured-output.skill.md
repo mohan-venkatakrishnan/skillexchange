@@ -4,7 +4,7 @@ category: AI/ML
 description: Turn an LLM into a typed function that returns validated Pydantic objects instead of JSON you have to pray about. Covers schema-as-prompt design, validators as self-healing retry signals, grounding fields, and the schema shapes that quietly cause hallucination.
 usage: Load this skill before asking your AI assistant to build any extraction, classification, or structured-generation feature. Say "use the Instructor structured output skill" and describe the data you need out of the text; the assistant will design the Pydantic model first and the prompt second.
 platforms: [Claude, ChatGPT, Cursor, Copilot]
-priceUsd: 4
+priceUsd: 0
 timeSavedHours: 12
 pocUrl: https://github.com/567-labs/instructor
 ---

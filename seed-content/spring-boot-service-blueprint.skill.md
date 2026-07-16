@@ -4,7 +4,7 @@ category: Coding
 description: Build a Spring Boot service that is testable, observable, and free of the proxy and lazy-loading traps that cost teams entire sprints. Covers constructor injection, typed configuration records, @Transactional self-invocation, @EntityGraph, DTO projections, a single error contract, and Testcontainers.
 usage: Load this skill before asking your AI assistant to create a controller, service, repository, or configuration class in a Spring Boot project. Say "use the Spring Boot blueprint skill" and describe the endpoint; the assistant will produce constructor-injected beans, DTO projections, and integration tests instead of field-injected entity-returning boilerplate.
 platforms: [Claude, Cursor]
-priceUsd: 7
+priceUsd: 0
 timeSavedHours: 24
 pocUrl: https://github.com/spring-projects/spring-boot
 ---

@@ -4,7 +4,7 @@ category: AI/ML
 description: Build and serve image generation pipelines with Diffusers without black outputs, silently truncated prompts, or OOM at batch size 4. Covers pipeline anatomy, SDXL vs SD 1.5 trade-offs, scheduler and CFG choices, real reproducibility, VRAM reduction with measured numbers, and a job-queue serving pattern built for 2-10 second latency.
 usage: Load this skill before asking your AI assistant to write generation code or design an image API. Say "use the Diffusers image generation skill" and describe your target resolution, GPU, and throughput; the assistant will pick a base model and scheduler with reasons, flag the model weight license separately from the library license, and produce serving code that assumes generation is slow rather than pretending it is a REST call.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 18
 pocUrl: https://github.com/huggingface/diffusers
 ---

@@ -4,7 +4,7 @@ category: Coding
 description: Build a payment webhook handler that never grants or revokes an entitlement incorrectly — HMAC-verified, idempotent, email-safe, and testable for $0. Distilled from a shipped production webhook (LemonSqueezy → Lambda → DynamoDB) at peerreview.tapdot.org.
 usage: Load this skill before wiring any payment provider webhook (LemonSqueezy, Stripe, Razorpay, Paddle) to a serverless backend. Tell the AI which provider and datastore you use; it will apply these verification, identity-resolution, and idempotency patterns to your handler and generate the zero-spend synthetic test harness.
 platforms: [Claude, Cursor, ChatGPT]
-priceUsd: 7
+priceUsd: 6
 timeSavedHours: 12
 pocUrl: https://peerreview.tapdot.org
 ---

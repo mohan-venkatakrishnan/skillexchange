@@ -4,7 +4,7 @@ category: Data
 description: Run Superset as real BI infrastructure instead of a SQL Lab window that falls over the first time twelve charts refresh at once. Covers physical vs virtual datasets, a semantic layer built from dataset metrics, async Celery query workers, row-level security for multi-tenant dashboards, cache warmup, and dashboards versioned as YAML in git.
 usage: Load this skill before asking your AI assistant to design a Superset deployment, model a dataset, or debug a slow dashboard. Say "use the Superset dashboards skill" and describe your warehouse and audience; the assistant will produce dataset models, metrics, RLS filters, and config that scale past the demo, instead of a pile of one-off virtual datasets.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 18
 pocUrl: https://github.com/apache/superset
 ---

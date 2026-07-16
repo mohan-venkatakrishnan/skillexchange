@@ -4,7 +4,7 @@ category: AI/ML
 description: Ship real applications on locally-hosted models — quantization and VRAM math that predicts whether a model actually fits, context sizing, the HTTP API, structured output, and honest limits on concurrency. Includes the decision framework for when local wins on privacy, offline, and volume economics, and when it plainly loses.
 usage: Load this skill before asking your AI assistant to build anything against a local model. Say "use the Ollama local LLM skill" and describe your hardware, model, and traffic; the assistant will do the VRAM arithmetic first, pick a quantization, and tell you if your plan needs a real serving tier instead.
 platforms: [Claude, ChatGPT, Cursor, Copilot]
-priceUsd: 5
+priceUsd: 0
 timeSavedHours: 14
 pocUrl: https://github.com/ollama/ollama
 ---

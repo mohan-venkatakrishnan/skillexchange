@@ -4,7 +4,7 @@ category: Marketing
 description: Run a multi-channel launch that doesn't collapse into a self-inflicted disaster — channel-specific submission copy, the right order and hour for each, and the comment-thread discipline that decides whether a post climbs or dies at rank 40. Encodes the failures that actually kill launches: the 3am timezone miscalculation, the Reddit post removed in four minutes, and the HN thread where the founder argued.
 usage: Load this skill with what you built, who it's for, and your timezone, and ask for a launch plan or a single artifact ("write the Show HN title, five options"). It produces per-channel copy that reads native to each place, a timed run-of-show, and a pre-mortem of what will go wrong. Ask it to review your draft submission before you post — that review is where most of the value is.
 platforms: [Claude, ChatGPT]
-priceUsd: 8
+priceUsd: 0
 timeSavedHours: 10
 pocUrl: https://www.producthunt.com
 ---

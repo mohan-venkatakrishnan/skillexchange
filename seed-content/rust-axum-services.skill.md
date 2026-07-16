@@ -4,7 +4,7 @@ category: Coding
 description: Build a production Axum service without fighting the type system — extractors in the right order, one domain error enum that becomes every HTTP response, and tower layers that wrap in the direction you meant. Covers State vs Extension, custom auth extractors, sqlx pools, tracing, graceful shutdown, and the borrow errors that eat an afternoon.
 usage: Load this skill before asking your AI assistant to write or refactor an Axum service. Say "use the Axum web services skill", name your Axum version, and describe your routes; the assistant will produce handlers, extractors, error types, and oneshot tests that compile the first time instead of the trait soup an untrained model emits.
 platforms: [Claude, Cursor]
-priceUsd: 8
+priceUsd: 0
 timeSavedHours: 26
 pocUrl: https://github.com/tokio-rs/axum
 ---

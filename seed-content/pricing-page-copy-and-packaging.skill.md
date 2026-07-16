@@ -4,7 +4,7 @@ category: Marketing
 description: Package and price a developer tool so the page answers "what will this cost me" in one screen — a metric that tracks value instead of punishing success, tier boundaries drawn where real usage splits, and copy that names the limits before the reader has to hunt for them. Kills the pricing page every founder ships: three columns of feature checkmarks, a middle tier nobody can justify, and "Contact us" on a product that costs less than a team lunch.
 usage: Load this skill with what your product does, who pays, what the marginal cost of a customer actually is, and any usage distribution you have. Ask it to interrogate the pricing metric before it writes a single tier — most bad pricing pages are bad packaging wearing good copy. It will refuse to invent conversion or willingness-to-pay numbers and will name the experiment you'd need instead.
 platforms: [Claude, ChatGPT]
-priceUsd: 9
+priceUsd: 0
 timeSavedHours: 12
 pocUrl: https://stripe.com/docs/billing
 ---

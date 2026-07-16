@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useTheme, FONT_DISPLAY, FONT_UI } from '../tokens/theme';
+import { useTheme, FONT_HEAD, FONT_UI } from '../tokens/theme';
 import { PageWrap, VerifiedStamp } from '../components/Shared.jsx';
 import { Card, Input, Textarea, GoldButton } from '../components/ui.jsx';
 import { Ic } from '../components/Icons.jsx';
@@ -92,7 +92,7 @@ export default function GetVerifiedPage({ user, onShowAuth }) {
         <div className="fade-up" style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 26 }}>
           <VerifiedStamp size={46} />
           <div>
-            <h1 style={{ fontFamily: FONT_DISPLAY, fontSize: 'clamp(22px,3vw,28px)', fontWeight: 700, color: c.text, margin: '0 0 5px', letterSpacing: '-0.02em' }}>Get Verified</h1>
+            <h1 style={{ fontFamily: FONT_HEAD, fontSize: 'clamp(22px,3vw,28px)', fontWeight: 700, color: c.text, margin: '0 0 5px', letterSpacing: '-0.02em' }}>Get Verified</h1>
             <p style={{ fontFamily: FONT_UI, fontSize: 13.5, color: c.textMuted, margin: 0 }}>Earn the Verified Creator badge and build buyer trust.</p>
           </div>
         </div>
@@ -111,7 +111,7 @@ export default function GetVerifiedPage({ user, onShowAuth }) {
         </div>
 
         {/* ── Progress stepper ── */}
-        <h2 className="fade-up-d1" style={{ fontFamily: FONT_DISPLAY, fontSize: 19, fontWeight: 700, color: c.text, margin: '0 0 18px', letterSpacing: '-0.01em' }}>Verification progress</h2>
+        <h2 className="fade-up-d1" style={{ fontFamily: FONT_HEAD, fontSize: 19, fontWeight: 700, color: c.text, margin: '0 0 18px', letterSpacing: '-0.01em' }}>Verification progress</h2>
         <div className="fade-up-d2" style={{ marginBottom: 30 }}>
           {STEPS.map((s, i) => (
             <Step key={s.label} step={s} index={i} last={i === STEPS.length - 1} submitted={applied} />
@@ -121,7 +121,7 @@ export default function GetVerifiedPage({ user, onShowAuth }) {
         {/* ── Application ── */}
         {!applied ? (
           <Card className="fade-up-d3" style={{ padding: 22 }}>
-            <h2 style={{ fontFamily: FONT_DISPLAY, fontSize: 17, fontWeight: 700, color: c.text, margin: '0 0 18px', letterSpacing: '-0.01em' }}>Apply for verification</h2>
+            <h2 style={{ fontFamily: FONT_HEAD, fontSize: 17, fontWeight: 700, color: c.text, margin: '0 0 18px', letterSpacing: '-0.01em' }}>Apply for verification</h2>
             <Input label="Your best skill URL" value={url} testId="verify-url"
               onChange={e => { setUrl(e.target.value); setError(''); }}
               placeholder="Link to your published skill" />
@@ -143,7 +143,7 @@ export default function GetVerifiedPage({ user, onShowAuth }) {
                 <Ic.Check s={22} c={c.green} />
               </span>
             </div>
-            <h2 style={{ fontFamily: FONT_DISPLAY, fontSize: 20, fontWeight: 700, color: c.text, margin: '0 0 8px', letterSpacing: '-0.01em' }}>Application submitted</h2>
+            <h2 style={{ fontFamily: FONT_HEAD, fontSize: 20, fontWeight: 700, color: c.text, margin: '0 0 8px', letterSpacing: '-0.01em' }}>Application submitted</h2>
             <p style={{ fontFamily: FONT_UI, fontSize: 13.5, color: c.textMuted, margin: 0, lineHeight: 1.6 }}>
               We'll review your proof of concept and get back to you within 48 hours.
             </p>

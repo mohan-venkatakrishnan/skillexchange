@@ -4,7 +4,7 @@ category: Website
 description: Build an Eleventy site that passes Core Web Vitals on real devices and gets indexed correctly the first time. Covers build-time performance budgets, responsive images, critical CSS, JSON-LD from front matter, canonicals, sitemaps, and why your Lighthouse 100 lies to you.
 usage: Load this skill before asking your AI assistant to set up, audit, or speed up an Eleventy site. Say "use the Eleventy SEO and performance skill" and describe your site; the assistant will produce config, templates, and data files that follow these patterns instead of blog-post boilerplate.
 platforms: [Claude, ChatGPT, Cursor, Copilot]
-priceUsd: 5
+priceUsd: 0
 timeSavedHours: 12
 pocUrl: https://github.com/11ty/eleventy
 ---

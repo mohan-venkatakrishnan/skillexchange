@@ -4,7 +4,7 @@ category: Coding
 description: Model a Postgres schema in Prisma and evolve it without downtime, data loss, or a migrations folder nobody trusts. Covers relations, expand/contract renames, transaction semantics, connection pooling in serverless, and the query patterns that quietly cost 40 round trips per request.
 usage: Load this skill before asking your AI assistant to touch schema.prisma or generate any migration. Say "use the Prisma schema and migration discipline skill", then describe the entity or change you want; the assistant will produce a schema, a migration strategy, and query code that follow these rules rather than the quickstart's happy path.
 platforms: [Claude, Cursor, ChatGPT]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 16
 pocUrl: https://github.com/prisma/prisma
 ---

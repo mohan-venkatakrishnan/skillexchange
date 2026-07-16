@@ -1,13 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useTheme, FONT_DISPLAY, FONT_UI } from '../tokens/theme';
+import { useTheme, FONT_HEAD, FONT_UI } from '../tokens/theme';
 import Logo from './Logo.jsx';
 import { Ic } from './Icons.jsx';
-import { GoldButton, Input, Label } from './ui.jsx';
+import { GoldButton, Input } from './ui.jsx';
+import UsernameField, { USERNAME_RE } from './UsernameField.jsx';
 import { signIn, signUp, confirmSignUp, signInWithGoogle, refreshProfile } from '../lib/auth.js';
-import { checkUsername } from '../lib/api.js';
-
-const USERNAME_RE = /^[a-z0-9_]{3,24}$/;
 
 export default function AuthModal({ onClose, onLogin }) {
   const { c } = useTheme();
@@ -16,33 +14,16 @@ export default function AuthModal({ onClose, onLogin }) {
   const [email, setEmail] = useState('');
   const [pw, setPw] = useState('');
   const [uname, setUname] = useState('');
-  const [unameStatus, setUnameStatus] = useState(null); // checking | available | taken | invalid
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [needsConfirm, setNeedsConfirm] = useState(false);
   const [code, setCode] = useState('');
-  const checkTimer = useRef(null);
 
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
-
-  const onUnameChange = (v) => {
-    const val = v.toLowerCase().trim();
-    setUname(val); setError('');
-    clearTimeout(checkTimer.current);
-    if (!val) { setUnameStatus(null); return; }
-    if (!USERNAME_RE.test(val)) { setUnameStatus('invalid'); return; }
-    setUnameStatus('checking');
-    checkTimer.current = setTimeout(async () => {
-      try {
-        const { available } = await checkUsername(val);
-        setUnameStatus(available ? 'available' : 'taken');
-      } catch { setUnameStatus(null); /* re-checked server-side at signup */ }
-    }, 350);
-  };
 
   const finish = async (session) => {
     // The handle lives in DynamoDB; pull it before the nav paints.
@@ -55,7 +36,6 @@ export default function AuthModal({ onClose, onLogin }) {
     if (tab === 'signup') {
       if (!name.trim() || name.trim().length < 2) { setError('Tell us your name — buyers see it on your listings.'); return; }
       if (!USERNAME_RE.test(uname)) { setError('Username: 3–24 characters, lowercase letters, numbers, underscores.'); return; }
-      if (unameStatus === 'taken') { setError('That username is taken.'); return; }
     }
     if (!email.trim() || !pw) { setError('Email and password are required.'); return; }
     setBusy(true);
@@ -85,12 +65,6 @@ export default function AuthModal({ onClose, onLogin }) {
     if (s?.mock) onLogin(s); // mock mode resolves synchronously
   };
 
-  const hint = unameStatus === 'checking' ? { t: 'Checking availability…', col: c.textMuted }
-    : unameStatus === 'available' ? { t: '✓ Available', col: c.green }
-    : unameStatus === 'taken' ? { t: '✗ Already taken', col: c.coral }
-    : unameStatus === 'invalid' ? { t: '3–24 characters: a–z, 0–9, _', col: c.coral }
-    : null;
-
   return createPortal(
     <div onClick={onClose} role="dialog" aria-modal="true"
       style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.66)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, animation: 'overlayIn 0.15s ease', overflowY: 'auto' }}>
@@ -100,7 +74,7 @@ export default function AuthModal({ onClose, onLogin }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Logo size={26} />
-            <h2 style={{ fontFamily: FONT_DISPLAY, fontSize: 19, fontWeight: 700, color: c.text, margin: 0, letterSpacing: '-0.02em' }}>
+            <h2 style={{ fontFamily: FONT_HEAD, fontSize: 19, fontWeight: 700, color: c.text, margin: 0, letterSpacing: '-0.02em' }}>
               {needsConfirm ? 'Confirm your email' : tab === 'signin' ? 'Welcome back' : 'Join Skill Exchange'}
             </h2>
           </div>
@@ -150,14 +124,8 @@ export default function AuthModal({ onClose, onLogin }) {
               <>
                 <Input label="Your name" value={name} onChange={e => { setName(e.target.value); setError(''); }}
                   placeholder="e.g. Mohan Venkatakrishnan" testId="signup-name" />
-                <div style={{ marginBottom: 16 }}>
-                  <Label>Username</Label>
-                  <input value={uname} onChange={e => onUnameChange(e.target.value)} placeholder="Choose a unique handle" data-testid="signup-username"
-                    style={{ width: '100%', background: c.surface, border: `1px solid ${hint?.col === c.coral ? c.coral : hint?.col === c.green ? c.green : c.border}`, borderRadius: 10, padding: '11px 13px', fontSize: 13, color: c.text, fontFamily: FONT_UI, boxSizing: 'border-box', outline: 'none' }} />
-                  <p style={{ fontFamily: FONT_UI, fontSize: 11, color: hint ? hint.col : c.textMuted, margin: '6px 2px 0' }}>
-                    {hint ? hint.t : 'Permanent and unique — it becomes your profile URL.'}
-                  </p>
-                </div>
+                <UsernameField value={uname} onChange={v => { setUname(v); setError(''); }}
+                  hint="Permanent and unique — it becomes your profile URL." />
               </>
             )}
 

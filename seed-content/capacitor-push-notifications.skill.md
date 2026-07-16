@@ -4,7 +4,7 @@ category: Mobile
 description: Wire APNs and FCM into a Capacitor app end to end — entitlements, channels, token lifecycle, tap routing on cold start, and payloads shaped so iOS and Android behave the same instead of almost the same. Covers the failures that only appear in production: silent iOS pushes throttled to nothing, Android 13 permission never requested, and a token that rotated while you weren't watching.
 usage: Load this skill before asking your assistant to add or debug push in a Capacitor app. State your platforms, whether you need alerts or silent data delivery, and what a tap should open ("tap opens /orders/:id, must work from cold start"), and it will produce the entitlement and channel setup, the token registration flow, and the exact server payload for both transports.
 platforms: [Claude, Cursor]
-priceUsd: 7
+priceUsd: 0
 timeSavedHours: 18
 pocUrl: https://github.com/ionic-team/capacitor
 ---

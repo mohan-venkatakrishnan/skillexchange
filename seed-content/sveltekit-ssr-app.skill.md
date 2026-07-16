@@ -4,7 +4,7 @@ category: Website
 description: Build genuinely server-rendered apps with SvelteKit instead of a client-side SPA wearing an SSR costume. Covers the load-function contract, form actions, session hooks, streaming, the server-only boundary, and the adapter decisions that bite you at deploy time.
 usage: Load this skill before asking your AI assistant to scaffold or extend any SvelteKit app. Say "use the SvelteKit SSR skill" and describe your routes and auth model; the assistant will produce load functions, actions, and hooks that respect the server boundary instead of the useEffect-and-fetch habits carried over from React.
 platforms: [Claude, ChatGPT, Cursor, Gemini]
-priceUsd: 7
+priceUsd: 0
 timeSavedHours: 18
 pocUrl: https://github.com/sveltejs/kit
 ---

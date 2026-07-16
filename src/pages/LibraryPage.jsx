@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme, FONT_DISPLAY, FONT_UI } from '../tokens/theme';
+import { useTheme, FONT_HEAD, FONT_UI } from '../tokens/theme';
 import { PageWrap, TimeSaved, Stars, Downloads, Price } from '../components/Shared.jsx';
 import { Card, PageTitle, ErrorBox, EmptyState, GoldButton, GhostButton } from '../components/ui.jsx';
 import SkillIcon from '../components/SkillIcon.jsx';
@@ -66,7 +66,7 @@ export default function LibraryPage() {
                         <div style={{ fontFamily: FONT_UI, fontSize: 10, fontWeight: 700, color: c.slate, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
                           {s.category}
                         </div>
-                        <div style={{ fontFamily: FONT_DISPLAY, fontSize: 16, fontWeight: 600, color: c.text, letterSpacing: '-0.01em', marginBottom: 6 }}>
+                        <div style={{ fontFamily: FONT_HEAD, fontSize: 16, fontWeight: 600, color: c.text, letterSpacing: '-0.01em', marginBottom: 6 }}>
                           {s.title}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>

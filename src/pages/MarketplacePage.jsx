@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useTheme, FONT_DISPLAY, FONT_UI } from '../tokens/theme';
+import { useTheme, FONT_HEAD, FONT_UI } from '../tokens/theme';
 import SkillCard from '../components/SkillCard.jsx';
 import Select from '../components/Select.jsx';
 import Loader from '../components/Loader.jsx';
@@ -26,7 +26,7 @@ const SORTS = [
 export default function MarketplacePage() {
   const { c } = useTheme();
   const [params, setParams] = useSearchParams();
-  const skills = useFetch(() => api.listSkills(), []);
+  const skills = useFetch(() => api.listSkills(), [], { key: 'skills' });
 
   const cat = params.get('cat') || 'All';
   const platform = params.get('platform') || 'All';
@@ -101,7 +101,7 @@ export default function MarketplacePage() {
       <div style={{ maxWidth: 1320, margin: '0 auto', padding: '26px clamp(16px,3.5vw,32px) 0' }}>
         {/* ── Search header ── */}
         <div className="fade-up" style={{ marginBottom: 22 }}>
-          <h1 style={{ fontFamily: FONT_DISPLAY, fontSize: 'clamp(21px,3vw,27px)', color: c.text, margin: '0 0 14px' }}>Browse skills</h1>
+          <h1 style={{ fontFamily: FONT_HEAD, fontSize: 'clamp(21px,3vw,27px)', color: c.text, margin: '0 0 14px' }}>Browse skills</h1>
           <div style={{ position: 'relative', maxWidth: 620 }}>
             <div style={{ position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}><Ic.Search s={15} c={c.textMuted} /></div>
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search skills, authors, categories…" data-testid="marketplace-search"

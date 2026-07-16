@@ -4,7 +4,7 @@ category: Coding
 description: Build a smooth, dependency-free node-graph/canvas UI in React — pan/zoom, pointer-captured node dragging, bezier edge rendering, selection, and keyboard shortcuts — using the interaction and rendering patterns proven in LaunchPad's shipped canvas layer. Every primitive here (tap-vs-drag discrimination, DPR-correct canvas loops, SVG path edges, RAF lifecycle hygiene) runs in production today.
 usage: Load this skill when building any spatial canvas UI — node editors, flow builders, mind maps, pipeline designers. Give the AI your node/edge data shape, then implement Section 5's steps in order; the pointer-capture and coordinate-space patterns in Section 3 are the load-bearing parts, so apply them verbatim before adding features.
 platforms: [Claude, Cursor]
-priceUsd: 7
+priceUsd: 5
 timeSavedHours: 24
 pocUrl: https://launch.tapdot.org
 ---

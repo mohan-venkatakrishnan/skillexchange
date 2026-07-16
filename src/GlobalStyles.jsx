@@ -1,4 +1,4 @@
-import { useTheme, FONT_UI, FONT_DISPLAY } from './tokens/theme';
+import { useTheme, FONT_UI, FONT_HEAD } from './tokens/theme';
 
 /* Global keyframes + resets. Rendered once; only theme colours vary. */
 export default function GlobalStyles() {
@@ -17,7 +17,7 @@ export default function GlobalStyles() {
       -moz-osx-font-smoothing: grayscale;
       text-rendering: optimizeLegibility;
     }
-    h1, h2, h3 { font-family: ${FONT_DISPLAY}; letter-spacing: -0.02em; }
+    h1, h2, h3 { font-family: ${FONT_HEAD}; letter-spacing: -0.02em; }
 
     @keyframes rotateMark { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -72,14 +72,41 @@ export default function GlobalStyles() {
       box-shadow: 0 8px 24px rgba(0,0,0,0.4); pointer-events: none;
     }
 
-    .nav-desktop-links { display: flex; gap: 2px; flex: 1; min-width: 0; }
+    /* Nav links sit in the CENTRE of the bar, not shoved against the brand.
+       The three-column grid keeps them optically centred regardless of how
+       wide the brand or the actions get — flex + margin:auto would drift as
+       soon as the signed-in username changes length. */
+    .nav-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+    }
+    .nav-desktop-links { display: flex; gap: 2px; justify-content: center; min-width: 0; }
+    .nav-actions { display: flex; gap: 8px; align-items: center; justify-content: flex-end; }
     .nav-hamburger { display: none; }
     .nav-brand-text { display: inline; }
-    @media (max-width: 860px) {
+    @media (max-width: 1080px) {
       .nav-desktop-links { display: none !important; }
       .nav-hamburger { display: flex !important; }
+      .nav-grid { grid-template-columns: auto 1fr; }
     }
     @media (max-width: 420px) { .nav-brand-text { display: none; } }
+
+    /* Category tiles. 13 is prime-ish: NO fixed column count divides it, so a
+       grid always strands the remainder on a ragged last row — that was the
+       "goes on a new line" complaint. A centred flex wrap makes the short last
+       row read as deliberate at every width instead. */
+    .cat-grid {
+      display: flex !important;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .cat-grid > button {
+      flex: 0 1 160px;
+    }
+    @media (max-width: 620px) { .cat-grid > button { flex: 1 1 128px; } }
 
     /* Marketplace shell: category rail collapses under the content on narrow */
     @media (max-width: 900px) {

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useTheme, FONT_DISPLAY, FONT_UI, FONT_MONO } from '../tokens/theme';
+import { useTheme, FONT_HEAD, FONT_UI, FONT_MONO } from '../tokens/theme';
 import { PageWrap } from '../components/Shared.jsx';
 import { Card, Input, GoldButton, GhostButton, ErrorBox, EmptyState } from '../components/ui.jsx';
 import Select from '../components/Select.jsx';
@@ -48,7 +48,7 @@ export default function AdminPage() {
       <div style={{ padding: '30px clamp(16px,4vw,40px) 0', maxWidth: 900, margin: '0 auto' }}>
         <div className="fade-up" style={{ marginBottom: 26 }}>
           <div style={{ fontFamily: FONT_UI, fontSize: 11, color: c.gold, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 9 }}>Founder access only</div>
-          <h1 style={{ fontFamily: FONT_DISPLAY, fontSize: 'clamp(22px,3vw,28px)', fontWeight: 700, color: c.text, margin: '0 0 7px', letterSpacing: '-0.02em' }}>Superadmin</h1>
+          <h1 style={{ fontFamily: FONT_HEAD, fontSize: 'clamp(22px,3vw,28px)', fontWeight: 700, color: c.text, margin: '0 0 7px', letterSpacing: '-0.02em' }}>Superadmin</h1>
           <p style={{ fontFamily: FONT_UI, fontSize: 13.5, color: c.textMuted, margin: 0 }}>Moderation queue, badges, and jobs.</p>
         </div>
         {loggedIn
@@ -109,7 +109,7 @@ function Section({ title, count, children }) {
   return (
     <section>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 9, marginBottom: 12 }}>
-        <h2 style={{ fontFamily: FONT_DISPLAY, fontSize: 18, fontWeight: 700, color: c.text, margin: 0, letterSpacing: '-0.01em' }}>{title}</h2>
+        <h2 style={{ fontFamily: FONT_HEAD, fontSize: 18, fontWeight: 700, color: c.text, margin: 0, letterSpacing: '-0.01em' }}>{title}</h2>
         {count > 0 && (
           <span style={{ fontFamily: FONT_UI, fontSize: 10.5, fontWeight: 700, color: c.gold, background: c.goldSoft, border: `1px solid ${c.gold}35`, borderRadius: 20, padding: '2px 9px' }}>{count}</span>
         )}

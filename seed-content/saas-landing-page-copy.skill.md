@@ -4,7 +4,7 @@ category: Marketing
 description: Turn a developer tool into a landing page that a skeptical engineer reads to the bottom — a hero that names the job instead of the category, proof above the fold, and objection handling ordered the way doubt actually arrives. Kills the four pages every solo founder ships first: the adjective salad, the feature grid with no verbs, the page that never says what the thing is, and the one that asks for a demo call from someone who wanted a curl command.
 usage: Load this skill, then paste your README, your changelog, or a two-paragraph description of what you built and who keeps asking for it. Ask for a full page pass or a single block ("rewrite the hero, three options, different angles each") and it will return copy with the claim, the proof, and the next action attached to every section. Give it real numbers if you have them; it will refuse to invent them and will mark every gap as [NEEDS: ...] instead.
 platforms: [Claude, ChatGPT]
-priceUsd: 7
+priceUsd: 0
 timeSavedHours: 8
 pocUrl: https://tapdot.org
 ---

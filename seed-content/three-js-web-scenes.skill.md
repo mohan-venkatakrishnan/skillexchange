@@ -4,7 +4,7 @@ category: Design
 description: Ship web 3D that loads fast, looks lit rather than rendered, and doesn't leak memory when the route unmounts. Covers color management and tone mapping, PBR lighting, glTF/Draco budgets, raycasting, instancing, disposal discipline, and the reduced-motion and no-WebGL fallbacks most demos skip.
 usage: Load this skill before asking your AI assistant to build or debug a Three.js scene — a product viewer, a hero animation, a data sculpture. Describe the scene, the target device, and your asset budget; the assistant will set up renderer color management correctly, keep draw calls bounded, and write the teardown path in the same pass as the setup path.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 7
+priceUsd: 0
 timeSavedHours: 24
 pocUrl: https://github.com/mrdoob/three.js
 ---

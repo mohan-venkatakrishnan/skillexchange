@@ -4,7 +4,7 @@ category: Design
 description: Treat Storybook as the executable spec for your component library, not a screenshot gallery nobody opens. Covers CSF3 meta/args/argTypes, play functions as real interaction tests, decorators for context, a11y triage, per-story MSW mocking, and using stories as the artifact designers actually review.
 usage: Load this skill before asking your AI assistant to write stories, set up Storybook, or add interaction tests to a component. Name the component and its states; the assistant will produce CSF3 stories with typed args, a play function for the interactive path, and the decorators the component needs — rather than one "Default" story with no coverage.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 5
+priceUsd: 0
 timeSavedHours: 16
 pocUrl: https://github.com/storybookjs/storybook
 ---

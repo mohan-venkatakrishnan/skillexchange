@@ -1,11 +1,15 @@
 // Authenticated routes: /me, /library, /verify, publish flow, reviews, buy/
 // confirm/download. Identity comes exclusively from the Cognito authorizer.
 import crypto from 'node:crypto';
-import { db, skillToApi, profileToApi } from './lib/db.mjs';
+import { CognitoIdentityProviderClient, AdminUpdateUserAttributesCommand } from '@aws-sdk/client-cognito-identity-provider';
+import { db, TABLE, skillToApi, profileToApi } from './lib/db.mjs';
 import { presignPut, presignGet, skillFileKey, screenshotKey, avatarKey } from './lib/s3.mjs';
 import { ok, bad, forbidden, notFound, conflict, unavailable, parseBody, claims, route } from './lib/http.mjs';
 import { paymentsConfigured, razorpayKeyId, createOrder, verifyCheckoutSignature } from './lib/razorpay.mjs';
 import { recordPurchase, hasPurchase } from './lib/purchases.mjs';
+
+const idp = new CognitoIdentityProviderClient({});
+const USERNAME_RE = /^[a-z0-9_]{3,24}$/;
 
 const CATEGORIES = ["Coding","Design","Extension","Desktop","Document","Marketing","Website","Data","DevOps","AI/ML","Testing","Mobile","Other"];
 const PLATFORMS = ["Claude","ChatGPT","Gemini","Cursor","Copilot"];
@@ -21,6 +25,7 @@ export const handler = route(async (event) => {
   if (method === 'GET' && parts[0] === 'me') return getMe(me);
   if (method === 'POST' && parts[0] === 'me' && !parts[1]) return updateProfile(me, parseBody(event));
   if (method === 'POST' && parts[0] === 'me' && parts[1] === 'avatar') return avatarUploadUrl(me, parseBody(event));
+  if (method === 'POST' && parts[0] === 'me' && parts[1] === 'username') return changeUsername(me, parseBody(event));
   if (method === 'GET' && parts[0] === 'library') return getLibrary(me);
   if (method === 'POST' && parts[0] === 'verify') return applyVerification(me, parseBody(event));
   if (method === 'POST' && parts[0] === 'skills' && !parts[1]) return createSkill(me, parseBody(event));
@@ -77,6 +82,67 @@ async function updateProfile(me, body) {
     ExpressionAttributeValues: { ':n': name, ':b': bio, ':l': location },
   });
   return ok({ updated: true });
+}
+
+/* Usernames are permanent — EXCEPT one: a handle we derived for a federated
+   user who never got to choose. usernameAutoDerived marks those, and this
+   spends that one change. The claim move is a single transaction so the new
+   handle can never be half-taken, and the old one is released in the same
+   write so it doesn't leak. */
+async function changeUsername(me, body) {
+  const next = (body?.username || '').toLowerCase().trim();
+  if (!USERNAME_RE.test(next)) return bad('Username must be 3-24 characters: lowercase letters, numbers, underscores.');
+  const profile = await ensureProfile(me);
+  if (next === profile.username) return ok({ username: next, unchanged: true });
+  if (!profile.usernameAutoDerived) {
+    return forbidden('Your username is permanent. Only an auto-assigned handle can be changed, and only once.');
+  }
+  const now = new Date().toISOString();
+  try {
+    await db.transact([
+      { Put: {
+        TableName: TABLE,
+        Item: { PK: `USERNAME#${next}`, SK: 'CLAIM', userId: me.userId, email: profile.email, claimedAt: now },
+        ConditionExpression: 'attribute_not_exists(PK)',
+      } },
+      { Delete: { TableName: TABLE, Key: { PK: `USERNAME#${profile.username}`, SK: 'CLAIM' } } },
+      { Update: {
+        TableName: TABLE,
+        Key: { PK: `USER#${me.userId}`, SK: 'PROFILE' },
+        UpdateExpression: 'SET username = :u, usernameAutoDerived = :f',
+        ExpressionAttributeValues: { ':u': next, ':f': false },
+      } },
+    ]);
+  } catch (err) {
+    if (err.name === 'TransactionCanceledException') return conflict('That username is already taken.');
+    throw err;
+  }
+
+  // Denormalised onto every skill this user sells — refresh so listings don't
+  // keep pointing at a handle whose profile URL no longer resolves.
+  const mine = await db.queryAll({
+    IndexName: 'GSI2',
+    KeyConditionExpression: 'GSI2PK = :pk',
+    ExpressionAttributeValues: { ':pk': `SELLER#${me.userId}` },
+  });
+  for (const s of mine) {
+    await db.update({
+      Key: { PK: `SKILL#${s.skillId}`, SK: 'META' },
+      UpdateExpression: 'SET sellerUsername = :u',
+      ExpressionAttributeValues: { ':u': next },
+    });
+  }
+
+  // Push it onto the Cognito user so future ID tokens carry the new handle.
+  try {
+    await idp.send(new AdminUpdateUserAttributesCommand({
+      UserPoolId: me.poolId, Username: me.cognitoUsername,
+      UserAttributes: [{ Name: 'custom:username', Value: next }],
+    }));
+  } catch (err) {
+    console.error(JSON.stringify({ setUsernameAttrFailed: err.message, userId: me.userId }));
+  }
+  return ok({ username: next, skillsUpdated: mine.length });
 }
 
 /* Presigned PUT for the profile photo; the key is deterministic per user so a

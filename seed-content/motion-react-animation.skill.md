@@ -4,7 +4,7 @@ category: Design
 description: Ship interface motion that explains state changes instead of decorating them, using Motion for React. Covers layout animations and shared-element transitions, exit choreography with AnimatePresence, when a spring beats a tween, variant orchestration, and the transform-only rule that keeps 60fps on a mid-range Android.
 usage: Load this skill before asking your AI assistant to add or fix animation in a React project using Motion. Describe the state change you want to explain — not the effect you want to see — and the assistant will choose layout animation, variants, or gestures accordingly, keep animation on compositor-friendly properties, and wire useReducedMotion from the start.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 12
 pocUrl: https://github.com/motiondivision/motion
 ---

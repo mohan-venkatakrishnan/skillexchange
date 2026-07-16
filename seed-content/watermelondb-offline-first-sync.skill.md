@@ -4,7 +4,7 @@ category: Mobile
 description: Build a mobile app that reads instantly on a dead train and reconciles cleanly when signal returns — a lazy SQLite model layer, an idempotent pull/push protocol, and the server contract that makes the client's optimism safe. Focused on the parts the docs leave to you: clock skew, conflict rules you can defend, and migrations that don't wipe a user's unsynced work.
 usage: Load this skill before asking your assistant to add offline storage or sync to a React Native app. Describe your entities, which side owns which field, and your conflict rule ("server wins on price, client wins on notes") and it will produce the schema, models, migrations, and both halves of the sync contract rather than a naive replace-everything pull.
 platforms: [Claude, Cursor]
-priceUsd: 9
+priceUsd: 0
 timeSavedHours: 30
 pocUrl: https://github.com/Nozbe/WatermelonDB
 ---

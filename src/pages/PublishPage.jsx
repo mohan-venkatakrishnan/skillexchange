@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { useTheme, FONT_DISPLAY, FONT_UI, FONT_MONO } from '../tokens/theme';
+import { useTheme, FONT_HEAD, FONT_UI, FONT_MONO } from '../tokens/theme';
 import { PageWrap, VerifiedStamp } from '../components/Shared.jsx';
 import { GoldButton, GhostButton, Card, Label, Input, Textarea } from '../components/ui.jsx';
 import Select from '../components/Select.jsx';
@@ -76,7 +76,7 @@ export default function PublishPage() {
     <PageWrap>
       <div className="fade-up" style={{ maxWidth: 560, margin: '0 auto', padding: '96px clamp(16px,4vw,40px)', textAlign: 'center' }}>
         <div style={{ marginBottom: 26, display: 'flex', justifyContent: 'center' }}><VerifiedStamp size={56} /></div>
-        <h2 style={{ fontFamily: FONT_DISPLAY, fontSize: 28, color: c.text, margin: '0 0 14px', letterSpacing: '-0.02em' }}>Skill Submitted!</h2>
+        <h2 style={{ fontFamily: FONT_HEAD, fontSize: 28, color: c.text, margin: '0 0 14px', letterSpacing: '-0.02em' }}>Skill Submitted!</h2>
         <p style={{ fontFamily: FONT_UI, fontSize: 14, color: c.textMuted, lineHeight: 1.7, margin: '0 0 30px' }}>
           Your skill is under review. We'll verify the proof of concept and notify you within 48 hours.
         </p>
@@ -91,7 +91,7 @@ export default function PublishPage() {
         {/* ── Header ── */}
         <div className="fade-up" style={{ marginBottom: 30 }}>
           <div style={{ fontFamily: FONT_UI, fontSize: 11, color: c.gold, fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>Step {step} of 3</div>
-          <h1 style={{ fontFamily: FONT_DISPLAY, fontSize: 'clamp(24px,3.2vw,31px)', color: c.text, margin: 0, letterSpacing: '-0.02em', lineHeight: 1.2 }}>Publish a Skill</h1>
+          <h1 style={{ fontFamily: FONT_HEAD, fontSize: 'clamp(24px,3.2vw,31px)', color: c.text, margin: 0, letterSpacing: '-0.02em', lineHeight: 1.2 }}>Publish a Skill</h1>
           <p style={{ fontFamily: FONT_UI, fontSize: 14, color: c.textMuted, margin: '10px 0 0', lineHeight: 1.65 }}>Share your workflow. Earn from every download.</p>
         </div>
 
@@ -295,7 +295,7 @@ function SectionTitle({ title, sub }) {
   const { c } = useTheme();
   return (
     <div style={{ marginBottom: 20 }}>
-      <h2 style={{ fontFamily: FONT_DISPLAY, fontSize: 17, color: c.text, margin: 0, letterSpacing: '-0.01em' }}>{title}</h2>
+      <h2 style={{ fontFamily: FONT_HEAD, fontSize: 17, color: c.text, margin: 0, letterSpacing: '-0.01em' }}>{title}</h2>
       {sub && <p style={{ fontFamily: FONT_UI, fontSize: 12.5, color: c.textMuted, margin: '5px 0 0', lineHeight: 1.55 }}>{sub}</p>}
     </div>
   );

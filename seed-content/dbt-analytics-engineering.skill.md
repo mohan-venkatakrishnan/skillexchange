@@ -4,7 +4,7 @@ category: Data
 description: Build a dbt project that survives contact with real data — layered models, incremental logic that handles late-arriving rows, snapshots, and tests that catch breakage before your CEO does. Covers staging/intermediate/mart discipline, sources and freshness, merge vs. delete+insert, contracts, and slim CI with state:modified+.
 usage: Load this skill before asking your AI assistant to design a dbt project, write or debug an incremental model, or add tests to an existing warehouse. Say "use the dbt analytics engineering skill" and describe your sources and the grain you need; the assistant will produce layered models with declared grain, tests, and incremental logic that stays correct on late-arriving data.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 8
+priceUsd: 0
 timeSavedHours: 24
 pocUrl: https://github.com/dbt-labs/dbt-core
 ---

@@ -4,7 +4,7 @@ category: Document
 description: A practical guide to generating real documents with Typst — the set/show rule mental model, templates as plain functions, data-driven pages fed from JSON, long tables with repeating headers, and compiling in CI without the font failures that only appear on the build machine. For teams who need LaTeX-quality PDFs from a toolchain that compiles in milliseconds and reports errors you can act on.
 usage: Load this skill when a user needs programmatic PDF or print output — invoices, reports, certificates, résumés, papers, generated docs — and wants better than HTML-to-PDF but faster to iterate than LaTeX. Settle the LaTeX-vs-Typst call with section 3.11 first, then build with set/show rules from 3.2 before writing any manual layout. Check section 4 before declaring the document done.
 platforms: [Claude, Cursor]
-priceUsd: 7
+priceUsd: 0
 timeSavedHours: 20
 pocUrl: https://github.com/typst/typst
 ---

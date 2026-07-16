@@ -75,6 +75,16 @@ resource "aws_api_gateway_resource" "me" {
   parent_id   = aws_api_gateway_rest_api.api.root_resource_id
   path_part   = "me"
 }
+resource "aws_api_gateway_resource" "me_avatar" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  parent_id   = aws_api_gateway_resource.me.id
+  path_part   = "avatar"
+}
+resource "aws_api_gateway_resource" "me_username" {
+  rest_api_id = aws_api_gateway_rest_api.api.id
+  parent_id   = aws_api_gateway_resource.me.id
+  path_part   = "username"
+}
 resource "aws_api_gateway_resource" "library" {
   rest_api_id = aws_api_gateway_rest_api.api.id
   parent_id   = aws_api_gateway_rest_api.api.root_resource_id
@@ -117,6 +127,13 @@ locals {
     "GET leaderboard"      = { resource = aws_api_gateway_resource.leaderboard.id, method = "GET", fn = "public", auth = false }
     "GET username-check"   = { resource = aws_api_gateway_resource.username_check.id, method = "GET", fn = "public", auth = false }
     "GET me"               = { resource = aws_api_gateway_resource.me.id, method = "GET", fn = "user", auth = true }
+    # These three existed as handlers in user.mjs but had no route. API Gateway
+    # answers an undefined method by falling back to IAM auth, so "Save
+    # changes" failed with a SigV4 "Authorization header requires 'Credential'"
+    # error rather than a 404 — which is why it looked like a token problem.
+    "POST me"              = { resource = aws_api_gateway_resource.me.id, method = "POST", fn = "user", auth = true }
+    "POST me avatar"       = { resource = aws_api_gateway_resource.me_avatar.id, method = "POST", fn = "user", auth = true }
+    "POST me username"     = { resource = aws_api_gateway_resource.me_username.id, method = "POST", fn = "user", auth = true }
     "GET library"          = { resource = aws_api_gateway_resource.library.id, method = "GET", fn = "user", auth = true }
     "POST verify"          = { resource = aws_api_gateway_resource.verify.id, method = "POST", fn = "user", auth = true }
     "POST skills"          = { resource = aws_api_gateway_resource.skills.id, method = "POST", fn = "user", auth = true }
@@ -143,6 +160,8 @@ locals {
     leaderboard      = aws_api_gateway_resource.leaderboard.id
     username_check   = aws_api_gateway_resource.username_check.id
     me               = aws_api_gateway_resource.me.id
+    me_avatar        = aws_api_gateway_resource.me_avatar.id
+    me_username      = aws_api_gateway_resource.me_username.id
     library          = aws_api_gateway_resource.library.id
     verify           = aws_api_gateway_resource.verify.id
     admin_proxy      = aws_api_gateway_resource.admin_proxy.id

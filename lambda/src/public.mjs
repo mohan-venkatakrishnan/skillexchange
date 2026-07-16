@@ -87,5 +87,27 @@ async function getLeaderboard() {
 async function usernameCheck(u) {
   if (!USERNAME_RE.test(u)) return bad('Username must be 3-24 chars: a-z, 0-9, _');
   const claim = await db.get({ PK: `USERNAME#${u}`, SK: 'CLAIM' });
-  return ok({ available: !claim });
+  if (!claim) return ok({ available: true, suggestions: [] });
+  return ok({ available: false, suggestions: await suggestUsernames(u) });
+}
+
+/* When a handle is taken, offer three free ones built off the same prefix
+   rather than making the visitor guess. Candidates are probed in one batch and
+   the first three free ones win, so the list is stable and cheap. */
+async function suggestUsernames(base) {
+  const stem = base.slice(0, 20).replace(/_+$/, '');
+  const candidates = [
+    `${stem}_dev`, `${stem}_ai`, `${stem}_hq`, `${stem}_io`,
+    `${stem}1`, `${stem}_builds`, `${stem}_labs`, `the_${stem}`,
+    `${stem}${new Date().getUTCFullYear() % 100}`, `${stem}_x`,
+  ].filter(c => USERNAME_RE.test(c));
+
+  const free = [];
+  for (const c of candidates) {
+    if (free.length === 3) break;
+    // eslint-disable-next-line no-await-in-loop
+    const taken = await db.get({ PK: `USERNAME#${c}`, SK: 'CLAIM' });
+    if (!taken) free.push(c);
+  }
+  return free;
 }

@@ -4,7 +4,7 @@ category: DevOps
 description: Build GitHub Actions pipelines that are fast, cheap, and trustworthy instead of a 14-minute tax on every push. Covers cache keys that actually hit, concurrency groups, matrix strategy, OIDC instead of long-lived cloud keys, SHA-pinned actions, and the `pull_request_target` footgun that leaks your secrets.
 usage: Load this skill before asking your AI assistant to write or fix a GitHub Actions workflow. Say "use the CI pipelines skill" and describe your stack and what needs to run; the assistant will produce workflows with lockfile-hashed cache keys, least-privilege job permissions, SHA-pinned third-party actions, and a concurrency group — not a copy of the quickstart.
 platforms: [Claude, ChatGPT, Cursor, Copilot]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 18
 pocUrl: https://github.com/actions/runner
 ---

@@ -4,7 +4,7 @@ category: Other
 description: Decide which mess to fix and which to leave alone, with an argument your product manager will actually accept — interest-rate thinking, a two-axis ranking, and the paydown patterns that ship alongside features instead of competing with them. Kills the two failure modes: the refactor quarter that delivers nothing, and the five-year backlog of "cleanup" tickets nobody will ever pull.
 usage: Load this skill when you're staring at a codebase you're afraid of, or writing the case for time to fix it. Describe the messes and where the team is slowing down, and your assistant will rank them by interest rate rather than by ugliness, and draft the pitch in cost-of-delay terms rather than engineering aesthetics.
 platforms: [Claude, Cursor]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 12
 pocUrl: https://martinfowler.com/bliki/TechnicalDebtQuadrant.html
 ---

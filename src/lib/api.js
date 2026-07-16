@@ -143,8 +143,19 @@ export async function getLeaderboard() {
 }
 
 export async function checkUsername(username) {
-  if (MOCK) { await delay(120); return { available: !mock.PROFILES[username] }; }
+  if (MOCK) {
+    await delay(120);
+    const taken = !!mock.PROFILES[username];
+    return { available: !taken, suggestions: taken ? [`${username}_dev`, `${username}_ai`, `${username}_hq`] : [] };
+  }
   return request(`/username-check?u=${encodeURIComponent(username)}`);
+}
+
+/* Only spendable once, and only on a handle we auto-derived for a federated
+   user who never chose one. The server is the authority on both rules. */
+export async function changeUsername(username) {
+  if (MOCK) { await delay(300); return { username }; }
+  return request('/me/username', { method: 'POST', body: { username }, auth: true });
 }
 
 // ── Authenticated ──

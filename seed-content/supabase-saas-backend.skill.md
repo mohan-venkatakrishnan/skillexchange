@@ -4,7 +4,7 @@ category: Coding
 description: Ship a production-grade SaaS backend on Supabase without writing a custom API server. Covers Postgres schema design, Row Level Security done right, auth, realtime subscriptions, and storage with signed URLs.
 usage: Load this skill before asking your AI assistant to design or build any Supabase-backed feature. Say "use the Supabase SaaS backend skill" and describe your product; the assistant will produce schema, RLS policies, and client code that follow these patterns instead of generic tutorials.
 platforms: [Claude, ChatGPT, Cursor, Gemini]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 20
 pocUrl: https://github.com/supabase/supabase
 ---

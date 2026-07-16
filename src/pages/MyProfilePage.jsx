@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme, FONT_DISPLAY, FONT_UI } from '../tokens/theme';
+import { useTheme, FONT_HEAD, FONT_UI } from '../tokens/theme';
 import SkillCard from '../components/SkillCard.jsx';
 import Loader from '../components/Loader.jsx';
 import { Ic } from '../components/Icons.jsx';
 import { PageWrap, VerifiedStamp, SellerBdg, Stars, Downloads } from '../components/Shared.jsx';
 import { Card, GoldButton, GhostButton, Input, Textarea, Avatar, AvatarUpload, ErrorBox, EmptyState } from '../components/ui.jsx';
+import UsernameField, { USERNAME_RE } from '../components/UsernameField.jsx';
 import * as api from '../lib/api.js';
+import { refreshProfile } from '../lib/auth.js';
 import useFetch from '../lib/useFetch.js';
 
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
@@ -43,7 +45,7 @@ export default function MyProfilePage({ user, onLogout, onShowAuth }) {
             onPick={f => uploadAvatar(f, me.retry)} />
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 5 }}>
-              <h1 style={{ fontFamily: FONT_DISPLAY, fontSize: 'clamp(21px,3vw,27px)', fontWeight: 700, color: c.text, margin: 0, letterSpacing: '-0.02em', lineHeight: 1.2 }}>{p.name}</h1>
+              <h1 style={{ fontFamily: FONT_HEAD, fontSize: 'clamp(21px,3vw,27px)', fontWeight: 700, color: c.text, margin: 0, letterSpacing: '-0.02em', lineHeight: 1.2 }}>{p.name}</h1>
               {p.verified && <VerifiedStamp size={22} />}
             </div>
             <p style={{ fontFamily: FONT_UI, fontSize: 12.5, color: c.gold, margin: '0 0 10px' }}>
@@ -75,7 +77,7 @@ export default function MyProfilePage({ user, onLogout, onShowAuth }) {
 
         {/* ── Skills ── */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
-          <h2 style={{ fontFamily: FONT_DISPLAY, fontSize: 19, fontWeight: 700, color: c.text, margin: 0, letterSpacing: '-0.01em' }}>My skills</h2>
+          <h2 style={{ fontFamily: FONT_HEAD, fontSize: 19, fontWeight: 700, color: c.text, margin: 0, letterSpacing: '-0.01em' }}>My skills</h2>
           <GhostButton size="sm" onClick={() => nav('/publish')}>+ Publish new</GhostButton>
         </div>
 
@@ -151,8 +153,17 @@ function ProfileEditor({ profile, onSaved, onCancel }) {
   const [name, setName] = useState(profile.name || '');
   const [bio, setBio] = useState(profile.bio || '');
   const [location, setLocation] = useState(profile.location || '');
+  const [handle, setHandle] = useState(profile.username || '');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+
+  const saveHandle = async () => {
+    if (!USERNAME_RE.test(handle)) { setError('Username: 3-24 characters, lowercase letters, numbers, underscores.'); return; }
+    setBusy(true); setError('');
+    try { await api.changeUsername(handle); await refreshProfile(); onSaved(); }
+    catch (e) { setError(e.message); }
+    finally { setBusy(false); }
+  };
 
   const save = async () => {
     if (!name.trim()) { setError('Name cannot be empty.'); return; }
@@ -168,9 +179,27 @@ function ProfileEditor({ profile, onSaved, onCancel }) {
       <Input label="Display name" value={name} onChange={e => { setName(e.target.value); setError(''); }} placeholder="Your name" testId="profile-name" />
       <Input label="Location" hint="optional" value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g. Mumbai, India" testId="profile-location" />
       <Textarea label="Bio" hint="optional" rows={3} value={bio} onChange={e => setBio(e.target.value)} placeholder="What do you build?" testId="profile-bio" />
-      <p style={{ fontFamily: FONT_UI, fontSize: 11.5, color: c.textMuted, margin: '-6px 0 16px' }}>
-        Your username <span style={{ color: c.text }}>@{profile.username}</span> is permanent and can't be changed.
-      </p>
+
+      {/* Signing in with Google never asks for a handle, so we derive one from
+          the email. That is our choice, not the user's — so they get exactly
+          one change to fix it. A handle they picked themselves stays permanent. */}
+      {profile.usernameAutoDerived ? (
+        <div style={{ background: c.goldSoft, border: `1px solid ${c.borderGold}`, borderRadius: 10, padding: 14, margin: '0 0 16px' }}>
+          <p style={{ fontFamily: FONT_UI, fontSize: 12, color: c.textSub, margin: '0 0 12px', lineHeight: 1.55 }}>
+            We picked <span style={{ color: c.gold, fontWeight: 600 }}>@{profile.username}</span> from your email when you signed in with Google.
+            You can change it <strong style={{ color: c.text }}>once</strong> — after that it's permanent.
+          </p>
+          <UsernameField value={handle} onChange={v => { setHandle(v); setError(''); }} label="Choose your handle" testId="profile-username" />
+          <GhostButton size="sm" disabled={busy || handle === profile.username || !handle} testId="profile-username-save"
+            onClick={saveHandle}>
+            {busy ? 'Claiming…' : `Claim @${handle || '…'}`}
+          </GhostButton>
+        </div>
+      ) : (
+        <p style={{ fontFamily: FONT_UI, fontSize: 11.5, color: c.textMuted, margin: '-6px 0 16px' }}>
+          Your username <span style={{ color: c.text }}>@{profile.username}</span> is permanent and can't be changed.
+        </p>
+      )}
       {error && <p style={{ fontFamily: FONT_UI, fontSize: 12.5, color: c.coral, margin: '0 0 14px' }}>{error}</p>}
       <div style={{ display: 'flex', gap: 10 }}>
         <GoldButton onClick={save} disabled={busy} testId="profile-save">{busy ? 'Saving…' : 'Save changes'}</GoldButton>
@@ -188,7 +217,7 @@ function AccountPane({ profile, onBack, onLogout, onShowAuth }) {
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}>
           <Avatar name={profile.name} src={profile.avatarUrl} size={72} />
         </div>
-        <h2 style={{ fontFamily: FONT_DISPLAY, fontSize: 23, fontWeight: 700, color: c.text, margin: '0 0 4px', letterSpacing: '-0.02em' }}>{profile.name}</h2>
+        <h2 style={{ fontFamily: FONT_HEAD, fontSize: 23, fontWeight: 700, color: c.text, margin: '0 0 4px', letterSpacing: '-0.02em' }}>{profile.name}</h2>
         <p style={{ fontFamily: FONT_UI, fontSize: 13, color: c.textMuted, margin: '0 0 34px' }}>@{profile.username}</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
           <GhostButton full onClick={onBack}>

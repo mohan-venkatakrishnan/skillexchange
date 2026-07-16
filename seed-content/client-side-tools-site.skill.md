@@ -4,7 +4,7 @@ category: Website
 description: The architecture that lets one solo-maintained repo ship 90+ zero-backend browser tools with per-page SEO, a shared design system, an SPA feel without a router, and free GitHub Pages hosting. Distilled from tools.tapdot.org, including the systemic bugs (global collisions, CSS leakage, min-width:0) that only show up at tool #40.
 usage: Load this skill when building a multi-tool utility site, a collection of calculators/converters/generators, or any "many small pages, one design system" static product. Follow the folder and shared-shell contract in section 3 exactly, and run the checklist in section 5 for every new tool added.
 platforms: [Claude, ChatGPT, Gemini]
-priceUsd: 6
+priceUsd: 0
 timeSavedHours: 25
 pocUrl: https://tools.tapdot.org
 ---

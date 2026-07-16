@@ -4,7 +4,7 @@ category: AI/ML
 description: Build production transcription pipelines with Whisper that do not hallucinate, do not stall in repetition loops, and do not burn 10x the compute they need. Covers model sizing, faster-whisper as the real runtime, VAD preprocessing, word timestamps, domain vocabulary priming, and transcript-to-summary chains.
 usage: Load this skill before asking your AI assistant to build anything that turns audio into text. Say "use the Whisper speech-to-text skill" and describe your audio (length, language, quality, daily volume) and latency budget; the assistant will pick a model size and runtime with reasons, and write a pipeline with VAD and preprocessing already in place rather than bolted on after the hallucinations start.
 platforms: [Claude, ChatGPT, Cursor]
-priceUsd: 5
+priceUsd: 0
 timeSavedHours: 15
 pocUrl: https://github.com/openai/whisper
 ---

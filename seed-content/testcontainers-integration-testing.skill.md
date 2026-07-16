@@ -4,7 +4,7 @@ category: Testing
 description: Test against a real Postgres, Redis, or Kafka in Docker instead of a mock that lies — one container per suite, deterministic wait strategies, and truncation between tests so the suite finishes in seconds rather than minutes. Prevents the two failures that kill integration suites: a mock that silently drifted from the real database's behavior, and a container-per-test design that made the suite 40x slower than it needed to be.
 usage: Load this skill before asking your AI assistant to add integration tests or a container harness to a Node/TypeScript repo. Tell it which real dependency to stand up and what to cover ("Postgres, test the migration and the unique-constraint path"), and it will produce a globalSetup that boots one container, a wait strategy tied to an observable readiness signal, and per-test truncation rather than recreation.
 platforms: [Claude, Cursor, ChatGPT]
-priceUsd: 8
+priceUsd: 0
 timeSavedHours: 16
 pocUrl: https://github.com/testcontainers/testcontainers-node
 ---

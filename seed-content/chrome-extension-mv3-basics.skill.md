@@ -4,7 +4,7 @@ category: Extension
 description: Build a complete Manifest V3 Chrome extension the way two shipped Web Store products (CommentIQ, Quill) actually do it — service worker lifecycle survival, content-script messaging that doesn't silently drop responses, and a storage schema that outlives worker restarts. Includes the exact keep-alive pattern, message-router shape, and a Web Store submission checklist earned through real reviews.
 usage: Load this skill before scaffolding or debugging any MV3 extension. Tell the AI what your extension does (which surfaces it needs — popup, side panel, content script, options) and it will generate the manifest, worker, and messaging skeleton following these patterns. Paste "stuck spinner" or "worker died" symptoms and it will diagnose against the lifecycle rules in section 4.
 platforms: [Claude, Cursor]
-priceUsd: 6
+priceUsd: 5
 timeSavedHours: 14
 pocUrl: https://tapdot.org
 ---

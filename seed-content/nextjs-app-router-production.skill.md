@@ -4,7 +4,7 @@ category: Coding
 description: Build App Router applications that stay static where they should, stream where it matters, and never leak a secret into the client bundle. Covers the server/client boundary, the fetch cache and revalidation, Server Actions with Zod, streaming Suspense, middleware limits, and the dynamic-rendering traps that silently kill your cache hit rate.
 usage: Load this skill before asking your AI assistant to scaffold or refactor any App Router route. Say "use the Production Next.js App Router skill" and describe the page or feature; the assistant will place the client boundary correctly, pick the right caching strategy, and flag anything that would force the route dynamic.
 platforms: [Claude, Cursor, Copilot]
-priceUsd: 7
+priceUsd: 0
 timeSavedHours: 24
 pocUrl: https://github.com/vercel/next.js
 ---
