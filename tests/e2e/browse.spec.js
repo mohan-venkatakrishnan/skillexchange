@@ -64,9 +64,16 @@ test.describe('Marketplace', () => {
     await expect(page.getByTestId('results-count')).toContainText('1 skill');
 
     await page.getByRole('button', { name: 'Any assistant' }).click();
-    await page.getByLabel('Verified creators only').check();
+    const verified = page.getByRole('checkbox', { name: 'Verified creators only' });
+    await verified.click();
+    await expect(verified).toHaveAttribute('aria-checked', 'true');
     await expect(page).toHaveURL(/verified=1/);
     await expect(page.getByTestId('results-count')).toContainText('4 skills');
+    // and it toggles back off cleanly — the old controlled native checkbox
+    // bounced here, landing out of sync with the URL.
+    await verified.click();
+    await expect(verified).toHaveAttribute('aria-checked', 'false');
+    await expect(page).not.toHaveURL(/verified=1/);
   });
 
   test('sort is a themed control, not a native select', async ({ page }) => {

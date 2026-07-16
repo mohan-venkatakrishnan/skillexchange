@@ -136,6 +136,30 @@ export function Textarea({ label, hint, value, onChange, placeholder, rows = 4, 
   );
 }
 
+/* ── Checkbox ──
+   A themed toggle, not a native <input type=checkbox>. Two reasons:
+   1. It's the last OS-chrome form control — everything else here is themed.
+   2. A *controlled* native checkbox whose state lives in the URL bounces: the
+      click sets .checked synchronously, React snaps it back to the current
+      prop, then the async router update flips it again. That transient
+      desync is visible to users on a slow update and made `.check()` fail
+      ~25% of the time. Driving aria-checked from state has no such window. */
+export function Checkbox({ checked, onChange, label, testId }) {
+  const { c } = useTheme();
+  return (
+    <button type="button" role="checkbox" aria-checked={checked} data-testid={testId}
+      onClick={() => onChange(!checked)}
+      style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', textAlign: 'left', background: 'transparent', border: 'none', borderRadius: 8, padding: '7px 10px', cursor: 'pointer', fontFamily: FONT_UI, fontSize: 12.5, color: checked ? c.gold : c.textSub, transition: 'color 0.14s' }}
+      onMouseEnter={e => { if (!checked) e.currentTarget.style.color = c.text; }}
+      onMouseLeave={e => { if (!checked) e.currentTarget.style.color = c.textSub; }}>
+      <span aria-hidden="true" style={{ width: 15, height: 15, flexShrink: 0, borderRadius: 4, border: `1.5px solid ${checked ? c.gold : c.border}`, background: checked ? c.gold : 'transparent', display: 'grid', placeItems: 'center', transition: 'background 0.14s, border-color 0.14s' }}>
+        {checked && <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={c.onGold} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
+      </span>
+      {label}
+    </button>
+  );
+}
+
 /* ── Avatar — uploaded photo (URL/data URL) or gold initial ── */
 export function Avatar({ name = '?', src, size = 36, style }) {
   const { c } = useTheme();

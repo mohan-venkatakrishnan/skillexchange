@@ -6,7 +6,7 @@ import Select from '../components/Select.jsx';
 import Loader from '../components/Loader.jsx';
 import { Ic } from '../components/Icons.jsx';
 import { PageWrap } from '../components/Shared.jsx';
-import { ErrorBox, EmptyState, GhostButton } from '../components/ui.jsx';
+import { ErrorBox, EmptyState, GhostButton, Checkbox } from '../components/ui.jsx';
 import { CATEGORIES, PLATFORMS } from '../data/constants.js';
 import * as api from '../lib/api.js';
 import useFetch from '../lib/useFetch.js';
@@ -139,11 +139,9 @@ export default function MarketplacePage() {
             </RailSection>
 
             <RailSection title="Trust">
-              <label style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '7px 10px', cursor: 'pointer', fontFamily: FONT_UI, fontSize: 12.5, color: verifiedOnly ? c.gold : c.textSub }}>
-                <input type="checkbox" checked={verifiedOnly} onChange={e => patch({ verified: e.target.checked ? '1' : null })}
-                  style={{ accentColor: c.gold, width: 14, height: 14, cursor: 'pointer' }} />
-                Verified creators only
-              </label>
+              <Checkbox checked={verifiedOnly} testId="filter-verified"
+                onChange={v => patch({ verified: v ? '1' : null })}
+                label="Verified creators only" />
             </RailSection>
 
             {activeFilters > 0 && (
