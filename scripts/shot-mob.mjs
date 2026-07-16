@@ -1,0 +1,12 @@
+import { chromium } from '@playwright/test';
+import { preview } from 'vite';
+const s = await preview({ preview: { port: 5205 } });
+const b = await chromium.launch();
+const p = await b.newPage({ viewport: { width: 390, height: 844 } });
+await p.goto('http://localhost:5205/');
+await p.evaluate(() => document.querySelector('#how')?.scrollIntoView());
+await p.waitForTimeout(2000);
+await p.screenshot({ path: 'land-mob.png' });
+const of = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+console.log('mobile overflow:', of);
+await b.close(); await s.close(); process.exit(0);

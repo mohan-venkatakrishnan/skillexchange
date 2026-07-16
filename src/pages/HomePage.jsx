@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useTheme, FONT_DISPLAY, FONT_UI } from '../tokens/theme';
 import Logo from '../components/Logo.jsx';
+import CountUp from '../components/CountUp.jsx';
+import PublishFlow from '../components/PublishFlow.jsx';
 import SkillCard from '../components/SkillCard.jsx';
 import Loader from '../components/Loader.jsx';
 import { Ic } from '../components/Icons.jsx';
@@ -60,11 +62,14 @@ export default function HomePage({ user, onShowAuth }) {
       <section style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '86px 24px 56px', position: 'relative' }}>
         <div style={{ maxWidth: 760, textAlign: 'center', position: 'relative', zIndex: 1 }}>
           <div className="float" style={{ marginBottom: 26, display: 'inline-block' }}><Logo size={64} /></div>
+          <div className="fade-up" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: c.goldSoft, border: `1px solid ${c.borderGold}`, borderRadius: 30, padding: '6px 16px', marginBottom: 22, fontFamily: FONT_UI, fontSize: 12.5, fontWeight: 600, color: c.gold, letterSpacing: '0.01em' }}>
+            The #1 marketplace for AI skills
+          </div>
           <h1 className="fade-up" style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 'clamp(36px, 6vw, 60px)', lineHeight: 1.12, letterSpacing: '-0.025em', color: c.text, margin: '0 0 20px' }}>
             Where AI builders<br /><span style={{ color: c.gold }}>share their edge</span>
           </h1>
-          <p className="fade-up-d1" style={{ fontFamily: FONT_UI, fontSize: 17, lineHeight: 1.7, color: c.textSub, maxWidth: 540, margin: '0 auto 34px' }}>
-            The GitHub for AI skills — buy and sell reusable workflows that power real products.
+          <p className="fade-up-d1" style={{ fontFamily: FONT_UI, fontSize: 17, lineHeight: 1.7, color: c.textSub, maxWidth: 560, margin: '0 auto 34px' }}>
+            The GitHub for AI skills — buy and sell reusable SKILL.md files that power real products. Every one ships with proof it works.
           </p>
           <div className="fade-up-d2" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <GoldButton size="lg" onClick={() => nav('/marketplace')}>Browse skills</GoldButton>
@@ -85,36 +90,42 @@ export default function HomePage({ user, onShowAuth }) {
             .filter(([v]) => v && v !== '0' && v !== '—')
             .map(([v, l]) => (
               <div key={l} style={{ textAlign: 'center' }}>
-                <div style={{ fontFamily: FONT_UI, fontSize: 23, fontWeight: 700, color: c.gold, letterSpacing: '-0.02em' }}>{v}</div>
+                <CountUp value={v} style={{ fontFamily: FONT_UI, fontSize: 26, fontWeight: 700, color: c.gold, letterSpacing: '-0.02em' }} />
                 <div style={{ fontFamily: FONT_UI, fontSize: 11, color: c.textMuted, marginTop: 3 }}>{l}</div>
               </div>
             ))}
         </div>
       </div>
 
-      {/* ── How it works ── */}
-      <Section id="how">
+      {/* ── How it works — the animation IS the section, so it reads complete
+             in one viewport instead of the old wall of cards + step columns. ── */}
+      <Section id="how" pad="72px 24px 40px">
         <SectionHeading eyebrow="How the exchange works"
-          title="Skills with receipts"
-          sub="A skill file teaches your AI assistant one workflow end to end. Here every one of them arrives with evidence it actually shipped something." />
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 18 }}>
-          {PRINCIPLES.map((p, i) => (
-            <Reveal key={p.t} delay={Math.min(3, i + 1)}>
-              <Card style={{ height: '100%' }}>
-                <div style={{ width: 36, height: 36, borderRadius: 9, background: c.goldSoft, border: `1px solid ${c.borderGold}`, display: 'grid', placeItems: 'center', marginBottom: 13 }}>{p.icon(c)}</div>
-                <div style={{ fontFamily: FONT_UI, fontSize: 14, fontWeight: 700, color: c.text, marginBottom: 6 }}>{p.t}</div>
-                <div style={{ fontFamily: FONT_UI, fontSize: 12.5, color: c.textMuted, lineHeight: 1.6 }}>{p.d}</div>
-              </Card>
-            </Reveal>
+          title="From your project to a sale"
+          sub="A skill file distils one workflow you already shipped. Here every listing arrives with proof it did." />
+        <Reveal>
+          <PublishFlow style={{ marginTop: 8 }} />
+        </Reveal>
+        <Reveal style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14, marginTop: 44 }}>
+          {PRINCIPLES.map((p) => (
+            <div key={p.t} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+              <div style={{ width: 34, height: 34, borderRadius: 9, background: c.goldSoft, border: `1px solid ${c.borderGold}`, display: 'grid', placeItems: 'center', flexShrink: 0 }}>{p.icon(c)}</div>
+              <div>
+                <div style={{ fontFamily: FONT_UI, fontSize: 13.5, fontWeight: 700, color: c.text, marginBottom: 3 }}>{p.t}</div>
+                <div style={{ fontFamily: FONT_UI, fontSize: 12, color: c.textMuted, lineHeight: 1.55 }}>{p.d}</div>
+              </div>
+            </div>
           ))}
-        </div>
+        </Reveal>
+      </Section>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 22, marginTop: 30 }}>
+      {/* ── Buy / sell details — a deliberate deeper read, not crammed into
+             the section above. ── */}
+      <Section id="details" style={{ paddingTop: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 22 }}>
           <StepColumn title="If you're buying" steps={STEPS_BUY} accent={c.gold} />
           <StepColumn title="If you're selling" steps={STEPS_SELL} accent={c.green} />
         </div>
-
         <Reveal style={{ textAlign: 'center', marginTop: 34 }}>
           <GhostButton onClick={() => nav('/create')}>Not sure how to write one? Generate a SKILL.md →</GhostButton>
         </Reveal>

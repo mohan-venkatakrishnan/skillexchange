@@ -9,7 +9,7 @@ test.describe('Home', () => {
     await expect(page.getByText('Skills published')).toBeVisible();
 
     // The "how the exchange works" explainer is the reason the page exists.
-    await expect(page.getByRole('heading', { name: 'Skills with receipts' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'From your project to a sale' })).toBeVisible();
     await expect(page.getByText("Proof or it doesn't list")).toBeVisible();
     await expect(page.getByText("If you're buying")).toBeVisible();
     await expect(page.getByText("If you're selling")).toBeVisible();

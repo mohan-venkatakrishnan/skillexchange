@@ -37,6 +37,7 @@ const NAV = [
 ];
 
 const THEME_KEY = 'se_theme';
+const NAV_H = 64; // taller bar (launch.tapdot.org rhythm); was 52
 
 /* Fade + 8px lift page transition (~200ms). transform must be "none" at rest:
    any transform on this wrapper would make it the containing block for its
@@ -118,7 +119,7 @@ function AuthGate({ onShowAuth }) {
     ? { title: 'Publish a Skill', description: 'Publish your SKILL.md and earn from every download. Proof of concept required — a live project URL and screenshot. Keep 95%.', path: '/publish' }
     : { title: 'Sign in', noindex: true });
   return (
-    <div style={{ position: 'relative', zIndex: 1, minHeight: 'calc(100vh - 52px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+    <div style={{ position: 'relative', zIndex: 1, minHeight: `calc(100vh - ${NAV_H}px)`, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
       <div style={{ textAlign: 'center', fontFamily: FONT_UI }} className="fade-up">
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}><Logo size={44} /></div>
         <p style={{ color: c.text, fontSize: 16, fontWeight: 600, marginBottom: 6 }}>{publishGate ? 'Sign in to publish' : 'Sign in to continue'}</p>
@@ -196,11 +197,11 @@ function Shell() {
       <NodeField />
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} onLogin={handleLogin} />}
 
-      <nav className="nav-grid" style={{ position: 'sticky', top: 0, zIndex: 100, background: c.bg, borderBottom: `1px solid ${c.border}`, padding: '0 clamp(12px,3vw,22px)', height: 52 }}>
+      <nav className="nav-grid" style={{ position: 'sticky', top: 0, zIndex: 100, background: c.bg, borderBottom: `1px solid ${c.border}`, padding: '0 clamp(16px,3vw,28px)', height: NAV_H }}>
         <button onClick={() => nav('/')} aria-label="Skill Exchange home"
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 9, flexShrink: 0, justifySelf: 'start' }}>
-          <Logo size={26} />
-          <span className="nav-brand-text" style={{ fontFamily: FONT_DISPLAY, fontSize: 15, fontWeight: 700, color: c.gold, whiteSpace: 'nowrap', letterSpacing: '-0.01em' }}>Skill Exchange</span>
+          <Logo size={30} />
+          <span className="nav-brand-text" style={{ fontFamily: FONT_DISPLAY, fontSize: 17, fontWeight: 700, color: c.gold, whiteSpace: 'nowrap', letterSpacing: '-0.01em' }}>Skill Exchange</span>
         </button>
 
         <div className="nav-desktop-links">{visibleNav.map(n => navBtn(n))}</div>
@@ -232,7 +233,7 @@ function Shell() {
       </nav>
 
       {menuOpen && (
-        <div style={{ position: 'sticky', top: 52, zIndex: 99, background: c.bg, borderBottom: `1px solid ${c.border}`, padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 2, boxShadow: '0 12px 24px rgba(0,0,0,0.25)' }}>
+        <div style={{ position: 'sticky', top: NAV_H, zIndex: 99, background: c.bg, borderBottom: `1px solid ${c.border}`, padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: 2, boxShadow: '0 12px 24px rgba(0,0,0,0.25)' }}>
           {visibleNav.map(n => navBtn(n, true))}
         </div>
       )}

@@ -116,5 +116,5 @@ export function Price({ cents, dollars, size = 13 }) {
 }
 
 export function PageWrap({ children, style }) {
-  return <div style={{ position: 'relative', zIndex: 1, minHeight: 'calc(100vh - 52px)', ...style }}>{children}</div>;
+  return <div style={{ position: 'relative', zIndex: 1, minHeight: 'calc(100vh - 64px)', ...style }}>{children}</div>;
 }

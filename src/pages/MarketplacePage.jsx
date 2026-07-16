@@ -119,7 +119,7 @@ export default function MarketplacePage() {
 
         <div className="mk-shell" style={{ display: 'grid', gridTemplateColumns: '224px 1fr', gap: 28, alignItems: 'start' }}>
           {/* ── Category rail ── */}
-          <aside className="mk-rail" style={{ position: 'sticky', top: 68 }}>
+          <aside className="mk-rail" style={{ position: 'sticky', top: 80 }}>
             <RailSection title="Categories">
               <RailItem label="All skills" count={all.length} active={cat === 'All'} onClick={() => patch({ cat: null })} />
               {CATEGORIES.filter(x => counts[x]).map(x => (
